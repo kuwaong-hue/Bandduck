@@ -74,29 +74,135 @@
     <!-- ========================================== -->
     <section id="tab-home" class="tab-content block relative min-h-[85vh] animate-[fadeIn_0.5s_ease-out]">
       
-      <!-- 밴드 멤버 공식 캐릭터 심플 배너 배치 -->
-      <div class="w-full flex flex-col items-center justify-center mt-6 mb-16">
-        <div class="w-full max-w-5xl bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-brandGray/40 overflow-hidden relative">
-          <!-- 공식 밴드 캐릭터 이미지 렌더링 -->
-          <img src="ChatGPT Image 2026년 5월 28일 오후 10_07_01.png" 
+      <!-- 밴드 멤버 공식 캐릭터 심플 배너 배치 (크기 축소 및 파일명 main.png로 수정) -->
+      <div class="w-full flex flex-col items-center justify-center mt-4 mb-8">
+        <div class="w-full max-w-3xl bg-white p-4 rounded-[2.5rem] shadow-sm border border-brandGray/40 overflow-hidden relative">
+          <!-- 공식 밴드 캐릭터 이미지 렌더링 (요청: 파일명을 main.png로 변경 및 크기 감소) -->
+          <img src="main.png" 
                alt="밴드 덕덕 공식 캐릭터" 
-               class="w-full h-auto object-contain rounded-2xl transform hover:scale-[1.01] transition-transform duration-500" 
-               onerror="this.src='https://placehold.co/1000x500/F2F0EA/111111?text=Band+Duck+Group'"/>
+               class="w-full h-auto object-contain rounded-2xl transform hover:scale-[1.01] transition-transform duration-500 max-h-[250px]" 
+               onerror="this.src='https://placehold.co/1000x400/F2F0EA/111111?text=Band+Duck+Group'"/>
         </div>
         
         <!-- 하단 심플 멤버 프로필 범례 배지 -->
-        <div class="flex flex-wrap justify-center gap-3 mt-6 max-w-4xl">
-          <span class="px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full text-xs font-bold border border-brandGray/40">🦊 경덕 (리더/기타/보컬)</span>
-          <span class="px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full text-xs font-bold border border-brandGray/40">🐢 숙인 (베이스)</span>
-          <span class="px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full text-xs font-bold border border-brandGray/40">🐰 민정 (드럼)</span>
-          <span class="px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full text-xs font-bold border border-brandGray/40">🐶 권영 (기타)</span>
-          <span class="px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full text-xs font-bold border border-brandGray/40">🐺 문열 (키보드)</span>
-          <span class="px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full text-xs font-bold border border-brandGray/40">🦆 현지 (보컬)</span>
-          <span class="px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full text-xs font-bold border border-brandGray/40">🐻 승빈 (바이올린)</span>
+        <div class="flex flex-wrap justify-center gap-2 mt-4 max-w-4xl">
+          <span class="px-3 py-1 bg-white/70 backdrop-blur-sm rounded-full text-[10px] font-bold border border-brandGray/40">🦊 경덕 (리더/기타/보컬)</span>
+          <span class="px-3 py-1 bg-white/70 backdrop-blur-sm rounded-full text-[10px] font-bold border border-brandGray/40">🐢 숙인 (베이스)</span>
+          <span class="px-3 py-1 bg-white/70 backdrop-blur-sm rounded-full text-[10px] font-bold border border-brandGray/40">🐰 민정 (드럼)</span>
+          <span class="px-3 py-1 bg-white/70 backdrop-blur-sm rounded-full text-[10px] font-bold border border-brandGray/40">🐶 권영 (기타)</span>
+          <span class="px-3 py-1 bg-white/70 backdrop-blur-sm rounded-full text-[10px] font-bold border border-brandGray/40">🐺 문열 (키보드)</span>
+          <span class="px-3 py-1 bg-white/70 backdrop-blur-sm rounded-full text-[10px] font-bold border border-brandGray/40">🦆 현지 (보컬)</span>
+          <span class="px-3 py-1 bg-white/70 backdrop-blur-sm rounded-full text-[10px] font-bold border border-brandGray/40">🐻 승빈 (바이올린)</span>
         </div>
       </div>
 
-      <!-- 중간 텍스트 및 공연 디데이 설정 -->
+      <!-- 동기화 정보 및 실시간 검색바 영역 -->
+      <div class="max-w-5xl mx-auto mb-10 bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-brandGray/50 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="w-full md:w-1/2 flex items-center gap-3">
+          <div class="w-10 h-10 bg-textMain text-white rounded-full flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <div class="w-full">
+            <p class="text-[10px] font-bold opacity-50 uppercase tracking-widest">통합 검색 엔진</p>
+            <input type="text" id="home-search-input" oninput="handleHomeSearch()" placeholder="검색어를 입력해 의사결정 및 공지를 즉시 검색해보세요..." class="bg-transparent text-sm font-bold w-full focus:outline-none border-b border-brandGray/50 pb-1 mt-1">
+          </div>
+        </div>
+        <div class="flex flex-col items-end shrink-0">
+          <span class="text-[10px] font-bold opacity-40 uppercase tracking-widest">최근 대화방 동기화 시각</span>
+          <span id="main-sync-time" class="text-sm font-black text-textMain mt-1">2026-05-28 22:54:44</span>
+        </div>
+      </div>
+
+      <!-- 주요 아카이브 카드 영역 (상단으로 배치 이동됨) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-20 mb-10">
+        
+        <!-- Card 1: 셋리스트 (Setlist) - 가시성 극대화 및 고대비 솔리드 스타일 & 호버 특이사항 요약 기능 탑재 -->
+        <div class="silvana-card bg-[#1E1C1A] p-8 min-h-[380px] flex flex-col justify-between border border-black/10 text-white hover:bg-black transition-all duration-300 relative group">
+          <div class="flex justify-between items-start">
+            <span class="text-white/40 text-xl font-light">/01</span>
+            <span class="px-3 py-1 border border-white/20 rounded-full text-[10px] uppercase text-white font-bold tracking-wider">Setlist</span>
+          </div>
+          <div class="mt-4 flex-1 flex flex-col justify-between">
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-brandDark font-bold mb-1">Current</p>
+              <h3 class="text-2xl font-black mb-5 tracking-tight text-white">공연 셋리스트</h3>
+            </div>
+            
+            <ul id="home-setlist" class="space-y-3.5 text-base font-black text-white/95">
+              <!-- JS에서 마우스 오버 특이사항 데이터와 함께 바인딩됩니다 -->
+            </ul>
+          </div>
+
+          <!-- 호버 시 하단에 곡별 특이사항을 실시간 표기해주는 세련된 툴팁 영역 -->
+          <div id="setlist-hover-tooltip" class="absolute bottom-4 left-4 right-4 bg-amber-400 text-slate-900 p-4 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform translate-y-2 text-xs font-bold shadow-2xl z-30">
+            <p class="text-[10px] opacity-75 uppercase tracking-wider mb-1">💡 곡별 집중 논의사항</p>
+            <p id="tooltip-text-content">각 곡에 마우스를 올려 특이사항을 확인하세요.</p>
+          </div>
+        </div>
+        
+        <!-- Card 2: 주요 요약 리스트 (고대비 깔끔한 피드, 해시태그 추가/수정 및 실시간 재분류 연동) -->
+        <div class="silvana-card bg-[#CECAC2] p-8 min-h-[380px] flex flex-col justify-between">
+          <div class="flex justify-between items-start">
+            <span class="text-textMain/40 text-xl font-light">/02</span>
+            <span class="px-3 py-1 border border-textMain/30 rounded-full text-[10px] uppercase text-textMain font-bold tracking-wider">Summaries</span>
+          </div>
+          <div class="mt-4 flex-1 flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-3">
+              <div>
+                <p class="text-[10px] uppercase tracking-wider text-textMain/60 font-bold">Key Decisions</p>
+                <h3 class="text-2xl font-black tracking-tight text-textMain">주요 의사결정</h3>
+              </div>
+              <!-- 필터 중일 때 리셋 버튼 표시 -->
+              <button id="hashtag-reset-btn" onclick="clearHashtagFilter()" class="hidden text-[10px] bg-textMain text-white px-2 py-1 rounded-full font-bold">전체보기 ↺</button>
+            </div>
+            
+            <!-- 리스트형 요약 바 (고대비 구조화) -->
+            <div id="home-summary-list" class="space-y-2.5 flex-1 overflow-y-auto no-scrollbar max-h-[220px] pr-1">
+              <!-- JS에서 자동 렌더링 됨 -->
+            </div>
+
+            <!-- 인라인 태그 입력/편집 모달 레이어 -->
+            <div id="tag-edit-overlay" class="hidden mt-3 p-3 bg-white/90 border border-brandGray rounded-2xl flex items-center justify-between gap-2 shadow-inner">
+              <input type="text" id="tag-edit-input" class="bg-transparent text-xs font-bold focus:outline-none w-full" placeholder="쉼표로 구분 예: 일정, 정산, 악보">
+              <button id="tag-edit-save-btn" class="bg-textMain text-white px-3 py-1 rounded-full text-[10px] font-bold">저장</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: 멤버 통계 및 분석 현황 (레이아웃 정렬 최적화) -->
+        <div class="silvana-card bg-[#848076] p-8 min-h-[380px] flex flex-col justify-between text-white group cursor-pointer" onclick="switchTab('upload')">
+          <div class="flex justify-between items-start">
+            <span class="text-white/40 text-xl font-light">/03</span>
+            <span class="px-3 py-1 border border-white/30 rounded-full text-[10px] uppercase font-bold tracking-wider">Data Sync</span>
+          </div>
+          <div class="mt-4 flex-1 flex flex-col justify-between">
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-white/60 font-bold mb-1">Total Archive</p>
+              <h3 class="text-2xl font-black mb-3 tracking-tight text-white leading-tight">대화 기록 데이터</h3>
+              <p class="text-xs text-white/80 leading-relaxed mb-6">
+                카카오톡 대화방에서 추출한 텍스트 파일을 분석하여 일정을 동기화하고 의사결정을 실시간 추출합니다.
+              </p>
+            </div>
+            
+            <div class="flex items-center gap-6">
+              <div>
+                <p class="text-3xl font-black tracking-tight" id="stat-total-msg">0</p>
+                <p class="text-[9px] uppercase tracking-widest text-white/60 font-bold mt-0.5">Messages</p>
+              </div>
+              <div class="w-[1px] h-8 bg-white/20"></div>
+              <div>
+                <p class="text-3xl font-black tracking-tight" id="stat-total-days">0</p>
+                <p class="text-[9px] uppercase tracking-widest text-white/60 font-bold mt-0.5">Active Days</p>
+              </div>
+            </div>
+            
+            <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mt-4 group-hover:bg-white group-hover:text-black transition self-start">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="flex flex-col md:flex-row justify-between items-stretch mb-12 gap-6 relative z-20">
         <div class="flex flex-col justify-center md:w-1/2">
           <p class="text-xs font-black opacity-40 uppercase tracking-widest mb-1.5">Introduce</p>
@@ -162,118 +268,6 @@
           </div>
           <div id="calendar-grid" class="grid grid-cols-7 gap-2">
             <!-- JS를 통해 동적 렌더링 됩니다 -->
-          </div>
-        </div>
-      </div>
-
-      <!-- 하단 3개 라운드 카드 (Silvana Style - 가도가 높은 정제된 레이아웃) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-20">
-        
-        <!-- Card 1: 셋리스트 (Setlist) - 가시성 극대화 및 고대비 솔리드 스타일 -->
-        <div class="silvana-card bg-[#1E1C1A] p-8 min-h-[380px] flex flex-col justify-between border border-black/10 text-white hover:bg-black transition-all duration-300">
-          <div class="flex justify-between items-start">
-            <span class="text-white/40 text-xl font-light">/01</span>
-            <span class="px-3 py-1 border border-white/20 rounded-full text-[10px] uppercase text-white font-bold tracking-wider">Setlist</span>
-          </div>
-          <div class="mt-4 flex-1 flex flex-col justify-between">
-            <div>
-              <p class="text-[10px] uppercase tracking-wider text-brandDark font-bold mb-1">Current</p>
-              <h3 class="text-2xl font-black mb-5 tracking-tight text-white">공연 셋리스트</h3>
-            </div>
-            
-            <ul id="home-setlist" class="space-y-3 text-base font-black text-white/95">
-              <li class="flex items-center justify-between border-b border-white/10 pb-2">
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-mono opacity-40">01</span>
-                  <span>혜성</span>
-                </div>
-                <span class="text-xs font-medium opacity-50">윤하</span>
-              </li>
-              <li class="flex items-center justify-between border-b border-white/10 pb-2">
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-mono opacity-40">02</span>
-                  <span>오리날다</span>
-                </div>
-                <span class="text-xs font-medium opacity-50">체리필터</span>
-              </li>
-              <li class="flex items-center justify-between border-b border-white/10 pb-2">
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-mono opacity-40">03</span>
-                  <span>썸데이</span>
-                </div>
-                <span class="text-xs font-medium opacity-50">리쌍</span>
-              </li>
-              <li class="flex items-center justify-between border-b border-white/10 pb-2">
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-mono opacity-40">04</span>
-                  <span>드라우닝</span>
-                </div>
-                <span class="text-xs font-medium opacity-50">우즈</span>
-              </li>
-              <li class="flex items-center justify-between border-b border-white/10 pb-2">
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-mono opacity-40">05</span>
-                  <span>고백</span>
-                </div>
-                <span class="text-xs font-medium opacity-50">뜨거운감자</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-        
-        <!-- Card 2: 주요 요약 리스트 (고대비 깔끔한 피드) -->
-        <div class="silvana-card bg-[#CECAC2] p-8 min-h-[380px] flex flex-col justify-between cursor-pointer group" onclick="switchTab('timeline')">
-          <div class="flex justify-between items-start">
-            <span class="text-textMain/40 text-xl font-light">/02</span>
-            <span class="px-3 py-1 border border-textMain/30 rounded-full text-[10px] uppercase text-textMain font-bold tracking-wider">Summaries</span>
-          </div>
-          <div class="mt-4 flex-1 flex flex-col justify-between">
-            <div>
-              <p class="text-[10px] uppercase tracking-wider text-textMain/60 font-bold mb-1">Key Decisions</p>
-              <h3 class="text-2xl font-black mb-4 tracking-tight text-textMain">주요 의사결정</h3>
-            </div>
-            
-            <!-- 리스트형 요약 바 (고대비 구조화) -->
-            <div id="home-summary-list" class="space-y-2.5 flex-1 overflow-y-auto no-scrollbar max-h-[200px]">
-              <!-- JS에서 자동 렌더링 됨 -->
-            </div>
-
-            <div class="w-8 h-8 rounded-full bg-white/40 backdrop-blur-md flex items-center justify-center mt-3 group-hover:bg-textMain group-hover:text-white transition text-textMain shadow-sm self-center">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 3: 멤버 통계 및 분석 현황 (레이아웃 틀어짐 방지 및 가독성 업) -->
-        <div class="silvana-card bg-[#848076] p-8 min-h-[380px] flex flex-col justify-between text-white group" onclick="switchTab('upload')">
-          <div class="flex justify-between items-start">
-            <span class="text-white/40 text-xl font-light">/03</span>
-            <span class="px-3 py-1 border border-white/30 rounded-full text-[10px] uppercase font-bold tracking-wider">Data Sync</span>
-          </div>
-          <div class="mt-4 flex-1 flex flex-col justify-between">
-            <div>
-              <p class="text-[10px] uppercase tracking-wider text-white/60 font-bold mb-1">Total Archive</p>
-              <h3 class="text-2xl font-black mb-3 tracking-tight text-white leading-tight">대화 기록 데이터</h3>
-              <p class="text-xs text-white/80 leading-relaxed mb-6">
-                카카오톡 대화방에서 추출한 텍스트 파일을 분석하여 일정을 동기화하고 의사결정을 실시간 추출합니다.
-              </p>
-            </div>
-            
-            <div class="flex items-center gap-6">
-              <div>
-                <p class="text-3xl font-black tracking-tight" id="stat-total-msg">0</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/60 font-bold mt-0.5">Messages</p>
-              </div>
-              <div class="w-[1px] h-8 bg-white/20"></div>
-              <div>
-                <p class="text-3xl font-black tracking-tight" id="stat-total-days">0</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/60 font-bold mt-0.5">Active Days</p>
-              </div>
-            </div>
-            
-            <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mt-4 group-hover:bg-white group-hover:text-black transition self-start">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            </div>
           </div>
         </div>
       </div>
@@ -381,9 +375,18 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 자바스크립트 로직 (기본 데이터 탑재 및 스마트 파서) -->
+  <!-- 자바스크립트 로직 -->
   <!-- ========================================== -->
   <script>
+    // 셋리스트 특이사항 데이터베이스 (곡 마우스 호버 시 가시성 지원)
+    const setlistNotes = {
+      "혜성": "졸업곡 성공! 단, 인트로 템포 밀림 방지를 위한 승빈의 바이올린 피드백 상시 주의할 것.",
+      "오리날다": "문열 신디사이저 파트 추가 확정. 보컬 황현지 키 맞춤 완성에 최적화 완료.",
+      "썸데이": "리쌍 원곡 기타 솔로 완전 축약 버전(2번 편집본)으로 타협하여 수진&권영 악기 비중 조율 완료.",
+      "드라우닝": "보컬 피치가 다소 애매하나 현지 본인 의사에 따라 드랍하지 않고 디벨롭하여 9월 공연 투입 확정.",
+      "고백": "경덕 보컬 데뷔곡. 베이스 숙인 불참 시 경덕이 땜빵 투입 예정 및 사운드 조율 합의."
+    };
+
     let db = {
       updated_at: "2026-05-28 22:54:44",
       transcripts: [
@@ -405,7 +408,7 @@
         { "date": "2025-01-16", "time": "13:35:00", "sender": "김경덕", "message": "권영 님도 새로 오셨기에, 저희 일정 관련해서 간단하게 공지 금방할게요~!" },
         { "date": "2025-01-16", "time": "13:39:00", "sender": "김경덕", "message": "[공지] NEW! 그리고 합주 일정\n다들 안녕! 고되디고된 목요일이에요!\n오늘이 금요일이라는 게 믿기지 않는데, 다들 그래도 힘내면 좋겠네요!\n저번 승빈이 이야기한 밴드 덕덕의 또 다른 줄쟁이 기타리스트! 권영 님이 함께 하시게 되었습니다~!\n하여 권영 님께 공유도 드릴 겸 다시금 일정 체크를 하자면\n***\n밴드 덕덕 정규 합주 다섯 번째.\n25년 1월 24일 18시 15분까지 합정 근처에서 모입니다!\n본래 합주 시간은 19시지만 앞선 투표에서 식사를 위해 좀 더 일찍 만나기로 하였어요!\n이때 권영 님 시간 맞춰 오실 수 있다면 식사 자리에서 간단히 먼저 인사 나누면 될 거 같네요.\n(입단식도 진행하죠!)\n환영합니다!!!\n***\n저희가 예약한 합정 애비로드 합주실의 경우 악기 대여가 가능합니다!\n하여 이미 예약이 된 상황이기에,,,, 수정은 따로 불가능하지만.\n권영 님이 기타 대여를 추가로 원하신다면 현장에서 진행하면 될 거 같아요!\n(이미 문열 형과 숙인이의 기타는 대여된 상황)" },
         { "date": "2025-01-16", "time": "13:43:00", "sender": "김경덕", "message": "3줄 요약\n1. 우리 24일 18시 15분 합정 근처에서 봐요\n2. 권영 님 오실 수 있다면 와 주세요!\n3. 다들 새 멤버 환영합시다~!!" },
-        { "date": "2025-01-24", "time": "23:01:00", "sender": "김경덕", "message": "[공지] 다섯 번째 합주 끝! 다음은!\n다들 조심히 들어갔거나 들어가고 있을까요~?\n슬슬 한파가 다가오는데, 추위가 몰아치는 야밤길 조심하면 좋겠어요!\n우리의 정식 다섯 번째 합주가 끝났습니다!\n그리고 문열 형과 권영 님의 합주로 정말 완전체가 된 듯한 느낌인데.\n오늘 고생한 두 명에게 감사를 다시 한번 표하며, 두 가지 안건 공지합니다!" },
+        { "date": "2025-01-24", "time": "23:01:00", "sender": "김경덕", "message": "[공지] 다섯 번째 합주 끝! 다음은!\n다들 조심히 들어갔거나 들어가고 있을까요~?\n슬슬 한파가 다가오는데, 추위가 몰아치는 야밤길 조심하면 좋겠어요!\n우리의 정식 다섯 번째 합주가 끝났습니다!\n그리고 문열 형과 권영 님의 합주로 정말 완전체 된 듯한 느낌인데.\n오늘 고생한 두 명에게 감사를 다시 한번 표하며, 두 가지 안건 공지합니다!" },
         { "date": "2025-02-28", "time": "23:38:00", "sender": "김경덕", "message": "[공지] 다음 합주, 친목 도모!\n다들 조심히 들어가고 있을까요? 혹은 조심히 들어갔을까요~?\n오늘 합주 정말 고생 많았어요 다들!\n친목회의 경우 3월, 합주의 경우 4월에 진행하면 좋을 거 같고요~!\n늘 그렇듯 투표 쭉 펼칠게요! 저번 일을 교훈 삼아 이번에는 A룸을 빠르게 우리가 선점합시다~!" },
         { "date": "2025-03-07", "time": "09:47:00", "sender": "김경덕", "message": "[공지] 어제 제가 회사에서 메신저를 보내 약간 추가합니다!\n친목회의 경우 시간이 맞는 사람이라도 일단 함께합니다!!\n권영 님 입단식을 미룰 수는 없죠~!!\n다들 바쁘시겠지만...! 여유 나는 날 의견 내 주면 감사드릴게요!!" },
         { "date": "2025-03-11", "time": "09:07:00", "sender": "김경덕", "message": "[공지] 18일 화요일 친목회!\n다들 18일 화요일 저녁에 봐요!!\n장소, 시간은 아직 미정이지만 요건 센스껏 정하면 될 거 같구.\n문열 형의 경우는 스케줄 확인한 뒤, 편하게 말해 주셔용~!!\n*민정이는 합주 때 다 같이 봅시다!" },
@@ -416,10 +419,17 @@
         { "date": "2026-05-27", "time": "00:09:00", "sender": "김경덕", "message": "오케이 그러면 오리날다는 확정으로 가죠~\n1. 혜성\n2. 오리날다\n3. 썸데이\n4. 드라우닝" },
         { "date": "2026-05-28", "time": "20:13:00", "sender": "김경덕", "message": "토요일 회의 안건\n1. 셋리스트 최종 확정의 건.\n확정곡: 혜성, 오리날다, 썸데이, 드라우닝\n추가 검토: 개화\n2. 공연 셋리스트 순서 정하기\n3. 공연 팀 순서\n4. 썸데이 편곡 필요한 것 확정\n5. 공연 일자 확정 (9/12 vs 9/19)" }
       ],
-      summaries: []
+      // 기본 요약 데이터 및 해시태그 초기 설정 (추가, 수정 가능)
+      summaries: [
+        { "date": "2026-05-28", "topic": "공연 기획 및 조인 밴드 논의", "content": "9월 홍대 인근 연습장에서 피아노 선생님 밴드와 합동 공연 관련하여 세션 파트와 의상, 리허설 일정을 정리했습니다.", "msgCount": 31, "tags": ["일정", "공연", "기획"] },
+        { "date": "2026-05-27", "topic": "공연 셋리스트 및 신곡 조율", "content": "오리날다 및 썸데이 편곡 버전 확정. 드라우닝 보컬 피치 체크 및 악보 통일 건을 토의했습니다.", "msgCount": 51, "tags": ["악보", "공연", "셋리스트"] },
+        { "date": "2026-05-26", "topic": "합주실 예약비 회비 정산", "content": "합정 애비로드 예약 완료에 따른 공금 요청 및 팀원별 정산 분담금을 안내했습니다.", "msgCount": 33, "tags": ["정산", "회비", "일정"] }
+      ]
     };
 
     let calDate = new Date(); // 캘린더 기준일
+    let selectedHashtagFilter = null; // 선택된 해시태그 필터 상태
+    let editingSummaryDate = null; // 현재 태그 편집 중인 요약 일자
 
     window.onload = () => {
       const saved = localStorage.getItem("band_duck_db");
@@ -427,18 +437,181 @@
         db = JSON.parse(saved);
       }
       calcDday();
-      generateAutoSummaries(); // 초기 로직에서 요약 데이터 생성
+      if (db.summaries.length === 0) {
+        generateAutoSummaries(); // 초기 로직에서 요약 데이터가 없을 때만 생성
+      }
       initApp();
     };
 
     function initApp() {
-      // 통계 지표 업데이트
+      // 통계 지표 및 최종 업로드 시간 바인딩
       document.getElementById('stat-total-msg').innerText = db.transcripts.length.toLocaleString();
       document.getElementById('stat-total-days').innerText = getUniqueDates().length;
+      document.getElementById('main-sync-time').innerText = db.updated_at || "2026-05-28 22:54:44";
       
+      renderHomeSetlist();
       renderHomeSummaries();
       renderNotices();
       initTimelineDates();
+      renderCalendar();
+    }
+
+    // 셋리스트 렌더링 및 곡별 논의사항 호버 이벤트 등록 (요청사항 반영)
+    function renderHomeSetlist() {
+      const listEl = document.getElementById('home-setlist');
+      listEl.innerHTML = '';
+      
+      const songs = [
+        { "id": "01", "name": "혜성", "singer": "윤하" },
+        { "id": "02", "name": "오리날다", "singer": "체리필터" },
+        { "id": "03", "name": "썸데이", "singer": "리쌍" },
+        { "id": "04", "name": "드라우닝", "singer": "우즈" },
+        { "id": "05", "name": "고백", "singer": "뜨거운감자" }
+      ];
+
+      songs.forEach(song => {
+        const li = document.createElement('li');
+        li.className = "flex items-center justify-between border-b border-white/10 pb-2 cursor-pointer transition hover:text-amber-400 group/item relative";
+        li.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono opacity-40">${song.id}</span>
+            <span>${song.name}</span>
+          </div>
+          <span class="text-xs font-medium opacity-50 group-hover/item:opacity-100">${song.singer}</span>
+        `;
+        
+        // 마우스 진입 시 하단 툴팁 데이터 실시간 바인딩
+        li.onmouseenter = () => {
+          const tooltip = document.getElementById('setlist-hover-tooltip');
+          const content = document.getElementById('tooltip-text-content');
+          content.innerText = setlistNotes[song.name] || "추가 등록된 특이사항이 없습니다.";
+          tooltip.style.opacity = '1';
+        };
+
+        li.onmouseleave = () => {
+          const tooltip = document.getElementById('setlist-hover-tooltip');
+          tooltip.style.opacity = '0';
+        };
+
+        listEl.appendChild(li);
+      });
+    }
+
+    // 주요 의사결정 요약 렌더링 (해시태그 연동 및 인라인 편집 모드 지원)
+    function renderHomeSummaries() {
+      const container = document.getElementById('home-summary-list');
+      container.innerHTML = '';
+
+      if (db.summaries.length === 0) {
+        container.innerHTML = `<p class="text-xs text-textMain/60 font-medium text-center mt-10">생성된 요약이 없습니다.<br>데이터를 분석해 주세요.</p>`;
+        return;
+      }
+
+      // 검색어 가져오기
+      const searchQuery = document.getElementById('home-search-input').value.toLowerCase().trim();
+
+      // 요약본 필터링 적용 (해시태그 필터 및 실시간 통합 검색어 필터 동시 지원)
+      let filteredSummaries = [...db.summaries];
+
+      if (selectedHashtagFilter) {
+        filteredSummaries = filteredSummaries.filter(sum => sum.tags && sum.tags.includes(selectedHashtagFilter));
+        document.getElementById('hashtag-reset-btn').classList.remove('hidden');
+      } else {
+        document.getElementById('hashtag-reset-btn').classList.add('hidden');
+      }
+
+      if (searchQuery) {
+        filteredSummaries = filteredSummaries.filter(sum => 
+          sum.topic.toLowerCase().includes(searchQuery) || 
+          sum.content.toLowerCase().includes(searchQuery) ||
+          (sum.tags && sum.tags.some(tag => tag.toLowerCase().includes(searchQuery)))
+        );
+      }
+
+      if (filteredSummaries.length === 0) {
+        container.innerHTML = `<p class="text-xs text-textMain/60 font-medium text-center mt-10">검색 조건에 매칭되는 내용이 없습니다.</p>`;
+        return;
+      }
+
+      // 최신일 순 정렬
+      filteredSummaries.sort((a,b) => b.date.localeCompare(a.date));
+
+      filteredSummaries.forEach(sum => {
+        const div = document.createElement('div');
+        div.className = "bg-white border border-black/5 rounded-xl p-3 flex flex-col hover:border-brandDark/40 transition text-textMain shadow-sm cursor-pointer relative";
+        
+        // 해시태그 HTML 생성
+        let tagsHtml = "";
+        if (sum.tags && sum.tags.length > 0) {
+          tagsHtml = sum.tags.map(t => `<span onclick="filterByHashtag('${t}', event)" class="inline-block bg-brandCream text-textMain text-[9px] font-bold px-2 py-0.5 rounded-full mr-1 hover:bg-textMain hover:text-white transition">#${t}</span>`).join('');
+        } else {
+          tagsHtml = `<span class="text-[9px] opacity-40">#태그없음</span>`;
+        }
+
+        div.innerHTML = `
+          <div class="flex justify-between items-start" onclick="switchTab('timeline'); selectTimelineDate('${sum.date}')">
+            <div class="flex-1 truncate pr-2">
+              <p class="text-xs font-bold text-textMain truncate">${sum.topic}</p>
+              <p class="text-[9px] font-medium text-textMain/50 mt-0.5">${sum.date} | 메시지 ${sum.msgCount}개</p>
+            </div>
+            <div class="w-5 h-5 rounded-full bg-brandCream flex items-center justify-center shrink-0">
+              <svg class="w-2.5 h-2.5 text-textMain" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <!-- 하단 해시태그 영역 및 편집 트리거 -->
+          <div class="mt-2 pt-2 border-t border-brandGray/20 flex justify-between items-center">
+            <div class="flex flex-wrap gap-1">${tagsHtml}</div>
+            <button onclick="openTagEditor('${sum.date}', event)" class="text-[9px] font-black text-brandDark hover:text-textMain">태그 편집 ✎</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // 해시태그 필터 적용
+    function filterByHashtag(tag, event) {
+      if (event) event.stopPropagation(); // 카드 클릭 이동 방지
+      selectedHashtagFilter = tag;
+      renderHomeSummaries();
+      showToast(`#${tag} 해시태그 분류 필터가 적용되었습니다.`);
+    }
+
+    // 해시태그 필터 클리어
+    function clearHashtagFilter() {
+      selectedHashtagFilter = null;
+      renderHomeSummaries();
+      showToast("해시태그 필터가 초기화되었습니다.");
+    }
+
+    // 인라인 태그 편집기 열기
+    function openTagEditor(date, event) {
+      if (event) event.stopPropagation();
+      editingSummaryDate = date;
+      const sum = db.summaries.find(s => s.date === date);
+      const overlay = document.getElementById('tag-edit-overlay');
+      const input = document.getElementById('tag-edit-input');
+      
+      input.value = sum.tags ? sum.tags.join(', ') : '';
+      overlay.classList.remove('hidden');
+      
+      // 저장 버튼 이벤트 동적 할당
+      document.getElementById('tag-edit-save-btn').onclick = () => {
+        const rawTags = input.value.split(',').map(t => t.trim()).filter(t => t.length > 0);
+        sum.tags = rawTags;
+        
+        // 로컬스토리지 영구 저장
+        localStorage.setItem("band_duck_db", JSON.stringify(db));
+        overlay.classList.add('hidden');
+        editingSummaryDate = null;
+        renderHomeSummaries();
+        showToast(`${date} 대화의 태그가 수정되어 자동으로 다시 분류되었습니다!`);
+      };
+    }
+
+    // 홈 화면 실시간 통합 검색바 핸들러
+    function handleHomeSearch() {
+      renderHomeSummaries();
+      renderNotices();
       renderCalendar();
     }
 
@@ -483,7 +656,6 @@
       }
     }
 
-    // 공지 및 투표 정보 자동 추출
     function renderNotices() {
       const container = document.getElementById('notice-list');
       container.innerHTML = '';
@@ -493,13 +665,19 @@
         return;
       }
 
+      const searchQuery = document.getElementById('home-search-input').value.toLowerCase().trim();
+
       // [공지], 투표, 정산 키워드 기반 필터링
-      const notices = db.transcripts.filter(t => 
+      let notices = db.transcripts.filter(t => 
         t.message.includes('[공지]') || 
         t.message.includes('투표') || 
         t.message.includes('정산') ||
         t.message.includes('예약')
       ).reverse();
+
+      if (searchQuery) {
+        notices = notices.filter(n => n.message.toLowerCase().includes(searchQuery) || n.sender.toLowerCase().includes(searchQuery));
+      }
 
       const uniqueNotices = [];
       const seen = new Set();
@@ -514,7 +692,7 @@
       const displayNotices = uniqueNotices.slice(0, 8);
 
       if (displayNotices.length === 0) {
-        container.innerHTML = `<p class="text-sm opacity-50 mt-4">최근 주요 공지나 안건이 감지되지 않았습니다.</p>`;
+        container.innerHTML = `<p class="text-sm opacity-50 mt-4">검색에 일치하는 주요 공지나 안건이 감지되지 않았습니다.</p>`;
         return;
       }
 
@@ -544,39 +722,6 @@
           <p class="text-sm font-medium text-textMain line-clamp-1">${shortMsg}</p>
         `;
         container.appendChild(li);
-      });
-    }
-
-    // 메인 홈 화면 - 요약 리스트 렌더링 (가독성 향상 고대비 카드)
-    function renderHomeSummaries() {
-      const container = document.getElementById('home-summary-list');
-      container.innerHTML = '';
-
-      if (db.summaries.length === 0) {
-        container.innerHTML = `<p class="text-xs text-textMain/60 font-medium text-center mt-10">생성된 요약이 없습니다.<br>데이터를 분석해 주세요.</p>`;
-        return;
-      }
-
-      const recentSummaries = [...db.summaries].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 5);
-
-      recentSummaries.forEach(sum => {
-        const div = document.createElement('div');
-        div.className = "bg-white border border-black/5 rounded-xl p-3 flex justify-between items-center hover:border-brandDark/40 transition text-textMain shadow-sm cursor-pointer";
-        div.innerHTML = `
-          <div class="flex-1 truncate pr-2">
-            <p class="text-xs font-bold text-textMain truncate">${sum.topic}</p>
-            <p class="text-[9px] font-medium text-textMain/50 mt-0.5">${sum.date} | 메시지 ${sum.msgCount}개</p>
-          </div>
-          <div class="w-5 h-5 rounded-full bg-brandCream flex items-center justify-center shrink-0">
-            <svg class="w-2.5 h-2.5 text-textMain" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </div>
-        `;
-        div.onclick = (e) => {
-          e.stopPropagation();
-          switchTab('timeline');
-          selectTimelineDate(sum.date);
-        };
-        container.appendChild(div);
       });
     }
 
@@ -675,7 +820,7 @@
           const parsedJson = JSON.parse(rawText);
           if (parsedJson.transcripts) {
             db.transcripts = parsedJson.transcripts;
-            db.updated_at = parsedJson.updated_at || new Date().toISOString().substring(0, 10);
+            db.updated_at = parsedJson.updated_at || new Date().toISOString().substring(0, 19).replace('T', ' ');
             generateAutoSummaries();
             localStorage.setItem("band_duck_db", JSON.stringify(db));
             showToast("JSON 분석 데이터베이스 동기화 완료!");
@@ -696,7 +841,7 @@
         
         generateAutoSummaries();
 
-        db.updated_at = new Date().toISOString().substring(0, 10);
+        db.updated_at = new Date().toISOString().substring(0, 19).replace('T', ' ');
         localStorage.setItem("band_duck_db", JSON.stringify(db));
         
         const addedCount = db.transcripts.length - beforeLen;
@@ -704,7 +849,7 @@
         
         document.getElementById('raw-chat-input').value = '';
         initApp();
-        switchTab('timeline');
+        switchTab('home');
 
       } catch (err) {
         showToast("오류 발생: " + err.message);
@@ -780,29 +925,35 @@
         const fullText = msgs.map(m => m.message).join(" ");
         let topic = "일상적인 대화 및 의견 공유";
         let content = "멤버들 간의 일상적인 안부와 대화를 나눴습니다.";
+        let tags = ["일상"];
 
         if (fullText.includes("합주") || fullText.includes("예약")) {
           topic = "합주 일정 조율 및 예약";
           content = "애비로드 합주실 일정과 시간, 장소 예약 및 세션 비중에 대한 세부 협의가 있었습니다.";
+          tags = ["일정", "합주"];
         }
         if (fullText.includes("셋리스트") || fullText.includes("곡")) {
           topic = "공연 셋리스트 및 신곡 조율";
           content = "공연을 위한 셋리스트(혜성, 오리날다, 썸데이, 드라우닝) 조율 및 투표 결과가 확정되었습니다.";
+          tags = ["악보", "셋리스트", "공연"];
         }
         if (fullText.includes("공연") || fullText.includes("대관")) {
           topic = "공연 기획 및 조인 밴드 논의";
           content = "9월 합동 공연을 위한 홍대 인근 장소 예약 및 공연 방식(팀 순서 등)에 관한 기획 회의입니다.";
+          tags = ["공연", "기획"];
         }
         if (fullText.includes("정산") || fullText.includes("금액")) {
           topic = "합주실 예약비 회비 정산";
           content = "예약 완료에 따른 정산 공유 및 회비 지출 명세를 확인했습니다.";
+          tags = ["정산", "회비"];
         }
 
         newSummaries.push({
           date: date,
           topic: topic,
           content: content,
-          msgCount: msgs.length
+          msgCount: msgs.length,
+          tags: tags
         });
       });
 
@@ -832,6 +983,8 @@
       const grid = document.getElementById('calendar-grid');
       grid.innerHTML = '';
 
+      const searchQuery = document.getElementById('home-search-input').value.toLowerCase().trim();
+
       for (let i = 0; i < firstDay; i++) {
         grid.innerHTML += `<div class="aspect-[4/3] md:aspect-auto md:h-20"></div>`;
       }
@@ -846,8 +999,20 @@
         let dotHtml = "";
         let topicHtml = "";
 
+        // 검색어 일치 강조
+        let isSearchMatch = false;
+        if (searchQuery && summary) {
+          if (summary.topic.toLowerCase().includes(searchQuery) || summary.content.toLowerCase().includes(searchQuery)) {
+            isSearchMatch = true;
+          }
+        }
+
         if (summary && summary.topic !== "일상적인 대화 및 의견 공유") {
-          cellClass += "border-textMain bg-textMain text-white cursor-pointer hover:bg-black shadow-md";
+          if (isSearchMatch) {
+            cellClass += "border-amber-500 bg-amber-400 text-slate-950 cursor-pointer hover:bg-amber-500 shadow-md ring-4 ring-amber-300";
+          } else {
+            cellClass += "border-textMain bg-textMain text-white cursor-pointer hover:bg-black shadow-md";
+          }
           let shortTopic = summary.topic.length > 6 ? summary.topic.substring(0,6) + '..' : summary.topic;
           topicHtml = `<span class="text-[9px] font-medium mt-1 text-center leading-tight opacity-90 block">${shortTopic}</span>`;
         } else if (hasRecord) {
