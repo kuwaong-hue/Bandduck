@@ -112,6 +112,11 @@
           <input id="e-title" type="text" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
         <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">아티스트</span>
           <input id="e-artist" type="text" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
+        <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">기본 BPM <span class="normal-case font-medium opacity-70">— 싱크 균등분배 기본값 · 재생 BPM 감속의 기준</span></span>
+          <input id="e-bpm" type="number" min="1" placeholder="예: 120" class="w-32 bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
+        <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">연습용 오디오 <span class="normal-case font-medium opacity-70">— 올리면 재생이 이 오디오 기준(임의 배속으로 정밀 감속 가능)</span></span>
+          <input id="e-audio" type="file" accept="audio/*" class="text-xs file:mr-2 file:rounded-full file:border-0 file:bg-textMain file:text-white file:px-3 file:py-1.5 file:text-xs file:font-bold">
+          <span id="e-audio-hint" class="text-[11px] opacity-50"></span></label>
         <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">유튜브 링크</span>
           <input id="e-youtube" type="text" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain">
           <span id="e-yt-hint" class="text-[11px] opacity-50"></span></label>
@@ -129,6 +134,7 @@
 
   <!-- ===================== 마디 마킹 + 싱크 저작 오버레이 ===================== -->
   <div id="author" class="hidden fixed inset-0 z-[55] flex flex-col bg-zinc-100 text-zinc-900">
+    <audio id="author-audio" class="hidden" preload="auto"></audio>
     <!-- 상단 바 -->
     <div class="flex flex-wrap items-center gap-2 border-b border-zinc-300 bg-white px-3 py-2">
       <button id="author-close" class="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium hover:bg-zinc-200 active:scale-95">✕ 닫기</button>
@@ -163,7 +169,8 @@
 
     <!-- 싱크 컨트롤 -->
     <div id="sync-ctrl" class="hidden flex flex-wrap items-center gap-3 border-b border-emerald-200 bg-emerald-50 px-3 py-2 text-sm">
-      <div class="w-24 aspect-video overflow-hidden rounded bg-black/60"><div id="yt-host-author" class="w-full h-full"></div></div>
+      <div id="yt-thumb-author" class="w-24 aspect-video overflow-hidden rounded bg-black/60"><div id="yt-host-author" class="w-full h-full"></div></div>
+      <span id="audio-badge-author" class="hidden rounded bg-indigo-600 px-2 py-1 text-xs font-bold text-white">🎵 연습용 오디오</span>
       <button id="sync-toggle" class="h-9 w-9 rounded-full bg-zinc-900 text-white">▶</button>
       <button id="tap-btn" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white active:scale-95">탭 → 마디 1</button>
       <span id="sync-count" class="text-xs tabular-nums text-emerald-900"></span>
@@ -192,11 +199,19 @@
 
   <!-- ===================== 노래방 재생 오버레이 ===================== -->
   <div id="perf" class="hidden fixed inset-0 z-[60] flex select-none flex-col bg-zinc-900 text-white">
+    <audio id="perf-audio" class="hidden" preload="auto"></audio>
     <div class="flex shrink-0 items-center gap-3 border-b border-white/10 px-3 py-2">
       <button id="perf-exit" class="rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium active:scale-95">✕ 나가기</button>
       <div id="perf-meta" class="text-sm font-semibold tabular-nums"></div>
       <div class="ml-auto flex items-center gap-3">
-        <div class="w-24 aspect-video overflow-hidden rounded bg-black/60"><div id="yt-host" class="w-full h-full"></div></div>
+        <div id="yt-thumb" class="w-24 aspect-video overflow-hidden rounded bg-black/60"><div id="yt-host" class="w-full h-full"></div></div>
+        <div id="bpm-ctrl" class="flex items-center gap-0.5 rounded-lg bg-white/10 px-1.5 py-0.5" title="재생 BPM — 곡의 기본 BPM 대비 속도가 자동 조정됩니다">
+          <span class="mr-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400">BPM</span>
+          <button id="bpm-down" class="h-7 w-7 rounded text-base font-bold hover:bg-white/10 active:scale-95">−</button>
+          <input id="bpm-val" type="number" min="1" step="1" class="w-12 bg-transparent text-center text-sm font-bold tabular-nums outline-none [appearance:textfield]">
+          <button id="bpm-up" class="h-7 w-7 rounded text-base font-bold hover:bg-white/10 active:scale-95">+</button>
+          <span id="bpm-rate" class="ml-1 w-11 text-[10px] tabular-nums text-emerald-300"></span>
+        </div>
         <button id="perf-toggle" class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-zinc-900 active:scale-95">▶</button>
       </div>
     </div>
@@ -432,10 +447,29 @@
           })
         })
       }
-      return { connect, play: () => player?.playVideo?.(), pause: () => player?.pauseVideo?.(), seekTo: (t) => player?.seekTo?.(t, true), getTime: () => player?.getCurrentTime?.() ?? 0, getDuration: () => player?.getDuration?.() ?? 0, get playing() { return state.playing } }
+      return { connect, play: () => player?.playVideo?.(), pause: () => player?.pauseVideo?.(), seekTo: (t) => player?.seekTo?.(t, true), getTime: () => player?.getCurrentTime?.() ?? 0, getDuration: () => player?.getDuration?.() ?? 0, setRate: (r) => player?.setPlaybackRate?.(r), getRate: () => player?.getPlaybackRate?.() ?? 1, availableRates: () => player?.getAvailablePlaybackRates?.() ?? [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2], get playing() { return state.playing } }
     }
     const yt = makeYT('yt-host')          // 재생 오버레이용
     const ytA = makeYT('yt-host-author')  // 싱크 저작용
+
+    // ===== 로컬/슈파베이스 오디오 소스 (yt와 동일 인터페이스). playbackRate는 임의값 허용 → 세밀한 BPM 감속 가능 =====
+    function makeAudioSrc(elId) {
+      const el = $(elId)
+      return {
+        async connect(url) {
+          el.src = url; el.preservesPitch = true; el.mozPreservesPitch = true; el.webkitPreservesPitch = true; el.playbackRate = 1
+          await new Promise((resolve, reject) => { el.onloadedmetadata = () => resolve(); el.onerror = () => reject(new Error('오디오를 불러오지 못했습니다')) })
+        },
+        play: () => el.play?.()?.catch(() => {}), pause: () => el.pause?.(), seekTo: (t) => { el.currentTime = t },
+        getTime: () => el.currentTime || 0, getDuration: () => (isFinite(el.duration) ? el.duration : 0),
+        setRate: (r) => { el.playbackRate = r }, getRate: () => el.playbackRate || 1,
+        get playing() { return !el.paused },
+      }
+    }
+    const audioSrc = makeAudioSrc('perf-audio')
+    const audioSrcA = makeAudioSrc('author-audio')
+    let src = yt   // 재생 오버레이 현재 소스
+    let srcA = ytA // 싱크 저작 현재 소스
 
     // ===== 등록 =====
     $('f-youtube').addEventListener('input', (e) => {
@@ -494,7 +528,7 @@
           const p = JSON.parse(await m.text())
           const mm = buildStepModel(p)
           const synced = !!(p.measures?.length && mm.steps.some((s) => typeof s === 'number'))
-          return { id, title: p.title || id, artist: p.artist || '', youtube: p.youtubeVideoId || '', synced, lyrics: Array.isArray(p.lyrics) ? p.lyrics : [], updatedAt: p.updatedAt || 0 }
+          return { id, title: p.title || id, artist: p.artist || '', youtube: p.youtubeVideoId || '', synced, lyrics: Array.isArray(p.lyrics) ? p.lyrics : [], defaultBpm: p.defaultBpm, audioPath: p.audioPath || '', updatedAt: p.updatedAt || 0 }
         } catch { return null }
       }))
       const songs = items.filter(Boolean).sort((a, b) => b.updatedAt - a.updatedAt)
@@ -507,7 +541,7 @@
           <div class="silvana-card bg-white p-6 border border-brandGray/40 shadow-sm flex flex-col gap-3">
             <div class="flex items-start justify-between"><span class="text-2xl">🎼</span>${del}</div>
             <div><h3 class="text-lg font-black leading-tight break-all">${s.title}</h3>${s.artist ? `<p class="text-xs opacity-50 mt-0.5">${s.artist}</p>` : ''}</div>
-            <div class="text-[10px] font-bold flex gap-1">${s.synced ? '<span class="bg-emerald-500 text-white px-2 py-0.5 rounded-full">싱크됨</span>' : '<span class="bg-amber-400 text-zinc-900 px-2 py-0.5 rounded-full">싱크 전</span>'}${s.lyrics?.length ? '<span class="bg-sky-500 text-white px-2 py-0.5 rounded-full">가사</span>' : ''}</div>
+            <div class="text-[10px] font-bold flex gap-1">${s.synced ? '<span class="bg-emerald-500 text-white px-2 py-0.5 rounded-full">싱크됨</span>' : '<span class="bg-amber-400 text-zinc-900 px-2 py-0.5 rounded-full">싱크 전</span>'}${s.lyrics?.length ? '<span class="bg-sky-500 text-white px-2 py-0.5 rounded-full">가사</span>' : ''}${s.audioPath ? '<span class="bg-indigo-500 text-white px-2 py-0.5 rounded-full">오디오</span>' : ''}</div>
             <div class="flex flex-wrap gap-2 mt-1">
               ${playBtn}
               <button data-edit="${s.id}" class="px-3 py-2 bg-violet-600 text-white rounded-full text-xs font-bold hover:bg-violet-700 transition">✎ 싱크</button>
@@ -518,7 +552,10 @@
       }).join('')
       $('song-grid').querySelectorAll('[data-del]').forEach((b) => b.onclick = async () => {
         if (!confirm('이 곡을 삭제할까요?')) return
-        const { error } = await supabase.storage.from(BUCKET).remove([`${b.dataset.del}/score.pdf`, `${b.dataset.del}/project.json`])
+        const ap = (window.__songs || {})[b.dataset.del]?.audioPath
+        const paths = [`${b.dataset.del}/score.pdf`, `${b.dataset.del}/project.json`]
+        if (ap) paths.push(`${b.dataset.del}/${ap}`)
+        const { error } = await supabase.storage.from(BUCKET).remove(paths)
         if (error) return alert('삭제 실패: ' + error.message); loadSongs()
       })
       $('song-grid').querySelectorAll('[data-play]').forEach((b) => b.onclick = () => openSong(b.dataset.play))
@@ -542,18 +579,21 @@
         if (e2) throw new Error('score.pdf 없음')
         pdfDoc = await pdfjsLib.getDocument({ data: await pdfBlob.arrayBuffer(), verbosity: 0 }).promise
         const vid = extractVideoId(project.youtubeVideoId)
-        if (!vid) throw new Error('유튜브 정보 없음')
-        await openPerformance(vid)
+        let audioUrl = null
+        if (project.audioPath) { const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(`${id}/${project.audioPath}`); audioUrl = pub?.publicUrl || null }
+        if (!vid && !audioUrl) throw new Error('재생 소스(유튜브/오디오) 없음')
+        await openPerformance(vid, audioUrl)
         syncEl.textContent = ''
       } catch (e) { syncEl.textContent = ''; alert('곡을 열지 못했습니다.\n' + (e?.message || e)) }
     }
 
     // ===== 노래방 재생 루프 =====
     let rafId = 0, lines = [], isSeeking = false, activeSlotKey = 'bottom'
+    let baseBpm = 0 // 곡의 기본 BPM(=1배속 기준). 재생 BPM과의 비율로 배속 결정.
     const perfEl = $('perf')
     const mkSlot = (id) => ({ box: $(id), wrap: $(id).querySelector('.cropwrap'), canvas: $(id).querySelector('canvas'), bar: $(id).querySelector('.playhead'), cut: $(id).querySelector('.cutmark'), start: $(id).querySelector('.startmark'), label: $(id).querySelector('.slot-label'), lineIdx: -1 })
     const slots = { top: mkSlot('slot-top'), bottom: mkSlot('slot-bottom') }
-    async function openPerformance(vid) {
+    async function openPerformance(vid, audioUrl) {
       lines = groupLines(project.measures)
       slots.top.lineIdx = -1; slots.bottom.lineIdx = -1; activeSlotKey = 'bottom'
       isSeeking = false; $('perf-seek').value = 0; $('perf-cur').textContent = '0:00'; $('perf-dur').textContent = '0:00'
@@ -561,9 +601,14 @@
       $('perf-lyrics').classList.toggle('hidden', !hasLyrics)
       if (hasLyrics) { $('lyric-section').textContent = ''; $('lyric-prev').textContent = ''; $('lyric-cur').textContent = ''; $('lyric-next').textContent = project.lyrics[0]?.text || '' }
       perfEl.classList.remove('hidden')
-      await yt.connect(vid); yt.play(); startLoop()
+      // 소스 선택: 오디오가 있으면 audioSrc(임의 배속 가능), 없으면 유튜브
+      src = audioUrl ? audioSrc : yt
+      $('yt-thumb').classList.toggle('hidden', !!audioUrl) // 오디오 모드에선 유튜브 썸네일 숨김
+      await src.connect(audioUrl || vid)
+      setupBpm() // 기본 BPM 기준으로 BPM 컨트롤 초기화 + 배속 적용
+      src.play(); startLoop()
     }
-    function closePerformance() { cancelAnimationFrame(rafId); rafId = 0; yt.pause(); perfEl.classList.add('hidden') }
+    function closePerformance() { cancelAnimationFrame(rafId); rafId = 0; src.pause(); $('perf-audio').pause(); perfEl.classList.add('hidden') }
     async function renderSlotLine(slot, lineIdx) {
       if (slot.lineIdx === lineIdx) return
       slot.lineIdx = lineIdx
@@ -582,11 +627,11 @@
       const total = project.measures.length
       const lyricsArr = Array.isArray(project.lyrics) ? project.lyrics : []
       let lastLyricIdx = -2
-      let sampleYt = yt.getTime(), samplePerf = performance.now(), lastResync = samplePerf
+      let sampleYt = src.getTime(), samplePerf = performance.now(), lastResync = samplePerf
       function estTime() {
         const now = performance.now()
-        if (yt.playing) { let est = sampleYt + (now - samplePerf) / 1000; if (now - lastResync > 250) { const r = yt.getTime(); sampleYt = r; samplePerf = now; lastResync = now; est = r } return est }
-        const r = yt.getTime(); sampleYt = r; samplePerf = now; return r
+        if (src.playing) { let est = sampleYt + (now - samplePerf) / 1000 * src.getRate(); if (now - lastResync > 250) { const r = src.getTime(); sampleYt = r; samplePerf = now; lastResync = now; est = r } return est }
+        const r = src.getTime(); sampleYt = r; samplePerf = now; return r
       }
       function frame() {
         const time = estTime()
@@ -643,13 +688,13 @@
           if (sm) { slot.start.classList.remove('hidden'); slot.start.style.left = (measureFrac(line, sm, false) * wrapW) + 'px' } else slot.start.classList.add('hidden')
         }
         $('perf-meta').innerHTML = current ? `마디 <span class="text-emerald-400">${currentIndex + 1}</span> / ${total}` : `<span class="text-zinc-400">${status === 'ended' ? '끝' : status === 'waiting' ? '대기' : ''} · ${total}마디</span>`
-        const dur = yt.getDuration()
+        const dur = src.getDuration()
         $('perf-dur').textContent = formatTime(dur)
         if (!isSeeking) {
           $('perf-cur').textContent = formatTime(time)
           $('perf-seek').value = dur > 0 ? Math.round((time / dur) * 1000) : 0
         }
-        $('perf-toggle').textContent = yt.playing ? '❚❚' : '▶'
+        $('perf-toggle').textContent = src.playing ? '❚❚' : '▶'
         if (lyricsArr.length) {
           const li = findLyricIdx(lyricsArr, time)
           if (li !== lastLyricIdx) {
@@ -671,14 +716,38 @@
       clearTimeout(resizeT)
       resizeT = setTimeout(() => { const t = slots.top.lineIdx, b = slots.bottom.lineIdx; slots.top.lineIdx = -1; slots.bottom.lineIdx = -1; renderSlotLine(slots.top, t); renderSlotLine(slots.bottom, b) }, 150)
     })
-    const togglePlay = () => (yt.playing ? yt.pause() : yt.play())
+    const togglePlay = () => (src.playing ? src.pause() : src.play())
     $('perf-exit').onclick = closePerformance
     $('perf-toggle').onclick = (e) => { e.stopPropagation(); togglePlay() }
     $('perf-body').onclick = togglePlay
     // 재생 위치 조정(seek): 드래그 중엔 루프가 값을 덮어쓰지 않도록 isSeeking으로 보호
-    const seekTimeFromBar = () => (yt.getDuration() > 0 ? (Number($('perf-seek').value) / 1000) * yt.getDuration() : 0)
+    const seekTimeFromBar = () => (src.getDuration() > 0 ? (Number($('perf-seek').value) / 1000) * src.getDuration() : 0)
     $('perf-seek').addEventListener('input', () => { isSeeking = true; $('perf-cur').textContent = formatTime(seekTimeFromBar()) })
-    $('perf-seek').addEventListener('change', () => { const t = seekTimeFromBar(); if (yt.getDuration() > 0) yt.seekTo(t); isSeeking = false })
+    $('perf-seek').addEventListener('change', () => { const t = seekTimeFromBar(); if (src.getDuration() > 0) src.seekTo(t); isSeeking = false })
+    // ===== 재생 BPM 컨트롤: 배속 = 재생BPM / 기본BPM =====
+    // 오디오 소스면 임의 배속(예: 0.94×) 정밀 적용, 유튜브 소스면 0.25 단계로 스냅됨.
+    function applyBpm() {
+      if (!(baseBpm > 0)) { $('bpm-rate').textContent = ''; return }
+      const bpm = Math.max(1, Math.round(Number($('bpm-val').value) || baseBpm))
+      const rate = bpm / baseBpm
+      src.setRate(rate)
+      const eff = src.getRate ? src.getRate() : rate // 유튜브는 스냅된 실제값
+      $('bpm-rate').textContent = `${(Math.round(eff * 100) / 100)}×`
+    }
+    function setupBpm() {
+      baseBpm = project?.defaultBpm > 0 ? project.defaultBpm : 0
+      const has = baseBpm > 0
+      $('bpm-ctrl').classList.toggle('opacity-40', !has)
+      $('bpm-val').disabled = !has
+      $('bpm-down').disabled = !has; $('bpm-up').disabled = !has
+      $('bpm-val').value = has ? baseBpm : ''
+      if (has) applyBpm(); else { $('bpm-rate').textContent = ''; src.setRate?.(1) }
+    }
+    const nudgeBpm = (d) => { if (!(baseBpm > 0)) return; $('bpm-val').value = Math.max(1, (Math.round(Number($('bpm-val').value) || baseBpm)) + d); applyBpm() }
+    $('bpm-down').onclick = (e) => { e.stopPropagation(); nudgeBpm(-1) }
+    $('bpm-up').onclick = (e) => { e.stopPropagation(); nudgeBpm(1) }
+    $('bpm-val').addEventListener('input', applyBpm)
+    $('bpm-val').addEventListener('click', (e) => e.stopPropagation())
 
     // ===== 셋리스트 / 곡 정보 (구글 시트) =====
     let setlistLoaded = false
@@ -842,6 +911,8 @@
         if (e2) throw new Error('score.pdf 없음')
         aPdf = await pdfjsLib.getDocument({ data: await pdfBlob.arrayBuffer(), verbosity: 0 }).promise
         aproj.pageCount = aPdf.numPages; aId = id
+        authorSrcKey = ''; ytA.pause(); $('author-audio').pause() // 소스 상태 초기화(곡 전환 대비)
+        $('d-bpm').value = aproj.defaultBpm > 0 ? aproj.defaultBpm : 120 // 곡 정보의 기본 BPM을 균등분배 디폴트로
         toDelete.clear(); updateDeleteBtn()
         $('author-title').textContent = aproj.title || id
         $('author').classList.remove('hidden')
@@ -1029,20 +1100,35 @@
       $('sync-table-wrap').classList.toggle('hidden', m !== 'sync')
       pageLayers.forEach((p) => { p.layer.style.pointerEvents = m === 'mark' ? 'auto' : 'none'; p.layer.style.cursor = m === 'mark' ? 'crosshair' : 'default' })
       redrawAllLayers(); updateMarkCount(); updateDeleteBtn()
-      if (m === 'sync') { ensureAuthorVideo(); rebuildSeq(); renderJumpList(); renderTable(); updateTap() }
+      if (m === 'sync') { ensureAuthorSource(); rebuildSeq(); renderJumpList(); renderTable(); updateTap() }
     }
 
-    let authorVid = ''
-    async function ensureAuthorVideo() {
+    let authorSrcKey = ''
+    async function ensureAuthorSource() {
+      // 연습용 오디오가 있으면 유튜브 대신 오디오로 싱크/재생
+      if (aproj.audioPath) {
+        const key = 'audio:' + aId
+        $('yt-thumb-author').classList.add('hidden'); $('audio-badge-author').classList.remove('hidden')
+        srcA = audioSrcA
+        if (key === authorSrcKey) return
+        authorSrcKey = key
+        const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(`${aId}/${aproj.audioPath}`)
+        await srcA.connect(pub.publicUrl)
+        return
+      }
+      $('yt-thumb-author').classList.remove('hidden'); $('audio-badge-author').classList.add('hidden')
+      srcA = ytA
       const vid = extractVideoId(aproj.youtubeVideoId)
-      if (!vid || vid === authorVid) return
-      authorVid = vid
-      await ytA.connect(vid)
+      if (!vid) return
+      const key = 'yt:' + vid
+      if (key === authorSrcKey) return
+      authorSrcKey = key
+      await srcA.connect(vid)
     }
 
     function recordTap() {
       if (!aseq.length) return
-      const t = ytA.getTime()
+      const t = srcA.getTime()
       const idx = astep.findIndex((s) => typeof s !== 'number')
       if (idx === -1) aproj.lastMeasureEndTime = t
       else astep[idx] = t
@@ -1078,7 +1164,7 @@
       wrap.innerHTML = `<table class="w-full text-sm"><thead class="sticky top-0 bg-zinc-50 text-xs text-zinc-500"><tr><th class="px-1 py-1">#</th><th class="px-1 py-1">마디</th><th class="px-1 py-1">시작</th><th class="px-1 py-1 text-right">길이</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
       wrap.querySelectorAll('[data-ts]').forEach((inp) => inp.onchange = () => { const k = +inp.dataset.ts, v = inp.value; astep[k] = (v === '' || isNaN(+v)) ? undefined : Math.max(0, +v); renderTable(); updateTap() })
       const last = wrap.querySelector('#t-last'); if (last) last.onchange = () => { aproj.lastMeasureEndTime = Math.max(0, +last.value || 0); renderTable() }
-      wrap.querySelectorAll('[data-seekk]').forEach((b) => b.onclick = () => { if (b.dataset.seekk !== '') ytA.seekTo(+b.dataset.seekk) })
+      wrap.querySelectorAll('[data-seekk]').forEach((b) => b.onclick = () => { if (b.dataset.seekk !== '') srcA.seekTo(+b.dataset.seekk) })
     }
 
     async function saveAuthor() {
@@ -1098,7 +1184,7 @@
         alert(`저장되었습니다!\n마디 ${aproj.measures.length}개 · 스텝 ${astep.filter((s) => typeof s === 'number').length}/${aseq.length}`)
       } catch (e) { alert('저장 오류: ' + (e?.message || e)) }
     }
-    function closeAuthor() { $('author').classList.add('hidden'); ytA.pause(); loadSongs() }
+    function closeAuthor() { $('author').classList.add('hidden'); ytA.pause(); $('author-audio').pause(); authorSrcKey = ''; loadSongs() }
 
     // 저작 버튼 바인딩
     $('author-close').onclick = closeAuthor
@@ -1123,9 +1209,9 @@
         clearSelection(); rebuildSeq(); redrawAllLayers(); updateMarkCount()
       } catch (e) { alert('자동 검출 오류: ' + (e?.message || e)) } finally { $('auto-detect').disabled = false }
     }
-    $('sync-toggle').onclick = () => { ytA.playing ? ytA.pause() : ytA.play() }
+    $('sync-toggle').onclick = () => { srcA.playing ? srcA.pause() : srcA.play() }
     $('tap-btn').onclick = recordTap
-    $('d-now').onclick = () => ($('d-start').value = ytA.getTime().toFixed(2))
+    $('d-now').onclick = () => ($('d-start').value = srcA.getTime().toFixed(2))
     $('d-apply').onclick = () => {
       const s = Number($('d-start').value), bpm = Number($('d-bpm').value), beats = Number($('d-beats').value)
       if (!(s >= 0) || $('d-start').value === '') return alert('시작 시간을 먼저 설정하세요 (현재 버튼).')
@@ -1160,14 +1246,30 @@
       $('e-artist').value = s?.artist || ''
       $('e-youtube').value = s?.youtube ? `https://youtu.be/${s.youtube}` : ''
       $('e-yt-hint').textContent = s?.youtube ? `현재 영상 ID: ${s.youtube}` : ''
+      $('e-bpm').value = s?.defaultBpm > 0 ? s.defaultBpm : ''
+      $('e-audio').value = ''
+      $('e-audio-hint').textContent = s?.audioPath ? `현재 오디오 있음 (${s.audioPath}) · 새 파일 선택 시 교체` : '없음 · 파일 선택 시 업로드'
+      setYoutubeDisabled(!!s?.audioPath)
       $('e-lyrics').value = lyricsToText(s?.lyrics)
       updateLyricsHint()
       $('e-status').textContent = ''
       $('edit-modal').classList.remove('hidden')
     }
+    // 연습용 오디오가 있으면(또는 새로 선택하면) 유튜브 링크 입력 비활성화 — 재생/싱크가 오디오 기준이 되므로
+    function setYoutubeDisabled(d) {
+      $('e-youtube').disabled = d
+      $('e-youtube').classList.toggle('opacity-40', d)
+      $('e-youtube').classList.toggle('cursor-not-allowed', d)
+      if (d) $('e-yt-hint').textContent = '🎵 오디오가 있어 유튜브 링크는 사용하지 않습니다 (비활성화).'
+    }
     $('e-youtube').addEventListener('input', (e) => {
       const id = extractVideoId(e.target.value)
       $('e-yt-hint').textContent = e.target.value ? (id ? `✓ 영상 ID: ${id}` : '⚠️ 유튜브 링크를 인식하지 못했습니다') : ''
+    })
+    $('e-audio').addEventListener('change', () => {
+      const f = $('e-audio').files?.[0]
+      if (f) { $('e-audio-hint').textContent = `선택됨: ${f.name}`; setYoutubeDisabled(true) }
+      else { const had = !!(window.__songs || {})[editId]?.audioPath; $('e-audio-hint').textContent = had ? '기존 오디오 유지' : '없음 · 파일 선택 시 업로드'; setYoutubeDisabled(had) }
     })
     function updateLyricsHint() {
       const txt = $('e-lyrics').value
@@ -1180,7 +1282,8 @@
       const title = $('e-title').value.trim(), artist = $('e-artist').value.trim(), ytRaw = $('e-youtube').value.trim()
       if (!title) { $('e-status').textContent = '⚠️ 곡명을 입력하세요.'; return }
       const ytId = extractVideoId(ytRaw)
-      if (!ytId) { $('e-status').textContent = '⚠️ 유튜브 링크를 확인하세요.'; return }
+      const hasAudio = !!((window.__songs || {})[editId]?.audioPath || $('e-audio').files?.[0])
+      if (!ytId && !hasAudio) { $('e-status').textContent = '⚠️ 유튜브 링크 또는 연습용 오디오 중 하나는 필요합니다.'; return }
       $('e-save').disabled = true
       try {
         const { data: sess } = await supabase.auth.getSession()
@@ -1194,7 +1297,18 @@
         const { data: mf, error: e1 } = await supabase.storage.from(BUCKET).download(`${editId}/project.json`)
         if (e1) throw new Error('project.json 없음')
         const p = JSON.parse(await mf.text())
-        p.title = title; p.artist = artist; p.youtubeVideoId = ytId; p.lyrics = parseLyricsInput($('e-lyrics').value); p.updatedAt = Date.now()
+        const bpm = parseInt($('e-bpm').value, 10)
+        p.title = title; p.artist = artist; p.youtubeVideoId = ytId || p.youtubeVideoId || ''; p.defaultBpm = bpm > 0 ? bpm : undefined; p.lyrics = parseLyricsInput($('e-lyrics').value); p.updatedAt = Date.now()
+        const audioFile = $('e-audio').files?.[0]
+        if (audioFile) {
+          $('e-status').textContent = '오디오 업로드 중…'
+          const ext = (audioFile.name.match(/\.([a-z0-9]+)$/i)?.[1] || 'mp3').toLowerCase()
+          const apath = `audio.${ext}`
+          const { error: au } = await supabase.storage.from(BUCKET).upload(`${editId}/${apath}`, audioFile, { contentType: audioFile.type || 'audio/mpeg', upsert: true })
+          if (au) throw new Error('오디오 업로드 실패: ' + au.message)
+          p.audioPath = apath
+        }
+        $('e-status').textContent = '저장 중…'
         const { error: e2 } = await supabase.storage.from(BUCKET).upload(`${editId}/project.json`, new Blob([JSON.stringify(p)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
         if (e2) throw new Error(e2.message)
         $('edit-modal').classList.add('hidden')
