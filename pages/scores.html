@@ -61,7 +61,7 @@
     <!-- ===================== 곡 / 재생 ===================== -->
     <section id="panel-songs">
       <div class="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-brandGray/50 shadow-sm mb-10">
-        <h2 class="text-sm font-black flex items-center gap-2 mb-4">⬆️ 곡 등록 (PDF + 유튜브)</h2>
+        <h2 class="text-sm font-black flex items-center gap-2 mb-4">⬆️ 곡 등록 <span class="font-medium opacity-60">— 곡을 먼저 만들고, 카드에서 세션별 악보를 추가하세요</span></h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <label class="flex flex-col gap-1">
             <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">곡명 *</span>
@@ -72,15 +72,11 @@
             <input id="f-artist" type="text" placeholder="예: 윤하 (선택)" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain">
           </label>
           <label class="flex flex-col gap-1 md:col-span-2">
-            <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">유튜브 링크 *</span>
+            <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">유튜브 링크 <span class="normal-case font-medium opacity-70">(선택 · 나중에 정보에서 추가/오디오로 대체 가능)</span></span>
             <input id="f-youtube" type="text" placeholder="https://www.youtube.com/watch?v=..." class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain">
             <span id="yt-hint" class="text-[11px] opacity-50"></span>
           </label>
-          <label class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">PDF 악보 *</span>
-            <input id="f-file" type="file" accept="application/pdf,.pdf" class="text-xs file:mr-2 file:rounded-full file:border-0 file:bg-textMain file:text-white file:px-3 file:py-1.5 file:text-xs file:font-bold">
-          </label>
-          <label class="flex flex-col gap-1">
+          <label class="flex flex-col gap-1 md:col-span-2">
             <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">업로드 비밀번호 *</span>
             <input id="f-pass" type="password" placeholder="••••••" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain">
           </label>
@@ -128,6 +124,29 @@
       <div class="flex justify-end gap-2 mt-4">
         <button id="e-cancel" class="px-4 py-2 bg-brandGray text-textMain rounded-full text-xs font-bold">취소</button>
         <button id="e-save" class="px-4 py-2 bg-textMain text-white hover:bg-black rounded-full text-xs font-bold">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 세션 악보 등록 모달 ===================== -->
+  <div id="part-modal" class="hidden fixed inset-0 z-[58] flex items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <h2 id="pt-title" class="text-base font-black mb-1">세션 악보 등록</h2>
+      <p id="pt-song" class="text-xs opacity-60 mb-4"></p>
+      <div class="flex flex-col gap-3">
+        <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">세션</span>
+          <select id="pt-session" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></select></label>
+        <label id="pt-custom-wrap" class="hidden flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">세션 이름 (커스텀)</span>
+          <input id="pt-custom" type="text" placeholder="예: 코러스, 색소폰" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
+        <label class="flex flex-col gap-1"><span id="pt-file-label" class="text-[10px] font-bold opacity-50 uppercase tracking-widest">PDF 악보 *</span>
+          <input id="pt-file" type="file" accept="application/pdf,.pdf" class="text-xs file:mr-2 file:rounded-full file:border-0 file:bg-textMain file:text-white file:px-3 file:py-1.5 file:text-xs file:font-bold"></label>
+        <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">업로드 비밀번호 *</span>
+          <input id="pt-pass" type="password" placeholder="••••••" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
+      </div>
+      <p id="pt-status" class="text-xs opacity-80 mt-3 min-h-[1rem]"></p>
+      <div class="flex justify-end gap-2 mt-4">
+        <button id="pt-cancel" class="px-4 py-2 bg-brandGray text-textMain rounded-full text-xs font-bold">취소</button>
+        <button id="pt-save" class="px-4 py-2 bg-textMain text-white hover:bg-black rounded-full text-xs font-bold">등록</button>
       </div>
     </div>
   </div>
@@ -471,6 +490,38 @@
     let src = yt   // 재생 오버레이 현재 소스
     let srcA = ytA // 싱크 저작 현재 소스
 
+    // ===== 세션(파트) 모델 =====
+    const FIXED_PARTS = [
+      { key: 'elec1', label: '일렉1' }, { key: 'elec2', label: '일렉2' },
+      { key: 'bass', label: '베이스' }, { key: 'drum', label: '드럼' },
+      { key: 'keys', label: '건반' }, { key: 'violin', label: '바이올린' },
+    ]
+    // 곡의 세션 목록. parts가 없으면 기존 단일 악보(score.pdf+project.json)를 레거시 '기본' 세션으로 합성.
+    function songParts(p) {
+      if (Array.isArray(p.parts) && p.parts.length) return p.parts
+      if (p.measures?.length || p.pageCount) {
+        const synced = !!(p.measures?.length && buildStepModel(p).steps.some((s) => typeof s === 'number'))
+        return [{ key: '__main', label: '기본', legacy: true, synced, pageCount: p.pageCount || 0 }]
+      }
+      return []
+    }
+    const partPdfPath = (id, part) => `${id}/${part.legacy ? 'score.pdf' : part.key + '.pdf'}`
+    // 세션 싱크 데이터(마디/타이밍/점프). 레거시면 project.json 자체에서.
+    async function loadPartData(id, p, part) {
+      if (part.legacy) return { measures: p.measures || [], timings: p.timings || [], stepTimings: p.stepTimings, jumps: p.jumps || [], lastMeasureEndTime: p.lastMeasureEndTime || 0, pageCount: p.pageCount || 0 }
+      try { const { data } = await supabase.storage.from(BUCKET).download(`${id}/${part.key}.json`); if (data) return JSON.parse(await data.text()) } catch {}
+      return { measures: [], timings: [], jumps: [], lastMeasureEndTime: 0, pageCount: 0 }
+    }
+    // 레거시(parts 없는) 곡에 세션을 처음 추가할 때, 기존 단일 악보를 '기본' 세션 항목으로 편입
+    function ensurePartsArray(P) {
+      if (Array.isArray(P.parts) && P.parts.length) return
+      P.parts = []
+      if (P.measures?.length || P.pageCount) {
+        const synced = !!(P.measures?.length && buildStepModel(P).steps.some((s) => typeof s === 'number'))
+        P.parts.push({ key: '__main', label: '기본', legacy: true, synced, pageCount: P.pageCount || 0 })
+      }
+    }
+
     // ===== 등록 =====
     $('f-youtube').addEventListener('input', (e) => {
       const id = extractVideoId(e.target.value)
@@ -479,12 +530,11 @@
     const setFormStatus = (t) => ($('status').textContent = t)
     async function submit() {
       const title = $('f-title').value.trim(), artist = $('f-artist').value.trim()
-      const ytRaw = $('f-youtube').value.trim(), file = $('f-file').files?.[0], pass = $('f-pass').value
+      const ytRaw = $('f-youtube').value.trim(), pass = $('f-pass').value
       if (!cfg.SUPABASE_URL) return setFormStatus('⚠️ config.js의 Supabase 설정이 없습니다.')
       if (!title) return setFormStatus('⚠️ 곡명을 입력하세요.')
-      const ytId = extractVideoId(ytRaw)
-      if (!ytId) return setFormStatus('⚠️ 올바른 유튜브 링크를 입력하세요.')
-      if (!file || !/\.pdf$/i.test(file.name)) return setFormStatus('⚠️ PDF 파일을 선택하세요.')
+      const ytId = ytRaw ? extractVideoId(ytRaw) : ''
+      if (ytRaw && !ytId) return setFormStatus('⚠️ 유튜브 링크를 인식하지 못했습니다 (비우거나 올바른 링크).')
       if (!pass) return setFormStatus('⚠️ 업로드 비밀번호를 입력하세요.')
       $('submit-btn').disabled = true
       try {
@@ -492,11 +542,9 @@
         const { error: authErr } = await supabase.auth.signInWithPassword({ email: cfg.UPLOAD_EMAIL, password: pass })
         if (authErr) { setFormStatus('❌ 비밀번호가 올바르지 않습니다.'); return }
         const id = `proj_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-        setFormStatus('PDF 업로드 중…')
-        const { error: upErr } = await supabase.storage.from(BUCKET).upload(`${id}/score.pdf`, file, { contentType: 'application/pdf', upsert: true })
-        if (upErr) { setFormStatus('❌ PDF 업로드 실패: ' + upErr.message); return }
         const now = Date.now()
-        const project = { id, title, artist, youtubeVideoId: ytId, pageCount: 0, measures: [], timings: [], lastMeasureEndTime: 0, createdAt: now, updatedAt: now }
+        const project = { id, title, artist, youtubeVideoId: ytId, parts: [], createdAt: now, updatedAt: now }
+        setFormStatus('곡 생성 중…')
         const { error: metaErr } = await supabase.storage.from(BUCKET).upload(`${id}/project.json`, new Blob([JSON.stringify(project)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
         if (metaErr) { setFormStatus('❌ 메타 저장 실패: ' + metaErr.message); return }
         let sheetMsg = ''
@@ -508,8 +556,8 @@
             sheetMsg = r?.ok ? ' · 시트 등록됨' : ' · ⚠️ 시트 실패(' + (r?.error || '확인') + ')'
           } catch { sheetMsg = ' · ⚠️ 시트 호출 실패' }
         }
-        setFormStatus(`✅ 등록 완료: ${title}${sheetMsg}`)
-        $('f-title').value = ''; $('f-artist').value = ''; $('f-youtube').value = ''; $('f-file').value = ''; $('yt-hint').textContent = ''
+        setFormStatus(`✅ 곡 등록 완료: ${title}${sheetMsg} — 아래 카드에서 세션별 악보를 추가하세요.`)
+        $('f-title').value = ''; $('f-artist').value = ''; $('f-youtube').value = ''; $('yt-hint').textContent = ''
         loadSongs()
       } catch (e) { setFormStatus('❌ 오류: ' + (e?.message || e)) } finally { $('submit-btn').disabled = false }
     }
@@ -526,57 +574,85 @@
       const items = await Promise.all(folders.map(async (id) => {
         try { const { data: m } = await supabase.storage.from(BUCKET).download(`${id}/project.json`); if (!m) return null
           const p = JSON.parse(await m.text())
-          const mm = buildStepModel(p)
-          const synced = !!(p.measures?.length && mm.steps.some((s) => typeof s === 'number'))
-          return { id, title: p.title || id, artist: p.artist || '', youtube: p.youtubeVideoId || '', synced, lyrics: Array.isArray(p.lyrics) ? p.lyrics : [], defaultBpm: p.defaultBpm, audioPath: p.audioPath || '', updatedAt: p.updatedAt || 0 }
+          return { id, title: p.title || id, artist: p.artist || '', youtube: p.youtubeVideoId || '', parts: songParts(p), lyrics: Array.isArray(p.lyrics) ? p.lyrics : [], defaultBpm: p.defaultBpm, audioPath: p.audioPath || '', updatedAt: p.updatedAt || 0 }
         } catch { return null }
       }))
       const songs = items.filter(Boolean).sort((a, b) => b.updatedAt - a.updatedAt)
       window.__songs = Object.fromEntries(songs.map((s) => [s.id, s]))
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
       $('song-grid').innerHTML = songs.map((s) => {
-        const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(`${s.id}/score.pdf`)
-        const del = signedIn ? `<button data-del="${s.id}" class="text-[10px] text-red-500 hover:text-red-700 font-bold">삭제</button>` : ''
-        const playBtn = `<button data-play="${s.id}" class="flex-1 text-center px-3 py-2 ${s.synced ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-zinc-400'} text-white rounded-full text-xs font-bold transition">▶ 재생</button>`
+        const del = signedIn ? `<button data-del="${s.id}" class="text-[10px] text-red-500 hover:text-red-700 font-bold">곡 삭제</button>` : ''
+        const partRows = s.parts.length ? s.parts.map((pt) => {
+          const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(partPdfPath(s.id, pt))
+          const id = `${s.id}::${pt.key}`
+          const playBtn = pt.synced
+            ? `<button data-play="${id}" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-[11px] font-bold">▶</button>`
+            : `<span class="px-2.5 py-1.5 bg-zinc-200 text-zinc-400 rounded-full text-[11px] font-bold" title="먼저 싱크하세요">▶</span>`
+          const delPart = (signedIn && !pt.legacy) ? `<button data-delpart="${id}" class="px-2 py-1.5 text-[11px] text-red-500 hover:text-red-700 font-bold">🗑</button>` : ''
+          return `<div class="flex items-center justify-between gap-2 rounded-xl border border-brandGray/40 bg-brandCream/40 px-3 py-2">
+            <div class="min-w-0"><span class="text-sm font-bold">${esc(pt.label)}</span> <span class="text-[10px] font-bold ${pt.synced ? 'text-emerald-600' : 'text-amber-600'}">${pt.synced ? '싱크됨' : '싱크 전'}</span></div>
+            <div class="flex items-center gap-1 shrink-0">
+              ${playBtn}
+              <button data-edit="${id}" title="마디·타이밍 싱크" class="px-2.5 py-1.5 bg-violet-600 text-white rounded-full text-[11px] font-bold hover:bg-violet-700">✎ 싱크</button>
+              <button data-editpart="${id}" title="세션 변경·PDF 교체" class="px-2 py-1.5 bg-white text-textMain rounded-full text-[11px] font-bold border border-brandGray hover:bg-brandGray">🏷</button>
+              <a href="${pub.publicUrl}" target="_blank" rel="noopener" class="px-2.5 py-1.5 bg-white text-textMain rounded-full text-[11px] font-bold border border-brandGray hover:bg-brandGray">PDF</a>
+              ${delPart}
+            </div></div>`
+        }).join('') : '<p class="text-xs opacity-50 px-1 py-2">아직 세션 악보가 없습니다. 아래에서 추가하세요.</p>'
         return `
           <div class="silvana-card bg-white p-6 border border-brandGray/40 shadow-sm flex flex-col gap-3">
             <div class="flex items-start justify-between"><span class="text-2xl">🎼</span>${del}</div>
-            <div><h3 class="text-lg font-black leading-tight break-all">${s.title}</h3>${s.artist ? `<p class="text-xs opacity-50 mt-0.5">${s.artist}</p>` : ''}</div>
-            <div class="text-[10px] font-bold flex gap-1">${s.synced ? '<span class="bg-emerald-500 text-white px-2 py-0.5 rounded-full">싱크됨</span>' : '<span class="bg-amber-400 text-zinc-900 px-2 py-0.5 rounded-full">싱크 전</span>'}${s.lyrics?.length ? '<span class="bg-sky-500 text-white px-2 py-0.5 rounded-full">가사</span>' : ''}${s.audioPath ? '<span class="bg-indigo-500 text-white px-2 py-0.5 rounded-full">오디오</span>' : ''}</div>
-            <div class="flex flex-wrap gap-2 mt-1">
-              ${playBtn}
-              <button data-edit="${s.id}" class="px-3 py-2 bg-violet-600 text-white rounded-full text-xs font-bold hover:bg-violet-700 transition">✎ 싱크</button>
-              <button data-info="${s.id}" class="px-3 py-2 bg-brandCream text-textMain rounded-full text-xs font-bold border border-brandGray hover:bg-brandGray transition">✏️ 정보</button>
-              <a href="${pub.publicUrl}" target="_blank" rel="noopener" class="px-3 py-2 bg-brandCream text-textMain rounded-full text-xs font-bold border border-brandGray hover:bg-brandGray transition">PDF</a>
+            <div><h3 class="text-lg font-black leading-tight break-all">${esc(s.title)}</h3>${s.artist ? `<p class="text-xs opacity-50 mt-0.5">${esc(s.artist)}</p>` : ''}</div>
+            <div class="text-[10px] font-bold flex gap-1">${s.lyrics?.length ? '<span class="bg-sky-500 text-white px-2 py-0.5 rounded-full">가사</span>' : ''}${s.audioPath ? '<span class="bg-indigo-500 text-white px-2 py-0.5 rounded-full">오디오</span>' : ''}<span class="bg-zinc-200 text-zinc-600 px-2 py-0.5 rounded-full">세션 ${s.parts.length}</span></div>
+            <div class="flex flex-col gap-1.5 mt-1">${partRows}</div>
+            <div class="flex flex-wrap gap-2 mt-1 border-t border-brandGray/40 pt-3">
+              <button data-addpart="${s.id}" class="px-3 py-2 bg-textMain text-white rounded-full text-xs font-bold hover:bg-black transition">➕ 세션 악보 추가</button>
+              <button data-info="${s.id}" class="px-3 py-2 bg-brandCream text-textMain rounded-full text-xs font-bold border border-brandGray hover:bg-brandGray transition">✏️ 곡 정보</button>
             </div>
           </div>`
       }).join('')
+      const split = (v) => { const i = v.indexOf('::'); return [v.slice(0, i), v.slice(i + 2)] }
       $('song-grid').querySelectorAll('[data-del]').forEach((b) => b.onclick = async () => {
-        if (!confirm('이 곡을 삭제할까요?')) return
-        const ap = (window.__songs || {})[b.dataset.del]?.audioPath
-        const paths = [`${b.dataset.del}/score.pdf`, `${b.dataset.del}/project.json`]
-        if (ap) paths.push(`${b.dataset.del}/${ap}`)
-        const { error } = await supabase.storage.from(BUCKET).remove(paths)
-        if (error) return alert('삭제 실패: ' + error.message); loadSongs()
+        if (!confirm('이 곡(모든 세션 악보 포함)을 삭제할까요?')) return
+        const { data: files } = await supabase.storage.from(BUCKET).list(b.dataset.del, { limit: 1000 })
+        const paths = (files || []).map((f) => `${b.dataset.del}/${f.name}`)
+        if (paths.length) { const { error } = await supabase.storage.from(BUCKET).remove(paths); if (error) return alert('삭제 실패: ' + error.message) }
+        loadSongs()
       })
-      $('song-grid').querySelectorAll('[data-play]').forEach((b) => b.onclick = () => openSong(b.dataset.play))
-      $('song-grid').querySelectorAll('[data-edit]').forEach((b) => b.onclick = () => openAuthor(b.dataset.edit))
+      $('song-grid').querySelectorAll('[data-delpart]').forEach((b) => b.onclick = async () => {
+        const [sid, key] = split(b.dataset.delpart)
+        if (!confirm('이 세션 악보를 삭제할까요?')) return
+        await supabase.storage.from(BUCKET).remove([`${sid}/${key}.pdf`, `${sid}/${key}.json`])
+        try { const { data: mf } = await supabase.storage.from(BUCKET).download(`${sid}/project.json`); const P = JSON.parse(await mf.text()); P.parts = (P.parts || []).filter((x) => x.key !== key); P.updatedAt = Date.now(); await supabase.storage.from(BUCKET).upload(`${sid}/project.json`, new Blob([JSON.stringify(P)], { type: 'application/json' }), { contentType: 'application/json', upsert: true }) } catch (e) { return alert('세션 삭제 실패: ' + (e?.message || e)) }
+        loadSongs()
+      })
+      $('song-grid').querySelectorAll('[data-play]').forEach((b) => b.onclick = () => { const [sid, key] = split(b.dataset.play); openSong(sid, key) })
+      $('song-grid').querySelectorAll('[data-edit]').forEach((b) => b.onclick = () => { const [sid, key] = split(b.dataset.edit); openAuthor(sid, key) })
+      $('song-grid').querySelectorAll('[data-editpart]').forEach((b) => b.onclick = () => { const [sid, key] = split(b.dataset.editpart); openPartModal(sid, key) })
+      $('song-grid').querySelectorAll('[data-addpart]').forEach((b) => b.onclick = () => openPartModal(b.dataset.addpart))
       $('song-grid').querySelectorAll('[data-info]').forEach((b) => b.onclick = () => openEdit(b.dataset.info))
       syncEl.textContent = `${songs.length}곡`
     }
 
     // ===== 곡 열기 → 재생 =====
     let pdfDoc = null, project = null, playSeq = [], playSteps = []
-    async function openSong(id) {
+    async function openSong(id, partKey) {
       syncEl.textContent = '여는 중…'
       try {
         const { data: metaFile, error: e1 } = await supabase.storage.from(BUCKET).download(`${id}/project.json`)
         if (e1) throw new Error('project.json 없음')
         project = JSON.parse(await metaFile.text())
-        const model = buildStepModel(project)
+        const parts = songParts(project)
+        const part = partKey ? parts.find((p) => p.key === partKey) : parts[0]
+        if (!part) throw new Error('세션을 찾을 수 없음')
+        const pd = await loadPartData(id, project, part)
+        project.measures = pd.measures || []
+        project.lastMeasureEndTime = pd.lastMeasureEndTime || 0
+        const model = buildStepModel({ measures: project.measures, jumps: pd.jumps || [], stepTimings: pd.stepTimings, timings: pd.timings })
         playSeq = model.seq; playSteps = model.steps
-        if (!project.measures?.length || !playSteps.some((s) => typeof s === 'number')) { syncEl.textContent = ''; alert('아직 싱크 데이터(마디/타이밍)가 없는 곡입니다.\n✎ 싱크에서 마디를 찍고 타이밍을 맞춘 뒤 재생할 수 있어요.'); return }
-        const { data: pdfBlob, error: e2 } = await supabase.storage.from(BUCKET).download(`${id}/score.pdf`)
-        if (e2) throw new Error('score.pdf 없음')
+        if (!project.measures.length || !playSteps.some((s) => typeof s === 'number')) { syncEl.textContent = ''; alert(`아직 싱크 데이터(마디/타이밍)가 없는 세션입니다: ${part.label}\n✎ 싱크에서 마디를 찍고 타이밍을 맞춘 뒤 재생할 수 있어요.`); return }
+        const { data: pdfBlob, error: e2 } = await supabase.storage.from(BUCKET).download(partPdfPath(id, part))
+        if (e2) throw new Error('악보 PDF 없음')
         pdfDoc = await pdfjsLib.getDocument({ data: await pdfBlob.arrayBuffer(), verbosity: 0 }).promise
         const vid = extractVideoId(project.youtubeVideoId)
         let audioUrl = null
@@ -889,7 +965,7 @@
     }
 
     // 저작 상태
-    let aproj = null, aPdf = null, aId = null, aMode = 'mark', splitOn = false, splitN = 4, pageLayers = []
+    let aproj = null, aPdf = null, aId = null, aPart = null, aMode = 'mark', splitOn = false, splitN = 4, pageLayers = []
     let aseq = [], astep = [] // 재생 순서(마디 index 나열) / 스텝별 시작시간
     function rebuildSeq() {
       const prev = astep
@@ -898,23 +974,28 @@
       astep = aseq.map((_, k) => (typeof prev[k] === 'number' ? prev[k] : undefined))
     }
 
-    async function openAuthor(id) {
+    async function openAuthor(id, partKey) {
       syncEl.textContent = '여는 중…'
       try {
         const { data: metaFile, error: e1 } = await supabase.storage.from(BUCKET).download(`${id}/project.json`)
         if (e1) throw new Error('project.json 없음')
-        aproj = JSON.parse(await metaFile.text())
-        aproj.measures = aproj.measures || []; aproj.timings = aproj.timings || []; aproj.lastMeasureEndTime = aproj.lastMeasureEndTime || 0
-        aproj.jumps = aproj.jumps || []
+        const P = JSON.parse(await metaFile.text())
+        const parts = songParts(P)
+        const part = partKey ? parts.find((p) => p.key === partKey) : parts[0]
+        if (!part) throw new Error('세션을 찾을 수 없음')
+        aPart = part
+        const pd = await loadPartData(id, P, part)
+        // 곡 메타(제목·유튜브·오디오·BPM)는 P에서, 세션 싱크(마디·타이밍·점프)는 pd에서 합친 작업본
+        aproj = Object.assign({}, P, { measures: pd.measures || [], timings: pd.timings || [], stepTimings: pd.stepTimings, lastMeasureEndTime: pd.lastMeasureEndTime || 0, jumps: pd.jumps || [] })
         { const mm = buildStepModel(aproj); aseq = mm.seq; astep = mm.steps.map((s) => (typeof s === 'number' ? s : undefined)) }
-        const { data: pdfBlob, error: e2 } = await supabase.storage.from(BUCKET).download(`${id}/score.pdf`)
-        if (e2) throw new Error('score.pdf 없음')
+        const { data: pdfBlob, error: e2 } = await supabase.storage.from(BUCKET).download(partPdfPath(id, part))
+        if (e2) throw new Error('악보 PDF 없음')
         aPdf = await pdfjsLib.getDocument({ data: await pdfBlob.arrayBuffer(), verbosity: 0 }).promise
         aproj.pageCount = aPdf.numPages; aId = id
         authorSrcKey = ''; ytA.pause(); $('author-audio').pause() // 소스 상태 초기화(곡 전환 대비)
         $('d-bpm').value = aproj.defaultBpm > 0 ? aproj.defaultBpm : 120 // 곡 정보의 기본 BPM을 균등분배 디폴트로
         toDelete.clear(); updateDeleteBtn()
-        $('author-title').textContent = aproj.title || id
+        $('author-title').textContent = `${P.title || id} · ${part.label}`
         $('author').classList.remove('hidden')
         await renderAuthorPages()
         setMode('mark')
@@ -1169,9 +1250,10 @@
 
     async function saveAuthor() {
       try {
-        aproj.updatedAt = Date.now(); aproj.pageCount = aPdf.numPages
-        aproj.stepTimings = astep.map((s) => (typeof s === 'number' ? s : null))
-        delete aproj.timings; delete aproj.repeats
+        const stepTimings = astep.map((s) => (typeof s === 'number' ? s : null))
+        const synced = !!(aproj.measures.length && stepTimings.some((s) => typeof s === 'number'))
+        const now = Date.now()
+        const partFields = { measures: aproj.measures, jumps: aproj.jumps || [], stepTimings, lastMeasureEndTime: aproj.lastMeasureEndTime || 0, pageCount: aPdf.numPages, updatedAt: now }
         const { data: sess } = await supabase.auth.getSession()
         if (!sess.session) {
           const pw = window.prompt('저장하려면 업로드 비밀번호를 입력하세요') || ''
@@ -1179,9 +1261,22 @@
           const { error } = await supabase.auth.signInWithPassword({ email: cfg.UPLOAD_EMAIL, password: pw })
           if (error) { alert('비밀번호가 올바르지 않습니다.'); return }
         }
-        const { error } = await supabase.storage.from(BUCKET).upload(`${aId}/project.json`, new Blob([JSON.stringify(aproj)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
+        // 세션 싱크는 세션 파일에, 레거시 '기본'은 project.json 자체에 저장
+        if (!aPart.legacy) {
+          const { error: ep } = await supabase.storage.from(BUCKET).upload(`${aId}/${aPart.key}.json`, new Blob([JSON.stringify(partFields)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
+          if (ep) { alert('세션 저장 실패: ' + ep.message); return }
+        }
+        // project.json: 곡 메타는 보존하고 parts 레지스트리만 갱신
+        const { data: mf, error: e1 } = await supabase.storage.from(BUCKET).download(`${aId}/project.json`)
+        if (e1) { alert('project.json 없음'); return }
+        const P = JSON.parse(await mf.text())
+        if (aPart.legacy) { Object.assign(P, { measures: partFields.measures, jumps: partFields.jumps, stepTimings: partFields.stepTimings, lastMeasureEndTime: partFields.lastMeasureEndTime, pageCount: partFields.pageCount }); delete P.timings; delete P.repeats }
+        if (Array.isArray(P.parts)) { const e = P.parts.find((x) => x.key === aPart.key); if (e) { e.synced = synced; e.pageCount = partFields.pageCount; e.updatedAt = now } }
+        P.updatedAt = now
+        const { error } = await supabase.storage.from(BUCKET).upload(`${aId}/project.json`, new Blob([JSON.stringify(P)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
         if (error) { alert('저장 실패: ' + error.message); return }
-        alert(`저장되었습니다!\n마디 ${aproj.measures.length}개 · 스텝 ${astep.filter((s) => typeof s === 'number').length}/${aseq.length}`)
+        aPart.synced = synced
+        alert(`저장되었습니다! (${aPart.label})\n마디 ${aproj.measures.length}개 · 스텝 ${astep.filter((s) => typeof s === 'number').length}/${aseq.length}`)
       } catch (e) { alert('저장 오류: ' + (e?.message || e)) }
     }
     function closeAuthor() { $('author').classList.add('hidden'); ytA.pause(); $('author-audio').pause(); authorSrcKey = ''; loadSongs() }
@@ -1318,6 +1413,84 @@
     $('e-cancel').onclick = () => $('edit-modal').classList.add('hidden')
     $('e-save').onclick = saveEdit
     $('edit-modal').onclick = (e) => { if (e.target.id === 'edit-modal') $('edit-modal').classList.add('hidden') }
+
+    // ===== 세션 악보 등록 / 수정 =====
+    let partSongId = null, partEditKey = null
+    const newPartKey = () => 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
+    function openPartModal(id, editKey = null) {
+      partSongId = id; partEditKey = editKey
+      const s = (window.__songs || {})[id]
+      const parts = s?.parts || []
+      const editing = !!editKey
+      const cur = editing ? parts.find((p) => p.key === editKey) : null
+      $('pt-song').textContent = `${s?.title || id}${s?.artist ? ' · ' + s.artist : ''}`
+      $('pt-title').textContent = editing ? `세션 수정 — ${cur?.label || ''}` : '세션 악보 등록'
+      $('pt-file-label').textContent = editing ? 'PDF 악보 (선택 · 비우면 기존 유지)' : 'PDF 악보 *'
+      $('pt-save').textContent = editing ? '수정' : '등록'
+      // 이미 쓰인 세션 이름(라벨)은 제외하되, 수정 중인 항목의 현재 라벨은 선택 가능하게 유지
+      const used = new Set(parts.filter((p) => p.key !== editKey).map((p) => p.label))
+      const opts = FIXED_PARTS.filter((f) => !used.has(f.label))
+      const curLabel = cur?.label || ''
+      const curFixed = FIXED_PARTS.find((f) => f.label === curLabel)
+      if (curFixed && !opts.some((f) => f.label === curLabel)) opts.unshift(curFixed)
+      $('pt-session').innerHTML = opts.map((f) => `<option value="${f.key}">${f.label}</option>`).join('') + '<option value="__custom">+ 커스텀 입력…</option>'
+      if (editing && !curFixed) { $('pt-session').value = '__custom'; $('pt-custom').value = curLabel }
+      else { if (curFixed) $('pt-session').value = curFixed.key; $('pt-custom').value = '' }
+      $('pt-custom-wrap').classList.toggle('hidden', $('pt-session').value !== '__custom')
+      $('pt-file').value = ''; $('pt-pass').value = ''; $('pt-status').textContent = ''
+      $('part-modal').classList.remove('hidden')
+    }
+    $('pt-session').addEventListener('change', () => $('pt-custom-wrap').classList.toggle('hidden', $('pt-session').value !== '__custom'))
+    $('pt-cancel').onclick = () => $('part-modal').classList.add('hidden')
+    $('part-modal').onclick = (e) => { if (e.target.id === 'part-modal') $('part-modal').classList.add('hidden') }
+    async function savePart() {
+      const sel = $('pt-session').value, editing = !!partEditKey
+      const s = (window.__songs || {})[partSongId], parts = s?.parts || []
+      let label
+      if (sel === '__custom') {
+        label = $('pt-custom').value.trim()
+        if (!label) { $('pt-status').textContent = '⚠️ 세션 이름을 입력하세요.'; return }
+      } else { const fp = FIXED_PARTS.find((f) => f.key === sel); if (!fp) { $('pt-status').textContent = '⚠️ 세션을 선택하세요.'; return } label = fp.label }
+      // 저장 키: 수정이면 기존 키 유지, 추가면 고정키(충돌 시 임의키) 또는 커스텀 임의키
+      let key
+      if (editing) key = partEditKey
+      else { key = sel === '__custom' ? newPartKey() : sel; if (parts.some((x) => x.key === key)) key = newPartKey() }
+      const curPart = parts.find((x) => x.key === key)
+      const file = $('pt-file').files?.[0]
+      if (file && !/\.pdf$/i.test(file.name)) { $('pt-status').textContent = '⚠️ PDF 파일을 선택하세요.'; return }
+      if (!editing && !file) { $('pt-status').textContent = '⚠️ PDF 파일을 선택하세요.'; return }
+      const pass = $('pt-pass').value
+      if (!pass) { $('pt-status').textContent = '⚠️ 비밀번호를 입력하세요.'; return }
+      $('pt-save').disabled = true
+      try {
+        const { data: sess } = await supabase.auth.getSession()
+        if (!sess.session) {
+          const { error } = await supabase.auth.signInWithPassword({ email: cfg.UPLOAD_EMAIL, password: pass })
+          if (error) { $('pt-status').textContent = '❌ 비밀번호가 올바르지 않습니다.'; return }
+        }
+        const now = Date.now()
+        if (file) {
+          $('pt-status').textContent = 'PDF 업로드 중…'
+          const pdfPath = curPart?.legacy ? `${partSongId}/score.pdf` : `${partSongId}/${key}.pdf`
+          const { error: up } = await supabase.storage.from(BUCKET).upload(pdfPath, file, { contentType: 'application/pdf', upsert: true })
+          if (up) { $('pt-status').textContent = '❌ PDF 업로드 실패: ' + up.message; return }
+        }
+        if (!editing) await supabase.storage.from(BUCKET).upload(`${partSongId}/${key}.json`, new Blob([JSON.stringify({ measures: [], jumps: [], stepTimings: [], lastMeasureEndTime: 0, pageCount: 0, updatedAt: now })], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
+        const { data: mf, error: e1 } = await supabase.storage.from(BUCKET).download(`${partSongId}/project.json`)
+        if (e1) throw new Error('project.json 없음')
+        const P = JSON.parse(await mf.text())
+        ensurePartsArray(P)
+        const ex = P.parts.find((x) => x.key === key)
+        if (ex) ex.label = label
+        else P.parts.push({ key, label, synced: false, pageCount: 0, updatedAt: now })
+        P.updatedAt = now
+        const { error: e2 } = await supabase.storage.from(BUCKET).upload(`${partSongId}/project.json`, new Blob([JSON.stringify(P)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
+        if (e2) throw new Error(e2.message)
+        $('part-modal').classList.add('hidden')
+        loadSongs()
+      } catch (e) { $('pt-status').textContent = '❌ ' + (e?.message || e) } finally { $('pt-save').disabled = false }
+    }
+    $('pt-save').onclick = savePart
 
     // ===== 초기화 =====
     $('refresh-btn').onclick = () => { loadSongs(); if (!$('panel-setlist').classList.contains('hidden')) { setlistLoaded = false; loadSetlist() } }
