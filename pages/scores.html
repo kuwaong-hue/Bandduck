@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Band Duck - 악보</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ['Poppins', 'Noto Sans KR', 'sans-serif'] },
+      colors: { brandCream: '#F2F0EA', brandGray: '#D9D6D0', brandDark: '#B0ACA3', textMain: '#111111' }
+    } } }
+  </script>
+  <style>
+    body { background-color: #F2F0EA; color: #111111; overflow-x: hidden; }
+    .nav-link.active { font-weight: 700; border-bottom: 2px solid #111111; }
+    .silvana-card { border-radius: 2rem; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .silvana-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px -10px rgba(0,0,0,0.06); }
+    .subtab.active { background:#111; color:#fff; }
+  </style>
+  <script src="../config.js"></script>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-black selection:text-white">
+
+  <header class="flex items-center justify-between px-8 py-6 sticky top-0 z-50 bg-brandCream/80 backdrop-blur-lg">
+    <div class="flex items-center gap-6">
+      <div class="flex flex-col">
+        <span class="text-xs font-bold tracking-widest uppercase opacity-50">Explore ➔</span>
+        <a href="../index.html" class="nav-link text-left text-sm mt-1 opacity-60 hover:opacity-100">홈페이지</a>
+        <a href="../index.html" class="nav-link text-left text-sm mt-1 opacity-60 hover:opacity-100">타임라인</a>
+        <a href="scores.html" class="nav-link active text-left text-sm mt-1">악보</a>
+      </div>
+    </div>
+    <div class="text-xs font-bold tracking-widest uppercase opacity-70 absolute left-1/2 transform -translate-x-1/2 hidden md:block">
+      - BAND DUCK ARCHIVE -
+    </div>
+    <div class="flex flex-col gap-3 opacity-60">
+      <a href="../index.html" class="text-xs font-bold hover:opacity-100 transition">← 메인으로</a>
+    </div>
+  </header>
+
+  <main class="flex-1 w-full max-w-[1400px] mx-auto px-6 md:px-10 pb-20 relative">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mt-4 mb-6">
+      <div>
+        <p class="text-[10px] font-bold opacity-50 uppercase tracking-widest">Sheet Music</p>
+        <h1 class="text-3xl md:text-4xl font-black mt-1">악보</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="sync-state" class="text-[10px] font-bold opacity-40 uppercase tracking-widest"></span>
+        <button id="refresh-btn" class="px-4 py-2 bg-textMain text-white hover:bg-black rounded-full text-xs font-bold transition shadow-sm">↻ 새로고침</button>
+      </div>
+    </div>
+
+    <!-- 서브탭 -->
+    <div class="flex gap-2 mb-8">
+      <button data-tab="songs" class="subtab active px-4 py-2 rounded-full text-xs font-bold border border-brandGray bg-white transition">🎼 곡 / 재생</button>
+      <button data-tab="setlist" class="subtab px-4 py-2 rounded-full text-xs font-bold border border-brandGray bg-white transition">🎵 셋리스트 / 곡 정보</button>
+    </div>
+
+    <!-- ===================== 곡 / 재생 ===================== -->
+    <section id="panel-songs">
+      <div class="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-brandGray/50 shadow-sm mb-10">
+        <h2 class="text-sm font-black flex items-center gap-2 mb-4">⬆️ 곡 등록 (PDF + 유튜브)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <label class="flex flex-col gap-1">
+            <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">곡명 *</span>
+            <input id="f-title" type="text" placeholder="예: 혜성" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain">
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">아티스트</span>
+            <input id="f-artist" type="text" placeholder="예: 윤하 (선택)" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain">
+          </label>
+          <label class="flex flex-col gap-1 md:col-span-2">
+            <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">유튜브 링크 *</span>
+            <input id="f-youtube" type="text" placeholder="https://www.youtube.com/watch?v=..." class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain">
+            <span id="yt-hint" class="text-[11px] opacity-50"></span>
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">PDF 악보 *</span>
+            <input id="f-file" type="file" accept="application/pdf,.pdf" class="text-xs file:mr-2 file:rounded-full file:border-0 file:bg-textMain file:text-white file:px-3 file:py-1.5 file:text-xs file:font-bold">
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">업로드 비밀번호 *</span>
+            <input id="f-pass" type="password" placeholder="••••••" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain">
+          </label>
+        </div>
+        <div class="flex items-center gap-3 mt-4">
+          <button id="submit-btn" class="px-6 py-2.5 bg-textMain text-white hover:bg-black rounded-full text-xs font-bold transition shadow-sm">등록하기</button>
+          <p id="status" class="text-xs opacity-80 whitespace-pre-line"></p>
+        </div>
+      </div>
+
+      <div id="song-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      <div id="songs-empty" class="hidden mt-6 bg-white/80 backdrop-blur-md p-8 rounded-[2rem] border border-brandGray/50 shadow-sm text-sm leading-relaxed"></div>
+    </section>
+
+    <!-- ===================== 셋리스트 / 곡 정보 ===================== -->
+    <section id="panel-setlist" class="hidden">
+      <p class="text-xs opacity-60 mb-6">공연 셋리스트와 곡별 정보(보컬·키·상태·메모)를 구글 시트에서 불러옵니다.</p>
+      <div id="setlist-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      <div id="setlist-empty" class="hidden mt-2 bg-white/80 backdrop-blur-md p-8 rounded-[2rem] border border-brandGray/50 shadow-sm text-sm leading-relaxed"></div>
+    </section>
+  </main>
+
+  <!-- ===================== 곡 정보 수정 모달 ===================== -->
+  <div id="edit-modal" class="hidden fixed inset-0 z-[58] flex items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <h2 class="text-base font-black mb-4">곡 정보 수정</h2>
+      <div class="flex flex-col gap-3">
+        <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">곡명</span>
+          <input id="e-title" type="text" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
+        <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">아티스트</span>
+          <input id="e-artist" type="text" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
+        <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">유튜브 링크</span>
+          <input id="e-youtube" type="text" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain">
+          <span id="e-yt-hint" class="text-[11px] opacity-50"></span></label>
+      </div>
+      <p id="e-status" class="text-xs opacity-80 mt-3 min-h-[1rem]"></p>
+      <div class="flex justify-end gap-2 mt-4">
+        <button id="e-cancel" class="px-4 py-2 bg-brandGray text-textMain rounded-full text-xs font-bold">취소</button>
+        <button id="e-save" class="px-4 py-2 bg-textMain text-white hover:bg-black rounded-full text-xs font-bold">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 마디 마킹 + 싱크 저작 오버레이 ===================== -->
+  <div id="author" class="hidden fixed inset-0 z-[55] flex flex-col bg-zinc-100 text-zinc-900">
+    <!-- 상단 바 -->
+    <div class="flex flex-wrap items-center gap-2 border-b border-zinc-300 bg-white px-3 py-2">
+      <button id="author-close" class="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium hover:bg-zinc-200 active:scale-95">✕ 닫기</button>
+      <span id="author-title" class="font-bold text-sm truncate max-w-[12rem]"></span>
+      <div class="ml-auto flex gap-1 rounded-xl bg-zinc-100 p-1">
+        <button id="mode-mark" class="mode-btn rounded-lg px-3 py-1.5 text-sm font-medium bg-zinc-900 text-white">마디 마킹</button>
+        <button id="mode-sync" class="mode-btn rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-200">싱크</button>
+      </div>
+      <div class="flex items-center gap-1">
+        <button id="zoom-out" class="h-8 w-8 rounded bg-zinc-100 font-bold hover:bg-zinc-200" title="축소">−</button>
+        <button id="zoom-in" class="h-8 w-8 rounded bg-zinc-100 font-bold hover:bg-zinc-200" title="확대">+</button>
+      </div>
+      <button id="author-save" class="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-emerald-700 active:scale-95">💾 저장</button>
+    </div>
+
+    <!-- 마킹 컨트롤 -->
+    <div id="mark-ctrl" class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-blue-200 bg-blue-50 px-3 py-2 text-sm">
+      <button id="auto-detect" class="rounded bg-violet-600 px-3 py-1 font-bold text-white hover:bg-violet-700 active:scale-95">✨ 자동 검출</button>
+      <span class="font-medium text-blue-900">또는 드래그로 직접</span>
+      <label class="flex items-center gap-1.5"><input type="checkbox" id="split-mode" class="h-4 w-4"> 줄 등분</label>
+      <span id="split-wrap" class="hidden flex items-center gap-1">
+        <button id="split-dec" class="h-6 w-6 rounded bg-white font-bold shadow">−</button>
+        <span id="split-n" class="w-8 text-center tabular-nums">4</span>등분
+        <button id="split-inc" class="h-6 w-6 rounded bg-white font-bold shadow">+</button>
+      </span>
+      <span id="mark-count" class="text-xs text-blue-800 tabular-nums"></span>
+      <div class="ml-auto flex items-center gap-2">
+        <button id="del-selected" class="hidden rounded bg-rose-600 px-2 py-1 text-xs font-bold text-white active:scale-95">🗑 0개 지우기</button>
+        <button id="clear-measures" class="rounded bg-red-500 px-2 py-1 text-xs font-bold text-white">전체 지우기</button>
+      </div>
+    </div>
+
+    <!-- 싱크 컨트롤 -->
+    <div id="sync-ctrl" class="hidden flex flex-wrap items-center gap-3 border-b border-emerald-200 bg-emerald-50 px-3 py-2 text-sm">
+      <div class="w-24 aspect-video overflow-hidden rounded bg-black/60"><div id="yt-host-author" class="w-full h-full"></div></div>
+      <button id="sync-toggle" class="h-9 w-9 rounded-full bg-zinc-900 text-white">▶</button>
+      <button id="tap-btn" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white active:scale-95">탭 → 마디 1</button>
+      <span id="sync-count" class="text-xs tabular-nums text-emerald-900"></span>
+      <span class="flex items-center gap-1 text-xs">
+        시작<input id="d-start" type="number" step="0.01" class="w-16 rounded border px-1 py-0.5 tabular-nums" placeholder="초">
+        <button id="d-now" class="rounded bg-emerald-600 px-2 py-1 font-bold text-white">현재</button>
+        BPM<input id="d-bpm" type="number" value="120" class="w-14 rounded border px-1 py-0.5 tabular-nums">
+        박자<input id="d-beats" type="number" value="4" class="w-12 rounded border px-1 py-0.5 tabular-nums">
+        <button id="d-apply" class="rounded bg-emerald-600 px-2 py-1 font-bold text-white">균등분배</button>
+      </span>
+      <button id="reset-timings" class="text-xs font-bold text-red-500">타이밍 초기화</button>
+      <span class="text-[11px] text-emerald-700">재생하며 각 단계 시작에 탭(또는 Space)</span>
+      <span class="flex items-center gap-1 text-xs basis-full md:basis-auto">
+        🔀 점프 마디<input id="r-from" type="number" min="1" class="w-12 rounded border px-1 py-0.5 tabular-nums">끝→마디<input id="r-to" type="number" min="1" class="w-12 rounded border px-1 py-0.5 tabular-nums">시작<span class="opacity-50">· 첫</span><input id="r-skip" type="number" min="0" value="0" class="w-10 rounded border px-1 py-0.5 tabular-nums" title="처음 N번 도착은 점프 안 함(통과)">회 무시<span class="opacity-50">·</span><input id="r-times" type="number" min="1" value="1" class="w-10 rounded border px-1 py-0.5 tabular-nums" title="점프 발동 횟수">회
+        <button id="r-add" class="rounded bg-violet-600 px-2 py-1 font-bold text-white">점프 추가</button>
+        <span id="r-list" class="flex flex-wrap items-center gap-1 text-[11px]"></span>
+      </span>
+    </div>
+
+    <!-- 본문: PDF 페이지 + (싱크) 시간표 -->
+    <div class="flex flex-1 min-h-0">
+      <div id="author-pages" class="flex-1 overflow-auto p-4 flex flex-col items-center gap-4"></div>
+      <div id="sync-table-wrap" class="hidden w-64 shrink-0 overflow-auto border-l border-zinc-300 bg-white"></div>
+    </div>
+  </div>
+
+  <!-- ===================== 노래방 재생 오버레이 ===================== -->
+  <div id="perf" class="hidden fixed inset-0 z-[60] flex select-none flex-col bg-zinc-900 text-white">
+    <div class="flex shrink-0 items-center gap-3 border-b border-white/10 px-3 py-2">
+      <button id="perf-exit" class="rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium active:scale-95">✕ 나가기</button>
+      <div id="perf-meta" class="text-sm font-semibold tabular-nums"></div>
+      <div class="ml-auto flex items-center gap-3">
+        <div class="w-24 aspect-video overflow-hidden rounded bg-black/60"><div id="yt-host" class="w-full h-full"></div></div>
+        <div id="perf-time" class="text-xs tabular-nums text-zinc-400 whitespace-nowrap"></div>
+        <button id="perf-toggle" class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-zinc-900 active:scale-95">▶</button>
+      </div>
+    </div>
+    <div id="perf-body" class="flex min-h-0 flex-1 flex-col cursor-pointer">
+      <div id="slot-top" class="relative flex min-h-0 flex-1 items-center justify-center p-2 sm:p-3">
+        <span class="slot-label absolute left-2 top-2 z-10 rounded px-2 py-0.5 text-[11px] font-bold"></span>
+        <div class="cropwrap relative"><canvas></canvas><div class="playhead absolute top-0 bottom-0 w-[2px] bg-emerald-400 hidden"></div></div>
+      </div>
+      <div class="h-px bg-white/10"></div>
+      <div id="slot-bottom" class="relative flex min-h-0 flex-1 items-center justify-center p-2 sm:p-3">
+        <span class="slot-label absolute left-2 top-2 z-10 rounded px-2 py-0.5 text-[11px] font-bold"></span>
+        <div class="cropwrap relative"><canvas></canvas><div class="playhead absolute top-0 bottom-0 w-[2px] bg-emerald-400 hidden"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+    import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4/+esm'
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4/build/pdf.worker.min.mjs'
+
+    const cfg = window.BAND_DUCK_CONFIG || {}
+    const BUCKET = cfg.SUPABASE_BUCKET || 'scores'
+    const supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY)
+
+    const $ = (id) => document.getElementById(id)
+    const syncEl = $('sync-state')
+
+    // ===== 서브탭 전환 =====
+    document.querySelectorAll('.subtab').forEach((btn) => {
+      btn.onclick = () => {
+        document.querySelectorAll('.subtab').forEach((b) => b.classList.remove('active'))
+        btn.classList.add('active')
+        const tab = btn.dataset.tab
+        $('panel-songs').classList.toggle('hidden', tab !== 'songs')
+        $('panel-setlist').classList.toggle('hidden', tab !== 'setlist')
+        if (tab === 'setlist') loadSetlist() // 들어올 때마다 최신 시트 반영
+      }
+    })
+
+    // ===== 순수 로직 (루트 앱 이식) =====
+    const getTiming = (t, i) => t.find((x) => x.index === i)?.startTime
+    const getMeasureEnd = (t, i, n, last) => (i >= n - 1 ? (last > 0 ? last : undefined) : getTiming(t, i + 1))
+    function findCurrentMeasure(t, time, n, last) {
+      const set = t.filter((x) => x.index >= 0 && x.index < n).sort((a, b) => a.index - b.index)
+      if (!set.length || time < set[0].startTime) return -1
+      let lo = 0, hi = set.length - 1, ans = 0
+      while (lo <= hi) { const m = (lo + hi) >> 1; if (set[m].startTime <= time) { ans = m; lo = m + 1 } else hi = m - 1 }
+      const idx = set[ans].index, end = getMeasureEnd(t, idx, n, last)
+      if (end != null && time >= end) return -1
+      return idx
+    }
+    function measureProgress(t, i, time, n, last) {
+      const s = getTiming(t, i), e = getMeasureEnd(t, i, n, last)
+      if (s == null || e == null || e <= s) return 0
+      return Math.max(0, Math.min(1, (time - s) / (e - s)))
+    }
+    function groupRows(ms, tol = 0.6) {
+      if (!ms?.length) return []
+      const sorted = [...ms].sort((a, b) => a.y - b.y || a.x - b.x), rows = []
+      for (const m of sorted) {
+        const r = rows[rows.length - 1]
+        if (r && m.y <= r.y + r.height * tol) {
+          r.indices.push(m.index)
+          const right = Math.max(r.x + r.width, m.x + m.width), bottom = Math.max(r.y + r.height, m.y + m.height)
+          r.x = Math.min(r.x, m.x); r.y = Math.min(r.y, m.y); r.width = right - r.x; r.height = bottom - r.y
+        } else rows.push({ indices: [m.index], x: m.x, y: m.y, width: m.width, height: m.height })
+      }
+      return rows
+    }
+    function groupLines(ms) {
+      if (!ms?.length) return []
+      const byPage = new Map()
+      for (const m of ms) { if (!byPage.has(m.page)) byPage.set(m.page, []); byPage.get(m.page).push(m) }
+      const lines = []
+      for (const pg of [...byPage.keys()].sort((a, b) => a - b)) {
+        const pm = byPage.get(pg)
+        for (const row of groupRows(pm)) {
+          const set = new Set(row.indices)
+          lines.push({ page: pg, measures: pm.filter((m) => set.has(m.index)).sort((a, b) => a.x - b.x), x: row.x, y: row.y, width: row.width, height: row.height })
+        }
+      }
+      return lines
+    }
+    // ── 점프(되돌림) 재생 순서 ──
+    // jumps: [{from,to,times}] (1-based 마디). "from 마디가 끝나면 to 마디 시작으로 점프"를 times회.
+    // 시퀀스 = 마디 index(0-based) 나열. 무한루프 방지용 guard 포함.
+    function buildSequence(count, jumps) {
+      const byFrom = new Map()
+      for (const j of jumps || []) if (j && j.from >= 1 && j.from <= count && j.to >= 1 && j.to <= count) byFrom.set(j.from, { to: j.to, skip: Math.max(0, j.skip | 0), times: Math.max(1, j.times | 0) })
+      const state = new Map(), seq = [] // from → {arrivals, fired}
+      let m = 1, guard = 0
+      const maxSteps = count * 200 + 1000
+      while (m >= 1 && m <= count && guard++ < maxSteps) {
+        seq.push(m - 1)
+        const j = byFrom.get(m)
+        if (j) {
+          const st = state.get(m) || { arrivals: 0, fired: 0 }
+          st.arrivals++
+          // 첫 skip회 도착은 무시(통과), 그 뒤 times회만 점프
+          if (st.arrivals > j.skip && st.fired < j.times) { st.fired++; state.set(m, st); m = j.to; continue }
+          state.set(m, st)
+        }
+        m += 1
+      }
+      return seq
+    }
+    // 저장된 프로젝트 → {seq, steps}. stepTimings 우선, 없으면 옛 per-measure timings에서 이행(선형 가정).
+    function buildStepModel(p) {
+      const seq = buildSequence((p.measures || []).length, p.jumps || [])
+      let steps
+      if (Array.isArray(p.stepTimings)) steps = seq.map((_, k) => p.stepTimings[k])
+      else { const tm = p.timings || []; steps = seq.map((mi) => tm.find((t) => t.index === mi)?.startTime) }
+      return { seq, steps }
+    }
+    // 재생 시간 t가 속한 스텝 index (없으면 -1). steps: 스텝별 시작시간(빈칸 undefined 허용)
+    function findStep(steps, t, lastEnd) {
+      const rec = []; for (let i = 0; i < steps.length; i++) if (typeof steps[i] === 'number') rec.push({ step: i, start: steps[i] })
+      rec.sort((a, b) => a.start - b.start)
+      if (!rec.length || t < rec[0].start) return -1
+      let lo = 0, hi = rec.length - 1, ans = 0
+      while (lo <= hi) { const m = (lo + hi) >> 1; if (rec[m].start <= t) { ans = m; lo = m + 1 } else hi = m - 1 }
+      const end = ans + 1 < rec.length ? rec[ans + 1].start : (lastEnd > 0 ? lastEnd : undefined)
+      if (end != null && t >= end) return -1
+      return rec[ans].step
+    }
+
+    function extractVideoId(input) {
+      if (!input) return null
+      const s = String(input).trim()
+      if (/^[\w-]{11}$/.test(s)) return s
+      try {
+        const url = new URL(s), host = url.hostname.replace(/^www\./, '')
+        if (host === 'youtu.be') { const id = url.pathname.slice(1, 12); return /^[\w-]{11}$/.test(id) ? id : null }
+        if (host.endsWith('youtube.com') || host.endsWith('youtube-nocookie.com')) {
+          const v = url.searchParams.get('v'); if (v && /^[\w-]{11}$/.test(v)) return v
+          const m = url.pathname.match(/\/(embed|shorts|live|v)\/([\w-]{11})/); if (m) return m[2]
+        }
+      } catch {}
+      const m = s.match(/[?&]v=([\w-]{11})/) || s.match(/([\w-]{11})/)
+      return m ? m[1] : null
+    }
+    const formatTime = (sec) => { let t = Number(sec); if (!isFinite(t) || t < 0) t = 0; return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}` }
+    const YT_ERR = { 2: '잘못된 영상 주소', 5: '재생 오류', 100: '영상을 찾을 수 없음', 101: '임베드 차단됨', 150: '임베드 차단됨' }
+    let _ytApi = null
+    function loadYouTubeApi() {
+      if (_ytApi) return _ytApi
+      _ytApi = new Promise((resolve) => {
+        if (window.YT && window.YT.Player) return resolve(window.YT)
+        const prev = window.onYouTubeIframeAPIReady
+        window.onYouTubeIframeAPIReady = () => { prev?.(); resolve(window.YT) }
+        const tag = document.createElement('script'); tag.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(tag)
+      })
+      return _ytApi
+    }
+    async function renderMeasureCrop(doc, pageNumber, measure, canvas, boxW, boxH) {
+      const page = await doc.getPage(pageNumber), base = page.getViewport({ scale: 1 })
+      const mw = measure.width * base.width, mh = measure.height * base.height
+      if (mw <= 0 || mh <= 0) return { cssWidth: 0, cssHeight: 0 }
+      const dpr = window.devicePixelRatio || 1
+      const scale = Math.min((boxW * dpr) / mw, (boxH * dpr) / mh)
+      const vp = page.getViewport({ scale })
+      const cropW = Math.max(1, Math.round(measure.width * vp.width)), cropH = Math.max(1, Math.round(measure.height * vp.height))
+      canvas.width = cropW; canvas.height = cropH
+      canvas.style.width = `${Math.round(cropW / dpr)}px`; canvas.style.height = `${Math.round(cropH / dpr)}px`
+      const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cropW, cropH)
+      await page.render({ canvasContext: ctx, viewport: vp, transform: [1, 0, 0, 1, -measure.x * vp.width, -measure.y * vp.height] }).promise
+      return { cssWidth: cropW / dpr, cssHeight: cropH / dpr }
+    }
+
+    // ===== 유튜브 래퍼 (재생/싱크 두 곳에서 독립 인스턴스) =====
+    function makeYT(hostId) {
+      let player = null, created = false
+      const state = { playing: false }
+      async function connect(vid) {
+        const YT = await loadYouTubeApi()
+        if (created && player?.loadVideoById) { player.loadVideoById(vid); return }
+        created = true
+        return new Promise((resolve) => {
+          player = new YT.Player(hostId, {
+            width: '100%', height: '100%', videoId: vid,
+            playerVars: { playsinline: 1, modestbranding: 1, rel: 0 },
+            events: {
+              onReady: () => resolve(),
+              onStateChange: (e) => { state.playing = e.data === YT.PlayerState.PLAYING },
+              onError: (e) => alert(YT_ERR[e.data] || '재생할 수 없는 영상'),
+            },
+          })
+        })
+      }
+      return { connect, play: () => player?.playVideo?.(), pause: () => player?.pauseVideo?.(), seekTo: (t) => player?.seekTo?.(t, true), getTime: () => player?.getCurrentTime?.() ?? 0, getDuration: () => player?.getDuration?.() ?? 0, get playing() { return state.playing } }
+    }
+    const yt = makeYT('yt-host')          // 재생 오버레이용
+    const ytA = makeYT('yt-host-author')  // 싱크 저작용
+
+    // ===== 등록 =====
+    $('f-youtube').addEventListener('input', (e) => {
+      const id = extractVideoId(e.target.value)
+      $('yt-hint').textContent = e.target.value ? (id ? `✓ 인식된 영상 ID: ${id}` : '⚠️ 유튜브 링크를 인식하지 못했습니다') : ''
+    })
+    const setFormStatus = (t) => ($('status').textContent = t)
+    async function submit() {
+      const title = $('f-title').value.trim(), artist = $('f-artist').value.trim()
+      const ytRaw = $('f-youtube').value.trim(), file = $('f-file').files?.[0], pass = $('f-pass').value
+      if (!cfg.SUPABASE_URL) return setFormStatus('⚠️ config.js의 Supabase 설정이 없습니다.')
+      if (!title) return setFormStatus('⚠️ 곡명을 입력하세요.')
+      const ytId = extractVideoId(ytRaw)
+      if (!ytId) return setFormStatus('⚠️ 올바른 유튜브 링크를 입력하세요.')
+      if (!file || !/\.pdf$/i.test(file.name)) return setFormStatus('⚠️ PDF 파일을 선택하세요.')
+      if (!pass) return setFormStatus('⚠️ 업로드 비밀번호를 입력하세요.')
+      $('submit-btn').disabled = true
+      try {
+        setFormStatus('로그인 중…')
+        const { error: authErr } = await supabase.auth.signInWithPassword({ email: cfg.UPLOAD_EMAIL, password: pass })
+        if (authErr) { setFormStatus('❌ 비밀번호가 올바르지 않습니다.'); return }
+        const id = `proj_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+        setFormStatus('PDF 업로드 중…')
+        const { error: upErr } = await supabase.storage.from(BUCKET).upload(`${id}/score.pdf`, file, { contentType: 'application/pdf', upsert: true })
+        if (upErr) { setFormStatus('❌ PDF 업로드 실패: ' + upErr.message); return }
+        const now = Date.now()
+        const project = { id, title, artist, youtubeVideoId: ytId, pageCount: 0, measures: [], timings: [], lastMeasureEndTime: 0, createdAt: now, updatedAt: now }
+        const { error: metaErr } = await supabase.storage.from(BUCKET).upload(`${id}/project.json`, new Blob([JSON.stringify(project)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
+        if (metaErr) { setFormStatus('❌ 메타 저장 실패: ' + metaErr.message); return }
+        let sheetMsg = ''
+        if (cfg.APPS_SCRIPT_URL) {
+          setFormStatus('시트에 등록 중…')
+          try {
+            const res = await fetch(cfg.APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ password: pass, row: { title, artist, projectId: id, youtube: ytRaw } }) })
+            const r = await res.json()
+            sheetMsg = r?.ok ? ' · 시트 등록됨' : ' · ⚠️ 시트 실패(' + (r?.error || '확인') + ')'
+          } catch { sheetMsg = ' · ⚠️ 시트 호출 실패' }
+        }
+        setFormStatus(`✅ 등록 완료: ${title}${sheetMsg}`)
+        $('f-title').value = ''; $('f-artist').value = ''; $('f-youtube').value = ''; $('f-file').value = ''; $('yt-hint').textContent = ''
+        loadSongs()
+      } catch (e) { setFormStatus('❌ 오류: ' + (e?.message || e)) } finally { $('submit-btn').disabled = false }
+    }
+
+    // ===== 곡 목록 =====
+    async function loadSongs() {
+      syncEl.textContent = '불러오는 중…'; $('song-grid').innerHTML = ''; $('songs-empty').classList.add('hidden')
+      const { data: session } = await supabase.auth.getSession()
+      const signedIn = !!session.session
+      const { data, error } = await supabase.storage.from(BUCKET).list('', { limit: 300 })
+      if (error) { syncEl.textContent = '실패'; $('songs-empty').classList.remove('hidden'); $('songs-empty').innerHTML = '<b>목록 실패:</b> ' + error.message; return }
+      const folders = (data || []).filter((f) => f && f.id === null).map((f) => f.name)
+      if (!folders.length) { syncEl.textContent = '0곡'; $('songs-empty').classList.remove('hidden'); $('songs-empty').textContent = '아직 등록된 곡이 없습니다. 위에서 첫 곡을 등록해 보세요.'; return }
+      const items = await Promise.all(folders.map(async (id) => {
+        try { const { data: m } = await supabase.storage.from(BUCKET).download(`${id}/project.json`); if (!m) return null
+          const p = JSON.parse(await m.text())
+          const mm = buildStepModel(p)
+          const synced = !!(p.measures?.length && mm.steps.some((s) => typeof s === 'number'))
+          return { id, title: p.title || id, artist: p.artist || '', youtube: p.youtubeVideoId || '', synced, updatedAt: p.updatedAt || 0 }
+        } catch { return null }
+      }))
+      const songs = items.filter(Boolean).sort((a, b) => b.updatedAt - a.updatedAt)
+      window.__songs = Object.fromEntries(songs.map((s) => [s.id, s]))
+      $('song-grid').innerHTML = songs.map((s) => {
+        const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(`${s.id}/score.pdf`)
+        const del = signedIn ? `<button data-del="${s.id}" class="text-[10px] text-red-500 hover:text-red-700 font-bold">삭제</button>` : ''
+        const playBtn = `<button data-play="${s.id}" class="flex-1 text-center px-3 py-2 ${s.synced ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-zinc-400'} text-white rounded-full text-xs font-bold transition">▶ 재생</button>`
+        return `
+          <div class="silvana-card bg-white p-6 border border-brandGray/40 shadow-sm flex flex-col gap-3">
+            <div class="flex items-start justify-between"><span class="text-2xl">🎼</span>${del}</div>
+            <div><h3 class="text-lg font-black leading-tight break-all">${s.title}</h3>${s.artist ? `<p class="text-xs opacity-50 mt-0.5">${s.artist}</p>` : ''}</div>
+            <div class="text-[10px] font-bold">${s.synced ? '<span class="bg-emerald-500 text-white px-2 py-0.5 rounded-full">싱크됨</span>' : '<span class="bg-amber-400 text-zinc-900 px-2 py-0.5 rounded-full">싱크 전</span>'}</div>
+            <div class="flex flex-wrap gap-2 mt-1">
+              ${playBtn}
+              <button data-edit="${s.id}" class="px-3 py-2 bg-violet-600 text-white rounded-full text-xs font-bold hover:bg-violet-700 transition">✎ 싱크</button>
+              <button data-info="${s.id}" class="px-3 py-2 bg-brandCream text-textMain rounded-full text-xs font-bold border border-brandGray hover:bg-brandGray transition">✏️ 정보</button>
+              <a href="${pub.publicUrl}" target="_blank" rel="noopener" class="px-3 py-2 bg-brandCream text-textMain rounded-full text-xs font-bold border border-brandGray hover:bg-brandGray transition">PDF</a>
+            </div>
+          </div>`
+      }).join('')
+      $('song-grid').querySelectorAll('[data-del]').forEach((b) => b.onclick = async () => {
+        if (!confirm('이 곡을 삭제할까요?')) return
+        const { error } = await supabase.storage.from(BUCKET).remove([`${b.dataset.del}/score.pdf`, `${b.dataset.del}/project.json`])
+        if (error) return alert('삭제 실패: ' + error.message); loadSongs()
+      })
+      $('song-grid').querySelectorAll('[data-play]').forEach((b) => b.onclick = () => openSong(b.dataset.play))
+      $('song-grid').querySelectorAll('[data-edit]').forEach((b) => b.onclick = () => openAuthor(b.dataset.edit))
+      $('song-grid').querySelectorAll('[data-info]').forEach((b) => b.onclick = () => openEdit(b.dataset.info))
+      syncEl.textContent = `${songs.length}곡`
+    }
+
+    // ===== 곡 열기 → 재생 =====
+    let pdfDoc = null, project = null, playSeq = [], playSteps = []
+    async function openSong(id) {
+      syncEl.textContent = '여는 중…'
+      try {
+        const { data: metaFile, error: e1 } = await supabase.storage.from(BUCKET).download(`${id}/project.json`)
+        if (e1) throw new Error('project.json 없음')
+        project = JSON.parse(await metaFile.text())
+        const model = buildStepModel(project)
+        playSeq = model.seq; playSteps = model.steps
+        if (!project.measures?.length || !playSteps.some((s) => typeof s === 'number')) { syncEl.textContent = ''; alert('아직 싱크 데이터(마디/타이밍)가 없는 곡입니다.\n✎ 싱크에서 마디를 찍고 타이밍을 맞춘 뒤 재생할 수 있어요.'); return }
+        const { data: pdfBlob, error: e2 } = await supabase.storage.from(BUCKET).download(`${id}/score.pdf`)
+        if (e2) throw new Error('score.pdf 없음')
+        pdfDoc = await pdfjsLib.getDocument({ data: await pdfBlob.arrayBuffer(), verbosity: 0 }).promise
+        const vid = extractVideoId(project.youtubeVideoId)
+        if (!vid) throw new Error('유튜브 정보 없음')
+        await openPerformance(vid)
+        syncEl.textContent = ''
+      } catch (e) { syncEl.textContent = ''; alert('곡을 열지 못했습니다.\n' + (e?.message || e)) }
+    }
+
+    // ===== 노래방 재생 루프 =====
+    let rafId = 0, lines = []
+    const perfEl = $('perf')
+    const slots = {
+      top: { box: $('slot-top'), wrap: $('slot-top').querySelector('.cropwrap'), canvas: $('slot-top').querySelector('canvas'), bar: $('slot-top').querySelector('.playhead'), label: $('slot-top').querySelector('.slot-label'), lineIdx: -1 },
+      bottom: { box: $('slot-bottom'), wrap: $('slot-bottom').querySelector('.cropwrap'), canvas: $('slot-bottom').querySelector('canvas'), bar: $('slot-bottom').querySelector('.playhead'), label: $('slot-bottom').querySelector('.slot-label'), lineIdx: -1 },
+    }
+    async function openPerformance(vid) {
+      lines = groupLines(project.measures)
+      slots.top.lineIdx = -1; slots.bottom.lineIdx = -1
+      perfEl.classList.remove('hidden')
+      await yt.connect(vid); yt.play(); startLoop()
+    }
+    function closePerformance() { cancelAnimationFrame(rafId); rafId = 0; yt.pause(); perfEl.classList.add('hidden') }
+    async function renderSlotLine(slot, lineIdx) {
+      if (slot.lineIdx === lineIdx) return
+      slot.lineIdx = lineIdx
+      const line = lines[lineIdx]
+      if (!line) { slot.canvas.width = 0; slot.bar.classList.add('hidden'); return }
+      const { cssWidth, cssHeight } = await renderMeasureCrop(pdfDoc, line.page + 1, line, slot.canvas, slot.box.clientWidth - 24, slot.box.clientHeight - 24)
+      slot.wrap.style.width = cssWidth + 'px'; slot.wrap.style.height = cssHeight + 'px'
+    }
+    function lineFraction(line, current, progress) {
+      if (!line || !current) return null
+      return Math.max(0, Math.min(1, (current.x + progress * current.width - line.x) / line.width))
+    }
+    function startLoop() {
+      const total = project.measures.length
+      let sampleYt = yt.getTime(), samplePerf = performance.now(), lastResync = samplePerf
+      function estTime() {
+        const now = performance.now()
+        if (yt.playing) { let est = sampleYt + (now - samplePerf) / 1000; if (now - lastResync > 250) { const r = yt.getTime(); sampleYt = r; samplePerf = now; lastResync = now; est = r } return est }
+        const r = yt.getTime(); sampleYt = r; samplePerf = now; return r
+      }
+      function frame() {
+        const time = estTime()
+        // 순서(시퀀스) 기반: 현재 스텝 → 그 스텝이 가리키는 마디
+        const stepIdx = findStep(playSteps, time, project.lastMeasureEndTime)
+        let currentIndex = -1, progress = 0
+        if (stepIdx >= 0) {
+          currentIndex = playSeq[stepIdx]
+          const start = playSteps[stepIdx]
+          let end = project.lastMeasureEndTime > 0 ? project.lastMeasureEndTime : undefined
+          for (let j = stepIdx + 1; j < playSteps.length; j++) { if (typeof playSteps[j] === 'number') { end = playSteps[j]; break } }
+          progress = (end != null && end > start) ? Math.max(0, Math.min(1, (time - start) / (end - start))) : 0
+        }
+        const current = currentIndex >= 0 ? project.measures.find((m) => m.index === currentIndex) : null
+        let activeLineIdx = current ? lines.findIndex((l) => l.measures.some((m) => m.index === currentIndex)) : -1
+        let frac = null, status = 'playing'
+        if (activeLineIdx < 0) {
+          const ended = project.lastMeasureEndTime > 0 && time >= project.lastMeasureEndTime
+          if (ended && lines.length) { activeLineIdx = lines.length - 1; frac = 1; status = 'ended' } else { activeLineIdx = 0; status = 'waiting' }
+        } else frac = lineFraction(lines[activeLineIdx], current, progress)
+        const activeIsTop = activeLineIdx % 2 === 0
+        renderSlotLine(slots.top, activeIsTop ? activeLineIdx : activeLineIdx + 1)
+        renderSlotLine(slots.bottom, activeIsTop ? activeLineIdx + 1 : activeLineIdx)
+        for (const slot of [slots.top, slots.bottom]) {
+          const isActive = slot.lineIdx === activeLineIdx
+          slot.label.textContent = isActive ? '현재' : (lines[slot.lineIdx] ? '다음' : (status === 'ended' ? '끝' : ''))
+          slot.label.className = 'slot-label absolute left-2 top-2 z-10 rounded px-2 py-0.5 text-[11px] font-bold ' + (isActive ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-zinc-900')
+          slot.canvas.style.opacity = isActive ? '1' : '0.45'
+          if (isActive && frac != null && lines[slot.lineIdx]) { slot.bar.classList.remove('hidden'); slot.bar.style.left = (frac * slot.wrap.clientWidth) + 'px' } else slot.bar.classList.add('hidden')
+        }
+        $('perf-meta').innerHTML = current ? `마디 <span class="text-emerald-400">${currentIndex + 1}</span> / ${total}` : `<span class="text-zinc-400">${status === 'ended' ? '끝' : status === 'waiting' ? '대기' : ''} · ${total}마디</span>`
+        $('perf-time').textContent = `${formatTime(time)} / ${formatTime(yt.getDuration())}`
+        $('perf-toggle').textContent = yt.playing ? '❚❚' : '▶'
+        rafId = requestAnimationFrame(frame)
+      }
+      rafId = requestAnimationFrame(frame)
+    }
+    let resizeT = 0
+    window.addEventListener('resize', () => {
+      if (perfEl.classList.contains('hidden')) return
+      clearTimeout(resizeT)
+      resizeT = setTimeout(() => { const t = slots.top.lineIdx, b = slots.bottom.lineIdx; slots.top.lineIdx = -1; slots.bottom.lineIdx = -1; renderSlotLine(slots.top, t); renderSlotLine(slots.bottom, b) }, 150)
+    })
+    const togglePlay = () => (yt.playing ? yt.pause() : yt.play())
+    $('perf-exit').onclick = closePerformance
+    $('perf-toggle').onclick = (e) => { e.stopPropagation(); togglePlay() }
+    $('perf-body').onclick = togglePlay
+
+    // ===== 셋리스트 / 곡 정보 (구글 시트) =====
+    let setlistLoaded = false
+    function parseCSV(text) {
+      const rows = []; let row = [], field = '', q = false
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i]
+        if (q) { if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++ } else q = false } else field += c }
+        else if (c === '"') q = true
+        else if (c === ',') { row.push(field); field = '' }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = '' }
+        else if (c !== '\r') field += c
+      }
+      if (field.length || row.length) { row.push(field); rows.push(row) }
+      return rows
+    }
+    const findCol = (h, keys) => h.findIndex((x) => keys.some((k) => x.replace(/\s/g, '').toLowerCase().includes(k)))
+    async function loadSetlist() {
+      setlistLoaded = true
+      const grid = $('setlist-grid'), empty = $('setlist-empty')
+      grid.innerHTML = ''; empty.classList.add('hidden')
+      if (!cfg.SETLIST_SHEET_ID) { empty.classList.remove('hidden'); empty.innerHTML = '<b>셋리스트 시트가 설정되지 않았습니다.</b><br><code>config.js</code> 의 <code>SETLIST_SHEET_ID</code> 에 시트 ID를 넣고, 시트를 "링크가 있는 모든 사용자"로 공개하세요.<br>헤더 예: <b>곡명 | 아티스트 | 보컬 | 키 | 상태 | 메모</b>'; return }
+      // _cb=타임스탬프 + no-store 로 Google/브라우저 캐시 회피 (시트 수정 즉시 반영)
+      const url = `https://docs.google.com/spreadsheets/d/${cfg.SETLIST_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(cfg.SETLIST_SHEET_NAME || '')}&_cb=${Date.now()}`
+      let rows
+      try { const res = await fetch(url, { cache: 'no-store' }); if (!res.ok) throw new Error('HTTP ' + res.status); rows = parseCSV(await res.text()) }
+      catch (e) { empty.classList.remove('hidden'); empty.innerHTML = '<b>시트를 불러오지 못했습니다.</b> ' + e.message; return }
+      if (rows.length < 2) { empty.classList.remove('hidden'); empty.textContent = '곡 정보가 비어 있습니다.'; return }
+      const h = rows[0].map((x) => (x || '').trim())
+      const ci = { title: findCol(h, ['곡명', '제목', 'title']), artist: findCol(h, ['아티스트', 'artist']), vocal: findCol(h, ['보컬', 'vocal']), key: findCol(h, ['키', 'key']), status: findCol(h, ['상태', 'status']), memo: findCol(h, ['메모', '비고', 'note']) }
+      const g = (r, k) => (ci[k] >= 0 ? (r[ci[k]] || '').trim() : '')
+      const cards = rows.slice(1).filter((r) => r.some((c) => (c || '').trim())).map((r, i) => {
+        const status = g(r, 'status'), vocal = g(r, 'vocal'), key = g(r, 'key'), memo = g(r, 'memo')
+        const meta = [vocal ? `🎤 ${vocal}` : '', key ? `🎹 ${key}` : ''].filter(Boolean).join(' · ')
+        return `<div class="silvana-card bg-white p-6 border border-brandGray/40 shadow-sm flex flex-col gap-3">
+          <div class="flex items-start justify-between"><span class="text-xs font-mono opacity-30">${String(i + 1).padStart(2, '0')}</span>${status ? `<span class="bg-textMain text-white text-[9px] font-bold px-2 py-0.5 rounded-full">${status}</span>` : ''}</div>
+          <div><h3 class="text-lg font-black leading-tight">${g(r, 'title') || '(제목 없음)'}</h3>${g(r, 'artist') ? `<p class="text-xs opacity-50 mt-0.5">${g(r, 'artist')}</p>` : ''}</div>
+          ${meta ? `<div class="text-xs opacity-70">${meta}</div>` : ''}
+          ${memo ? `<p class="text-xs opacity-70 border-t border-brandGray/40 pt-3 whitespace-pre-line">${memo}</p>` : ''}
+        </div>`
+      }).join('')
+      grid.innerHTML = cards || ''
+      if (!cards) { empty.classList.remove('hidden'); empty.textContent = '표시할 곡이 없습니다.' }
+    }
+
+    // ===================== 마디 마킹 + 싱크 저작 =====================
+    // 순수 로직 (루트 marking.js / sync.js 이식)
+    const clamp01 = (v) => Math.max(0, Math.min(1, v))
+    function normalizedRect(p1, p2, w, h) {
+      if (!w || !h) return { x: 0, y: 0, width: 0, height: 0 }
+      const x1 = clamp01(Math.min(p1.x, p2.x) / w), y1 = clamp01(Math.min(p1.y, p2.y) / h)
+      const x2 = clamp01(Math.max(p1.x, p2.x) / w), y2 = clamp01(Math.max(p1.y, p2.y) / h)
+      return { x: x1, y: y1, width: x2 - x1, height: y2 - y1 }
+    }
+    function splitRow(rect, n) {
+      const c = Math.max(1, Math.floor(n)), w = rect.width / c, out = []
+      for (let i = 0; i < c; i++) out.push({ x: rect.x + w * i, y: rect.y, width: w, height: rect.height })
+      return out
+    }
+    const MIN_SIZE = 0.012
+    const nextUnsetIndex = (timings, count) => { const s = new Set(timings.map((t) => t.index)); for (let i = 0; i < count; i++) if (!s.has(i)) return i; return -1 }
+    const setTiming = (timings, index, startTime) => [...timings.filter((t) => t.index !== index), { index, startTime }].sort((a, b) => a.index - b.index)
+    const removeTiming = (timings, index) => timings.filter((t) => t.index !== index).sort((a, b) => a.index - b.index)
+    const recordedCount = (timings, count) => timings.filter((t) => t.index >= 0 && t.index < count).length
+    function distributeTimings(start, count, bpm, beats) {
+      if (!(bpm > 0) || !(beats > 0) || !(count > 0) || !(start >= 0)) return { timings: [], lastMeasureEndTime: 0 }
+      const sec = (beats * 60) / bpm, timings = []
+      for (let i = 0; i < count; i++) timings.push({ index: i, startTime: start + i * sec })
+      return { timings, lastMeasureEndTime: start + count * sec }
+    }
+    // 내부 해상도(internalWidth)로 선명하게 렌더하고, 화면 표시폭은 wrap 줌이 결정(canvas width:100%).
+    async function renderFullPage(doc, pageNumber, canvas, internalWidth) {
+      const page = await doc.getPage(pageNumber), base = page.getViewport({ scale: 1 })
+      const vp = page.getViewport({ scale: (internalWidth || base.width) / base.width })
+      canvas.width = Math.floor(vp.width); canvas.height = Math.floor(vp.height)
+      canvas.style.width = '100%'; canvas.style.height = 'auto'
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise
+    }
+
+    // ===== 마디 자동 검출 (루트 detectMeasures.js 이식) =====
+    function detectMeasuresFromBinary(ink, width, height, opts = {}) {
+      const { lineCoverage = 0.25, barRunFrac = 0.9, staffColCoverage = 0.5, barMaxWidthFrac = 0.6, wideRowFracLimit = 0.2, minMeasureFrac = 0.02, vPadFrac = 1.5 } = opts
+      if (!width || !height || !ink?.length) return []
+      const rowInk = new Float32Array(height)
+      for (let y = 0; y < height; y++) { let c = 0; const base = y * width; for (let x = 0; x < width; x++) c += ink[base + x]; rowInk[y] = c / width }
+      const lines = []
+      for (let y = 0; y < height;) { if (rowInk[y] > lineCoverage) { let y2 = y; while (y2 < height && rowInk[y2] > lineCoverage) y2++; lines.push((y + y2 - 1) / 2); y = y2 } else y++ }
+      if (lines.length < 2) return []
+      const gaps = []; for (let i = 1; i < lines.length; i++) gaps.push(lines[i] - lines[i - 1])
+      const sortedGaps = [...gaps].sort((a, b) => a - b); const medianGap = sortedGaps[Math.floor(sortedGaps.length / 2)] || 1; const splitThreshold = medianGap * 2.2
+      const systems = []; let group = [lines[0]]
+      for (let i = 1; i < lines.length; i++) { if (lines[i] - lines[i - 1] > splitThreshold) { systems.push(group); group = [] } group.push(lines[i]) }
+      if (group.length) systems.push(group)
+      const cleaned = Uint8Array.from(ink)
+      { const dd = Math.max(2, Math.min(Math.round(medianGap * 0.4), Math.round(medianGap) - 1)); const thick = 2
+        for (const c of lines) { const yc = Math.round(c)
+          for (let y = yc - thick; y <= yc + thick; y++) { if (y < 0 || y >= height) continue; const base = y * width
+            for (let x = 0; x < width; x++) { if (!ink[base + x]) continue; const up = y - dd >= 0 && ink[(y - dd) * width + x]; const dn = y + dd < height && ink[(y + dd) * width + x]; if (!up && !dn) cleaned[base + x] = 0 } } } }
+      const minMeasureW = minMeasureFrac * width; const results = []
+      for (const sys of systems) {
+        if (sys.length < 2) continue
+        const y0 = Math.round(sys[0]), y1 = Math.round(sys[sys.length - 1]), bandH = y1 - y0 + 1
+        if (bandH < 3) continue
+        const staffSpacing = (y1 - y0) / (sys.length - 1), lineRows = sys.map((c) => Math.round(c))
+        let leftX = -1, rightX = -1
+        for (let x = 0; x < width; x++) { let c = 0; for (const ly of lineRows) if (ink[ly * width + x]) c++; if (c / lineRows.length >= staffColCoverage) { if (leftX < 0) leftX = x; rightX = x } }
+        if (leftX < 0 || rightX <= leftX) continue
+        const gapTol = Math.max(1, Math.round(staffSpacing * 0.4)), spanTol = Math.max(1, Math.round(staffSpacing * 0.6)), barMaxWidth = Math.max(2, Math.round(staffSpacing * barMaxWidthFrac))
+        const isBarColumn = (x) => {
+          let best = 0, bestStart = 0, bestEnd = 0, runStart = -1, lastInk = -1
+          for (let y = y0; y <= y1; y++) { if (cleaned[y * width + x]) { if (runStart < 0 || y - lastInk > gapTol) runStart = y; lastInk = y; const len = y - runStart + 1; if (len > best) { best = len; bestStart = runStart; bestEnd = y } } }
+          if (!(best >= bandH * barRunFrac && bestStart <= y0 + spanTol && bestEnd >= y1 - spanTol)) return false
+          let wide = 0, totalRows = 0
+          for (let y = bestStart; y <= bestEnd; y++) { if (!cleaned[y * width + x]) continue; let l = x; while (l > 0 && cleaned[y * width + (l - 1)]) l--; let r = x; while (r < width - 1 && cleaned[y * width + (r + 1)]) r++; totalRows++; if (r - l + 1 > barMaxWidth) wide++ }
+          return totalRows > 0 && wide / totalRows <= wideRowFracLimit
+        }
+        const bars = []
+        for (let x = leftX; x <= rightX;) { if (isBarColumn(x)) { let x2 = x; while (x2 <= rightX && isBarColumn(x2)) x2++; bars.push((x + x2 - 1) / 2); x = x2 } else x++ }
+        const bounds = [leftX, ...bars, rightX].sort((a, b) => a - b)
+        const padTop = Math.min(y0, staffSpacing * vPadFrac), padBot = Math.min(height - 1 - y1, staffSpacing * vPadFrac), top = y0 - padTop, bot = y1 + padBot
+        for (let i = 1; i < bounds.length; i++) { const x0 = bounds[i - 1], xe = bounds[i]; if (xe - x0 < minMeasureW) continue; results.push({ x: x0 / width, y: top / height, width: (xe - x0) / width, height: (bot - top) / height }) }
+      }
+      return results
+    }
+    async function renderPageToBinary(doc, pageNumber, analysisWidth = 1200, inkThreshold = 160) {
+      const page = await doc.getPage(pageNumber), base = page.getViewport({ scale: 1 })
+      const vp = page.getViewport({ scale: analysisWidth / base.width }), w = Math.floor(vp.width), h = Math.floor(vp.height)
+      const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d', { willReadFrequently: true }); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h)
+      await page.render({ canvasContext: ctx, viewport: vp }).promise
+      const { data } = ctx.getImageData(0, 0, w, h), ink = new Uint8Array(w * h)
+      for (let i = 0, j = 0; i < data.length; i += 4, j++) { const lum = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114; ink[j] = lum < inkThreshold ? 1 : 0 }
+      return { ink, width: w, height: h }
+    }
+    async function detectMeasuresForDoc(doc, onProgress) {
+      const all = []
+      for (let p = 1; p <= doc.numPages; p++) { const { ink, width, height } = await renderPageToBinary(doc, p); for (const r of detectMeasuresFromBinary(ink, width, height)) all.push({ page: p - 1, ...r }); onProgress?.(p, doc.numPages) }
+      return all
+    }
+
+    // 저작 상태
+    let aproj = null, aPdf = null, aId = null, aMode = 'mark', splitOn = false, splitN = 4, pageLayers = []
+    let aseq = [], astep = [] // 재생 순서(마디 index 나열) / 스텝별 시작시간
+    function rebuildSeq() {
+      const prev = astep
+      aproj.jumps = aproj.jumps || []
+      aseq = buildSequence(aproj.measures.length, aproj.jumps)
+      astep = aseq.map((_, k) => (typeof prev[k] === 'number' ? prev[k] : undefined))
+    }
+
+    async function openAuthor(id) {
+      syncEl.textContent = '여는 중…'
+      try {
+        const { data: metaFile, error: e1 } = await supabase.storage.from(BUCKET).download(`${id}/project.json`)
+        if (e1) throw new Error('project.json 없음')
+        aproj = JSON.parse(await metaFile.text())
+        aproj.measures = aproj.measures || []; aproj.timings = aproj.timings || []; aproj.lastMeasureEndTime = aproj.lastMeasureEndTime || 0
+        aproj.jumps = aproj.jumps || []
+        { const mm = buildStepModel(aproj); aseq = mm.seq; astep = mm.steps.map((s) => (typeof s === 'number' ? s : undefined)) }
+        const { data: pdfBlob, error: e2 } = await supabase.storage.from(BUCKET).download(`${id}/score.pdf`)
+        if (e2) throw new Error('score.pdf 없음')
+        aPdf = await pdfjsLib.getDocument({ data: await pdfBlob.arrayBuffer(), verbosity: 0 }).promise
+        aproj.pageCount = aPdf.numPages; aId = id
+        toDelete.clear(); updateDeleteBtn()
+        $('author-title').textContent = aproj.title || id
+        $('author').classList.remove('hidden')
+        await renderAuthorPages()
+        setMode('mark')
+        syncEl.textContent = ''
+      } catch (e) { syncEl.textContent = ''; alert('열기 실패: ' + (e?.message || e)) }
+    }
+
+    const RENDER_W = 1100 // 내부 렌더 해상도(선명도)
+    let authorZoomPx = 640
+    async function renderAuthorPages() {
+      const cont = $('author-pages'); cont.innerHTML = ''; pageLayers = []
+      for (let i = 0; i < aPdf.numPages; i++) {
+        const wrap = document.createElement('div'); wrap.className = 'relative bg-white shadow shrink-0'
+        const canvas = document.createElement('canvas'); canvas.className = 'block'
+        const layer = document.createElement('div'); layer.className = 'absolute inset-0'
+        wrap.appendChild(canvas); wrap.appendChild(layer); cont.appendChild(wrap)
+        pageLayers[i] = { wrap, layer, canvas }
+        await renderFullPage(aPdf, i + 1, canvas, RENDER_W)
+        attachMarking(layer, i)
+        redrawLayer(i)
+      }
+      // 기본 줌: 첫 페이지가 화면 높이에 들어오도록 (너무 확대 방지)
+      const first = pageLayers[0]
+      if (first) {
+        const ratio = first.canvas.width / first.canvas.height
+        const availH = cont.clientHeight - 32, availW = cont.clientWidth - 32
+        authorZoomPx = Math.max(320, Math.min(availH * ratio, availW, 950))
+      }
+      applyZoom()
+    }
+    const applyZoom = () => pageLayers.forEach((p) => { p.wrap.style.width = authorZoomPx + 'px' })
+
+    function attachMarking(layer, pageIndex) {
+      let startP = null, draft = null
+      layer.style.touchAction = 'none'
+      layer.onpointerdown = (e) => {
+        if (aMode !== 'mark') return
+        layer.setPointerCapture(e.pointerId)
+        const r = layer.getBoundingClientRect()
+        startP = { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height }
+        draft = document.createElement('div'); draft.className = 'absolute border-2 border-blue-600 bg-blue-400/25'; layer.appendChild(draft)
+      }
+      layer.onpointermove = (e) => {
+        if (!startP || !draft) return
+        const r = layer.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top
+        Object.assign(draft.style, { left: Math.min(startP.x, x) + 'px', top: Math.min(startP.y, y) + 'px', width: Math.abs(x - startP.x) + 'px', height: Math.abs(y - startP.y) + 'px' })
+      }
+      const end = (e) => {
+        if (!startP) return
+        const r = layer.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top
+        const rect = normalizedRect({ x: startP.x, y: startP.y }, { x, y }, startP.w, startP.h)
+        if (draft) { draft.remove(); draft = null }
+        startP = null
+        if (rect.width < MIN_SIZE || rect.height < MIN_SIZE) return
+        if (splitOn && splitN > 1) addMeasures(pageIndex, splitRow(rect, splitN))
+        else addMeasures(pageIndex, [rect])
+      }
+      layer.onpointerup = end
+      layer.onpointercancel = () => { if (draft) { draft.remove(); draft = null } startP = null }
+    }
+
+    function addMeasures(pageIndex, rects) {
+      const start = aproj.measures.length
+      aproj.measures = [...aproj.measures, ...rects.map((r, i) => ({ index: start + i, page: pageIndex, ...r }))]
+      rebuildSeq(); redrawLayer(pageIndex); updateMarkCount()
+    }
+    function deleteMeasures(indices) {
+      const remove = new Set(indices)
+      const kept = aproj.measures.filter((m) => !remove.has(m.index)).sort((a, b) => a.index - b.index)
+      const map = new Map(); kept.forEach((m, i) => map.set(m.index, i))
+      aproj.measures = kept.map((m, i) => ({ ...m, index: i }))
+      aproj.timings = aproj.timings.filter((t) => map.has(t.index)).map((t) => ({ ...t, index: map.get(t.index) })).sort((a, b) => a.index - b.index)
+      // 마디 번호가 바뀌면 기존 반복/타이밍 정합이 깨지므로 초기화 (사용자 재싱크)
+      aproj.jumps = []; rebuildSeq()
+      redrawAllLayers(); updateMarkCount(); if (aMode === 'sync') { renderJumpList(); renderTable(); updateTap() }
+    }
+    function clearMeasures() {
+      if (!confirm('마디를 모두 지울까요?')) return
+      aproj.measures = []; aproj.timings = []; aproj.lastMeasureEndTime = 0; aproj.jumps = []
+      clearSelection(); rebuildSeq(); redrawAllLayers(); updateMarkCount(); if (aMode === 'sync') { renderJumpList(); renderTable(); updateTap() }
+    }
+    function redrawLayer(i) {
+      const layer = pageLayers[i].layer; layer.innerHTML = ''
+      const pageMeasures = aproj.measures.filter((m) => m.page === i)
+      pageMeasures.forEach((m) => {
+        const sel = toDelete.has(m.index)
+        const box = document.createElement('div')
+        box.dataset.mi = m.index
+        box.className = 'absolute rounded-sm border-2 ' + (sel ? 'border-rose-500 bg-rose-500/30' : 'border-blue-500/80 bg-blue-400/15')
+        box.style.cssText = `left:${m.x * 100}%;top:${m.y * 100}%;width:${m.width * 100}%;height:${m.height * 100}%`
+        const lab = document.createElement('span')
+        lab.className = 'absolute -left-1.5 -top-2.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold text-white shadow ' + (sel ? 'bg-rose-600' : 'bg-blue-600')
+        lab.textContent = m.index + 1; box.appendChild(lab)
+        if (aMode === 'mark') {
+          const del = document.createElement('button')
+          del.className = 'absolute -right-2.5 -top-2.5 h-5 w-5 rounded-full text-xs font-bold text-white shadow ' + (sel ? 'bg-zinc-500' : 'bg-red-500')
+          del.textContent = sel ? '↺' : '×'
+          del.title = sel ? '삭제 표시 취소' : '삭제 목록에 추가'
+          del.onpointerdown = (e) => e.stopPropagation()
+          del.onclick = (e) => { e.stopPropagation(); toggleDelete([m.index]) }
+          box.appendChild(del)
+        }
+        layer.appendChild(box)
+      })
+      if (aMode === 'mark') {
+        groupRows(pageMeasures).forEach((row) => {
+          // 줄 단위 선택 핸들 (✕ 줄)
+          const allSel = row.indices.every((ix) => toDelete.has(ix))
+          const h = document.createElement('button')
+          h.className = 'absolute z-20 flex items-center whitespace-nowrap rounded-md px-1.5 py-1 text-[11px] font-bold text-white shadow active:scale-90 ' + (allSel ? 'bg-zinc-500' : 'bg-rose-600')
+          h.style.cssText = `left:${row.x * 100}%;top:${(row.y + row.height / 2) * 100}%;transform:translate(-50%,-50%)`
+          h.textContent = allSel ? '↺ 줄' : '✕ 줄'
+          h.title = `이 줄(마디 ${row.indices.length}개) 삭제 토글`
+          h.onpointerdown = (e) => e.stopPropagation()
+          h.onclick = (e) => { e.stopPropagation(); toggleDelete(row.indices) }
+          layer.appendChild(h)
+
+          // 마디 경계선 드래그 핸들 — 인접(연속)한 마디 사이를 드래그로 세밀 조정
+          const ms = row.indices.map((ix) => pageMeasures.find((m) => m.index === ix)).sort((a, b) => a.x - b.x)
+          for (let k = 0; k < ms.length - 1; k++) {
+            const a = ms[k], b = ms[k + 1]
+            if (Math.abs(b.x - (a.x + a.width)) > 0.04) continue // 맞닿은 경우만
+            const bx = (a.x + a.width + b.x) / 2
+            const handle = document.createElement('div')
+            handle.className = 'absolute z-30 cursor-ew-resize group'
+            handle.style.cssText = `left:${bx * 100}%;top:${row.y * 100}%;height:${row.height * 100}%;width:12px;transform:translateX(-50%)`
+            handle.innerHTML = '<div class="mx-auto h-full w-[2px] bg-amber-500/70 group-hover:w-[3px] group-hover:bg-amber-600"></div>'
+            handle.title = '드래그로 경계 조정'
+            attachBoundaryDrag(handle, layer, a, b, i)
+            layer.appendChild(handle)
+          }
+        })
+      }
+    }
+    // 두 인접 마디 사이 경계를 드래그로 이동 (왼쪽 너비 ↔ 오른쪽 시작/너비)
+    function attachBoundaryDrag(handle, layer, a, b, pageIndex) {
+      handle.onpointerdown = (e) => {
+        e.stopPropagation(); e.preventDefault()
+        const leftEdge = a.x, rightEdge = b.x + b.width
+        const move = (ev) => {
+          const r = layer.getBoundingClientRect()
+          let nx = (ev.clientX - r.left) / r.width
+          nx = Math.max(leftEdge + MIN_SIZE, Math.min(rightEdge - MIN_SIZE, nx))
+          a.width = nx - a.x; b.x = nx; b.width = rightEdge - nx
+          const bA = layer.querySelector(`[data-mi="${a.index}"]`), bB = layer.querySelector(`[data-mi="${b.index}"]`)
+          if (bA) bA.style.width = a.width * 100 + '%'
+          if (bB) { bB.style.left = b.x * 100 + '%'; bB.style.width = b.width * 100 + '%' }
+          handle.style.left = nx * 100 + '%'
+        }
+        const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); redrawLayer(pageIndex) }
+        window.addEventListener('pointermove', move)
+        window.addEventListener('pointerup', up)
+      }
+    }
+    const redrawAllLayers = () => pageLayers.forEach((_, i) => redrawLayer(i))
+    const updateMarkCount = () => ($('mark-count').textContent = `마디 ${aproj.measures.length}개`)
+
+    // 삭제 선택 모음 → "N개 지우기"로 한 번에 (알럿 없이)
+    let toDelete = new Set()
+    function toggleDelete(indices) {
+      const allSel = indices.every((i) => toDelete.has(i))
+      indices.forEach((i) => (allSel ? toDelete.delete(i) : toDelete.add(i)))
+      redrawAllLayers(); updateDeleteBtn()
+    }
+    function updateDeleteBtn() {
+      const btn = $('del-selected')
+      btn.classList.toggle('hidden', toDelete.size === 0)
+      btn.textContent = `🗑 ${toDelete.size}개 지우기`
+    }
+    function commitDelete() {
+      if (!toDelete.size) return
+      const arr = [...toDelete]; toDelete.clear()
+      deleteMeasures(arr); updateDeleteBtn()
+    }
+    function clearSelection() { toDelete.clear(); updateDeleteBtn() }
+
+    function setMode(m) {
+      aMode = m
+      $('mode-mark').className = 'mode-btn rounded-lg px-3 py-1.5 text-sm font-medium ' + (m === 'mark' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-200')
+      $('mode-sync').className = 'mode-btn rounded-lg px-3 py-1.5 text-sm font-medium ' + (m === 'sync' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-200')
+      $('mark-ctrl').classList.toggle('hidden', m !== 'mark')
+      $('sync-ctrl').classList.toggle('hidden', m !== 'sync')
+      $('sync-table-wrap').classList.toggle('hidden', m !== 'sync')
+      pageLayers.forEach((p) => { p.layer.style.pointerEvents = m === 'mark' ? 'auto' : 'none'; p.layer.style.cursor = m === 'mark' ? 'crosshair' : 'default' })
+      redrawAllLayers(); updateMarkCount(); updateDeleteBtn()
+      if (m === 'sync') { ensureAuthorVideo(); rebuildSeq(); renderJumpList(); renderTable(); updateTap() }
+    }
+
+    let authorVid = ''
+    async function ensureAuthorVideo() {
+      const vid = extractVideoId(aproj.youtubeVideoId)
+      if (!vid || vid === authorVid) return
+      authorVid = vid
+      await ytA.connect(vid)
+    }
+
+    function recordTap() {
+      if (!aseq.length) return
+      const t = ytA.getTime()
+      const idx = astep.findIndex((s) => typeof s !== 'number')
+      if (idx === -1) aproj.lastMeasureEndTime = t
+      else astep[idx] = t
+      renderTable(); updateTap()
+    }
+    function updateTap() {
+      const n = aseq.length, rec = astep.filter((s) => typeof s === 'number').length, idx = astep.findIndex((s) => typeof s !== 'number')
+      $('tap-btn').textContent = n === 0 ? '먼저 마디를 그리세요' : idx === -1 ? '🏁 마지막 끝 기록' : `탭 → ${idx + 1}/${n} (마디 ${aseq[idx] + 1})`
+      $('sync-count').textContent = `${rec} / ${n} 스텝`
+    }
+    function renderJumpList() {
+      const el = $('r-list')
+      el.innerHTML = (aproj.jumps || []).map((j, i) => `<span class="inline-flex items-center gap-1 rounded-full bg-violet-100 text-violet-800 px-2 py-0.5">마디${j.from}→${j.to}${j.skip > 0 ? ' (첫' + j.skip + '무시)' : ''}${j.times > 1 ? ' ×' + j.times : ''}<button data-rr="${i}" class="font-bold">✕</button></span>`).join('')
+      el.querySelectorAll('[data-rr]').forEach((b) => b.onclick = () => { aproj.jumps.splice(+b.dataset.rr, 1); rebuildSeq(); renderJumpList(); renderTable(); updateTap() })
+    }
+    function renderTable() {
+      const n = aseq.length, wrap = $('sync-table-wrap')
+      if (!n) { wrap.innerHTML = '<p class="p-3 text-xs text-zinc-400">먼저 “마디 마킹”에서 마디를 그리세요</p>'; return }
+      const nextIdx = astep.findIndex((s) => typeof s !== 'number')
+      const endAt = (k) => { for (let j = k + 1; j < n; j++) if (typeof astep[j] === 'number') return astep[j]; return aproj.lastMeasureEndTime > 0 ? aproj.lastMeasureEndTime : null }
+      let rows = ''
+      for (let k = 0; k < n; k++) {
+        const s = typeof astep[k] === 'number' ? astep[k] : null, e = endAt(k)
+        const len = (s != null && e != null) ? (e - s).toFixed(2) : '—'
+        rows += `<tr class="border-t border-zinc-100 ${k === nextIdx ? 'bg-blue-50' : ''}">
+          <td class="px-1 py-1 text-zinc-400 tabular-nums">${k + 1}</td>
+          <td class="px-1 py-1 text-zinc-600 tabular-nums">마디${aseq[k] + 1}</td>
+          <td class="px-1 py-1"><input data-ts="${k}" type="number" step="0.01" value="${s ?? ''}" class="w-14 rounded border border-zinc-200 px-1 py-0.5 text-xs tabular-nums"></td>
+          <td class="px-1 py-1 text-right text-zinc-400 tabular-nums">${len}</td>
+          <td class="px-1 py-1 text-right"><button data-seekk="${s ?? ''}" class="text-blue-600 text-xs px-1">▶</button></td></tr>`
+      }
+      rows += `<tr class="border-t-2 border-zinc-200 bg-zinc-50"><td colspan="2" class="px-2 py-1 text-xs text-zinc-500">끝</td><td class="px-1 py-1"><input id="t-last" type="number" step="0.01" value="${aproj.lastMeasureEndTime || ''}" class="w-14 rounded border border-zinc-200 px-1 py-0.5 text-xs tabular-nums"></td><td></td><td></td></tr>`
+      wrap.innerHTML = `<table class="w-full text-sm"><thead class="sticky top-0 bg-zinc-50 text-xs text-zinc-500"><tr><th class="px-1 py-1">#</th><th class="px-1 py-1">마디</th><th class="px-1 py-1">시작</th><th class="px-1 py-1 text-right">길이</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+      wrap.querySelectorAll('[data-ts]').forEach((inp) => inp.onchange = () => { const k = +inp.dataset.ts, v = inp.value; astep[k] = (v === '' || isNaN(+v)) ? undefined : Math.max(0, +v); renderTable(); updateTap() })
+      const last = wrap.querySelector('#t-last'); if (last) last.onchange = () => { aproj.lastMeasureEndTime = Math.max(0, +last.value || 0); renderTable() }
+      wrap.querySelectorAll('[data-seekk]').forEach((b) => b.onclick = () => { if (b.dataset.seekk !== '') ytA.seekTo(+b.dataset.seekk) })
+    }
+
+    async function saveAuthor() {
+      try {
+        aproj.updatedAt = Date.now(); aproj.pageCount = aPdf.numPages
+        aproj.stepTimings = astep.map((s) => (typeof s === 'number' ? s : null))
+        delete aproj.timings; delete aproj.repeats
+        const { data: sess } = await supabase.auth.getSession()
+        if (!sess.session) {
+          const pw = window.prompt('저장하려면 업로드 비밀번호를 입력하세요') || ''
+          if (!pw) return
+          const { error } = await supabase.auth.signInWithPassword({ email: cfg.UPLOAD_EMAIL, password: pw })
+          if (error) { alert('비밀번호가 올바르지 않습니다.'); return }
+        }
+        const { error } = await supabase.storage.from(BUCKET).upload(`${aId}/project.json`, new Blob([JSON.stringify(aproj)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
+        if (error) { alert('저장 실패: ' + error.message); return }
+        alert(`저장되었습니다!\n마디 ${aproj.measures.length}개 · 스텝 ${astep.filter((s) => typeof s === 'number').length}/${aseq.length}`)
+      } catch (e) { alert('저장 오류: ' + (e?.message || e)) }
+    }
+    function closeAuthor() { $('author').classList.add('hidden'); ytA.pause(); loadSongs() }
+
+    // 저작 버튼 바인딩
+    $('author-close').onclick = closeAuthor
+    $('author-save').onclick = saveAuthor
+    $('mode-mark').onclick = () => setMode('mark')
+    $('mode-sync').onclick = () => setMode('sync')
+    $('split-mode').onchange = (e) => { splitOn = e.target.checked; $('split-wrap').classList.toggle('hidden', !splitOn) }
+    $('split-dec').onclick = () => { splitN = Math.max(2, splitN - 1); $('split-n').textContent = splitN }
+    $('split-inc').onclick = () => { splitN = Math.min(16, splitN + 1); $('split-n').textContent = splitN }
+    $('clear-measures').onclick = clearMeasures
+    $('del-selected').onclick = commitDelete
+    $('zoom-out').onclick = () => { authorZoomPx = Math.max(280, authorZoomPx * 0.85); applyZoom() }
+    $('zoom-in').onclick = () => { authorZoomPx = Math.min(2200, authorZoomPx * 1.18); applyZoom() }
+    $('auto-detect').onclick = async () => {
+      if (aproj.measures.length && !confirm('자동 검출하면 기존 마디·타이밍이 대체됩니다. 진행할까요?')) return
+      $('auto-detect').disabled = true
+      try {
+        const rects = await detectMeasuresForDoc(aPdf, (p, t) => { $('mark-count').textContent = `검출 중… ${p}/${t}` })
+        if (!rects.length) { alert('마디를 자동으로 찾지 못했습니다. 직접 그려주세요.'); return }
+        aproj.measures = rects.map((r, i) => ({ index: i, page: r.page, x: r.x, y: r.y, width: r.width, height: r.height }))
+        aproj.timings = []; aproj.lastMeasureEndTime = 0; aproj.jumps = []
+        clearSelection(); rebuildSeq(); redrawAllLayers(); updateMarkCount()
+      } catch (e) { alert('자동 검출 오류: ' + (e?.message || e)) } finally { $('auto-detect').disabled = false }
+    }
+    $('sync-toggle').onclick = () => { ytA.playing ? ytA.pause() : ytA.play() }
+    $('tap-btn').onclick = recordTap
+    $('d-now').onclick = () => ($('d-start').value = ytA.getTime().toFixed(2))
+    $('d-apply').onclick = () => {
+      const s = Number($('d-start').value), bpm = Number($('d-bpm').value), beats = Number($('d-beats').value)
+      if (!(s >= 0) || $('d-start').value === '') return alert('시작 시간을 먼저 설정하세요 (현재 버튼).')
+      if (!aseq.length) return alert('먼저 마디를 그리세요.')
+      const sec = (beats * 60) / bpm
+      if (!(sec > 0)) return alert('BPM/박자를 확인하세요.')
+      if (astep.some((x) => typeof x === 'number') && !confirm('기존 타이밍을 균등분배로 덮어쓸까요?')) return
+      astep = aseq.map((_, k) => s + k * sec)
+      aproj.lastMeasureEndTime = s + aseq.length * sec
+      renderTable(); updateTap()
+    }
+    $('reset-timings').onclick = () => { if (!confirm('타이밍을 모두 지울까요?')) return; astep = new Array(aseq.length).fill(undefined); aproj.lastMeasureEndTime = 0; renderTable(); updateTap() }
+    $('r-add').onclick = () => {
+      const from = parseInt($('r-from').value, 10), to = parseInt($('r-to').value, 10)
+      const skip = Math.max(0, parseInt($('r-skip').value, 10) || 0), times = Math.max(1, parseInt($('r-times').value, 10) || 1)
+      const count = aproj.measures.length
+      if (!(from >= 1 && from <= count && to >= 1 && to <= count)) return alert(`마디 번호가 올바르지 않습니다 (1~${count}).`)
+      aproj.jumps.push({ from, to, skip, times }); rebuildSeq(); renderJumpList(); renderTable(); updateTap()
+    }
+    window.addEventListener('keydown', (e) => {
+      if ($('author').classList.contains('hidden') || aMode !== 'sync' || e.code !== 'Space') return
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return
+      e.preventDefault(); recordTap()
+    })
+
+    // ===== 곡 정보 수정 (곡명·아티스트·유튜브) =====
+    let editId = null
+    function openEdit(id) {
+      const s = (window.__songs || {})[id]
+      editId = id
+      $('e-title').value = s?.title || ''
+      $('e-artist').value = s?.artist || ''
+      $('e-youtube').value = s?.youtube ? `https://youtu.be/${s.youtube}` : ''
+      $('e-yt-hint').textContent = s?.youtube ? `현재 영상 ID: ${s.youtube}` : ''
+      $('e-status').textContent = ''
+      $('edit-modal').classList.remove('hidden')
+    }
+    $('e-youtube').addEventListener('input', (e) => {
+      const id = extractVideoId(e.target.value)
+      $('e-yt-hint').textContent = e.target.value ? (id ? `✓ 영상 ID: ${id}` : '⚠️ 유튜브 링크를 인식하지 못했습니다') : ''
+    })
+    async function saveEdit() {
+      const title = $('e-title').value.trim(), artist = $('e-artist').value.trim(), ytRaw = $('e-youtube').value.trim()
+      if (!title) { $('e-status').textContent = '⚠️ 곡명을 입력하세요.'; return }
+      const ytId = extractVideoId(ytRaw)
+      if (!ytId) { $('e-status').textContent = '⚠️ 유튜브 링크를 확인하세요.'; return }
+      $('e-save').disabled = true
+      try {
+        const { data: sess } = await supabase.auth.getSession()
+        if (!sess.session) {
+          const pw = window.prompt('수정하려면 업로드 비밀번호를 입력하세요') || ''
+          if (!pw) return
+          const { error } = await supabase.auth.signInWithPassword({ email: cfg.UPLOAD_EMAIL, password: pw })
+          if (error) { $('e-status').textContent = '❌ 비밀번호가 올바르지 않습니다.'; return }
+        }
+        $('e-status').textContent = '저장 중…'
+        const { data: mf, error: e1 } = await supabase.storage.from(BUCKET).download(`${editId}/project.json`)
+        if (e1) throw new Error('project.json 없음')
+        const p = JSON.parse(await mf.text())
+        p.title = title; p.artist = artist; p.youtubeVideoId = ytId; p.updatedAt = Date.now()
+        const { error: e2 } = await supabase.storage.from(BUCKET).upload(`${editId}/project.json`, new Blob([JSON.stringify(p)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
+        if (e2) throw new Error(e2.message)
+        $('edit-modal').classList.add('hidden')
+        loadSongs()
+      } catch (e) { $('e-status').textContent = '❌ ' + (e?.message || e) } finally { $('e-save').disabled = false }
+    }
+    $('e-cancel').onclick = () => $('edit-modal').classList.add('hidden')
+    $('e-save').onclick = saveEdit
+    $('edit-modal').onclick = (e) => { if (e.target.id === 'edit-modal') $('edit-modal').classList.add('hidden') }
+
+    // ===== 초기화 =====
+    $('refresh-btn').onclick = () => { loadSongs(); if (!$('panel-setlist').classList.contains('hidden')) { setlistLoaded = false; loadSetlist() } }
+    if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) {
+      $('songs-empty').classList.remove('hidden'); $('songs-empty').innerHTML = '<b>Supabase 설정이 없습니다.</b> config.js를 확인하세요.'
+    } else {
+      $('submit-btn').onclick = submit
+      loadSongs()
+    }
+  </script>
+</body>
+</html>
