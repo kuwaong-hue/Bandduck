@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# 에디터 / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# 로그 / 임시 파일
+*.log
+*.tmp
+
+# 프로젝트 메모 (깃 공유 제외)
+CLAUDE.md
+
+# 환경설정 비밀값 (필요 시 사용)
+# config.js 의 Supabase anon 키는 공개용이라 커밋해도 안전하지만,
+# 만약 service_role 키 등 진짜 비밀값을 담는 파일을 따로 둔다면 여기에 추가하세요.
+# config.local.js
+.env
+.env.*
