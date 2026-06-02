@@ -175,6 +175,21 @@
       </span>
       <button id="chart-export" class="shrink-0 rounded-lg bg-textMain px-3 py-2 text-sm font-bold text-white hover:bg-black active:scale-95">⬇<span class="hidden sm:inline"> HTML 내보내기</span></button>
     </div>
+    <audio id="chart-audio" class="hidden" preload="auto"></audio>
+    <div id="chart-transport" class="hidden flex-wrap items-center gap-2 border-b border-zinc-200 bg-zinc-50 px-2 py-2 sm:px-3">
+      <div id="chart-yt-thumb" class="aspect-video w-16 shrink-0 overflow-hidden rounded bg-black/60"><div id="yt-host-chart" class="h-full w-full"></div></div>
+      <button id="c-toggle" class="h-10 w-10 shrink-0 rounded-full bg-zinc-900 text-lg text-white active:scale-95">▶</button>
+      <div id="c-bpm-ctrl" class="flex items-center gap-0.5 rounded-lg border border-zinc-300 bg-white px-1.5 py-0.5" title="재생 BPM — 기본 BPM 대비 속도가 자동 조정됩니다">
+        <span class="mr-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">BPM</span>
+        <button id="c-bpm-down" class="h-7 w-7 rounded text-base font-bold hover:bg-zinc-100 active:scale-95">−</button>
+        <input id="c-bpm-val" type="number" min="1" class="w-12 bg-transparent text-center text-sm font-bold tabular-nums outline-none">
+        <button id="c-bpm-up" class="h-7 w-7 rounded text-base font-bold hover:bg-zinc-100 active:scale-95">+</button>
+        <span id="c-bpm-rate" class="ml-1 w-11 text-[10px] tabular-nums text-emerald-600"></span>
+      </div>
+      <span id="c-cur" class="w-10 shrink-0 text-right text-[11px] tabular-nums text-zinc-500">0:00</span>
+      <input id="c-seek" type="range" min="0" max="1000" value="0" step="1" class="h-1.5 min-w-[120px] flex-1 cursor-pointer accent-emerald-500" title="재생 위치">
+      <span id="c-dur" class="w-10 shrink-0 text-[11px] tabular-nums text-zinc-500">0:00</span>
+    </div>
     <div id="chart-body" class="flex-1 overflow-y-auto overflow-x-hidden p-3"></div>
   </div>
 
@@ -719,11 +734,12 @@
       const sortedLyr = lyrics.slice().sort((a, b) => a.time - b.time)
       const lyr = sortedLyr.map((l, i) => ({ time: l.time, end: i + 1 < sortedLyr.length ? sortedLyr[i + 1].time : undefined, text: l.text || '' }))
       duration = duration > 0 ? duration + 2 : 0
-      return { id, title: P.title || id, artist: P.artist || '', duration, lanes, sections, lyrics: lyr }
+      return { id, title: P.title || id, artist: P.artist || '', duration, lanes, sections, lyrics: lyr, youtube: P.youtubeVideoId || '', audioPath: P.audioPath || '', defaultBpm: P.defaultBpm }
     }
+    const CHART_LBL = 78
     // 가로 스크롤 대신 시간대를 SPR초씩 잘라 여러 줄로 줄바꿈(악보 시스템처럼 아래로 쌓임)
     function chartHTML(m, secondsPerRow = 15) {
-      const SPR = Math.max(8, secondsPerRow), LBL = 78
+      const SPR = Math.max(8, secondsPerRow), LBL = CHART_LBL
       const fmt = (s) => { s = Math.max(0, Math.floor(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` }
       const sectionAt = (t) => { let cur = ''; for (const s of m.sections) { if (s.time <= t + 0.001) cur = s.name; else break } return cur }
       const rows = Math.max(1, Math.ceil(m.duration / SPR))
@@ -745,7 +761,7 @@
           const a = Math.max(ly.time, w0), ee = Math.min(e, w1), left = pct(a), wd = Math.max(1.5, pct(ee) - pct(a))
           lyrBlocks += `<div title="${escHtml(ly.text)}" style="position:absolute;left:${left}%;width:${wd}%;top:1px;bottom:1px;display:flex;align-items:center;padding:0 3px;font-size:10px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#fffbeb;border:1px solid #fde68a;border-radius:2px;color:#92400e">${escHtml(ly.text)}</div>`
         }
-        out += `<div style="display:flex;margin-top:${r ? 14 : 0}px">
+        out += `<div class="csys" data-w0="${w0}" data-w1="${w1}" style="position:relative;margin-top:${r ? 14 : 0}px"><div style="display:flex">
           <div style="width:${LBL}px;flex:none;display:flex;align-items:center;justify-content:flex-start;padding-left:6px;font-size:9px;color:#999">${fmt(w0)}</div>
           <div style="position:relative;flex:1;min-width:0;overflow:hidden;height:15px;background:#faf5ff;border:1px solid #e5e7eb;border-bottom:none">${carry}${secLabels}</div>
         </div>`
@@ -764,6 +780,7 @@
             <div style="position:relative;flex:1;min-width:0;overflow:hidden;height:16px;background:#fafafa;border:1px solid #e5e7eb;border-top:none">${ticks}${secLines}${inner}</div>
           </div>`
         }
+        out += `</div>` // .csys 닫기
       }
       return `<div style="font-family:sans-serif;width:100%;overflow-x:hidden">${out || '<p style="padding:16px;color:#999;font-size:13px">표시할 세션이 없습니다.</p>'}</div>`
     }
@@ -775,6 +792,57 @@
       const blob = new Blob([doc], { type: 'text/html' }), url = URL.createObjectURL(blob)
       const a = document.createElement('a'); a.href = url; a.download = `공용악보_${m.title}.html`; a.click(); URL.revokeObjectURL(url)
     }
+    // ===== 공용 악보 재생(트랜스포트 + BPM + 진행바 + 차트 위 재생 헤드) =====
+    const ytC = makeYT('yt-host-chart'), audioSrcC = makeAudioSrc('chart-audio')
+    let srcC = ytC, cRaf = 0, cSeeking = false, cBaseBpm = 0, cConnected = false, cHasSource = false
+    let chartPlayhead = null
+    function ensureChartPlayhead() {
+      if (!chartPlayhead) { chartPlayhead = document.createElement('div'); chartPlayhead.style.cssText = 'position:absolute;top:0;bottom:0;width:2px;background:#10b981;box-shadow:0 0 5px rgba(16,185,129,.9);pointer-events:none;z-index:5' }
+      return chartPlayhead
+    }
+    function positionChartPlayhead(t) {
+      const systems = $('chart-body').querySelectorAll('.csys')
+      let target = null, frac = 0
+      for (const sys of systems) { const w0 = +sys.dataset.w0, w1 = +sys.dataset.w1; if (t >= w0 && t < w1) { target = sys; frac = (t - w0) / ((w1 - w0) || 1); break } }
+      if (!target) { if (chartPlayhead?.parentElement) chartPlayhead.parentElement.removeChild(chartPlayhead); return }
+      const ph = ensureChartPlayhead(); if (ph.parentElement !== target) target.appendChild(ph)
+      ph.style.left = (CHART_LBL + frac * (target.clientWidth - CHART_LBL)) + 'px'
+    }
+    function chartApplyBpm() {
+      if (!(cBaseBpm > 0)) { $('c-bpm-rate').textContent = ''; return }
+      const bpm = Math.max(1, Math.round(Number($('c-bpm-val').value) || cBaseBpm)), rate = bpm / cBaseBpm
+      srcC.setRate(rate)
+      $('c-bpm-rate').textContent = `${Math.round((srcC.getRate ? srcC.getRate() : rate) * 100) / 100}×`
+    }
+    function startChartLoop() {
+      cancelAnimationFrame(cRaf)
+      const tick = () => {
+        const dur = srcC.getDuration(), t = srcC.getTime()
+        $('c-dur').textContent = formatTime(dur)
+        if (!cSeeking) { $('c-cur').textContent = formatTime(t); $('c-seek').value = dur > 0 ? Math.round((t / dur) * 1000) : 0 }
+        $('c-toggle').textContent = srcC.playing ? '❚❚' : '▶'
+        positionChartPlayhead(t)
+        cRaf = requestAnimationFrame(tick)
+      }
+      cRaf = requestAnimationFrame(tick)
+    }
+    function stopChartLoop() { cancelAnimationFrame(cRaf); cRaf = 0; if (chartPlayhead?.parentElement) chartPlayhead.parentElement.removeChild(chartPlayhead) }
+    async function chartConnect() {
+      if (cConnected) return
+      const m = chartModel
+      if (m.audioPath) { srcC = audioSrcC; const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(`${m.id}/${m.audioPath}`); await srcC.connect(pub.publicUrl) }
+      else { srcC = ytC; const vid = extractVideoId(m.youtube); if (!vid) return; await srcC.connect(vid) }
+      cConnected = true; chartApplyBpm()
+    }
+    $('c-toggle').onclick = async () => { if (!cHasSource) return; if (!cConnected) { $('c-toggle').textContent = '…'; await chartConnect() } srcC.playing ? srcC.pause() : srcC.play() }
+    const cNudge = (d) => { if (!(cBaseBpm > 0)) return; $('c-bpm-val').value = Math.max(1, (Math.round(Number($('c-bpm-val').value) || cBaseBpm)) + d); chartApplyBpm() }
+    $('c-bpm-down').onclick = () => cNudge(-1)
+    $('c-bpm-up').onclick = () => cNudge(1)
+    $('c-bpm-val').addEventListener('input', chartApplyBpm)
+    const cSeekTime = () => (srcC.getDuration() > 0 ? (Number($('c-seek').value) / 1000) * srcC.getDuration() : 0)
+    $('c-seek').addEventListener('input', () => { cSeeking = true; $('c-cur').textContent = formatTime(cSeekTime()) })
+    $('c-seek').addEventListener('change', () => { const t = cSeekTime(); if (srcC.getDuration() > 0) srcC.seekTo(t); cSeeking = false })
+    function closeChart() { stopChartLoop(); ytC.pause(); $('chart-audio').pause(); $('common-score').classList.add('hidden') }
     async function openCommonScore(id) {
       syncEl.textContent = '공용 악보 생성 중…'
       try {
@@ -783,13 +851,29 @@
         chartModel = m
         $('chart-title').textContent = `${m.title}${m.artist ? ' · ' + m.artist : ''} — 공용 악보`
         $('chart-body').innerHTML = chartHTML(m)
+        // 트랜스포트 초기화
+        stopChartLoop(); ytC.pause(); $('chart-audio').pause()
+        cConnected = false; cSeeking = false; srcC = m.audioPath ? audioSrcC : ytC
+        cHasSource = !!(m.audioPath || extractVideoId(m.youtube))
+        cBaseBpm = m.defaultBpm > 0 ? m.defaultBpm : 0
+        $('chart-transport').classList.toggle('hidden', !cHasSource)
+        $('chart-transport').style.display = cHasSource ? 'flex' : 'none'
+        $('chart-yt-thumb').classList.toggle('hidden', !!m.audioPath)
+        if (cHasSource) {
+          const has = cBaseBpm > 0
+          $('c-bpm-ctrl').classList.toggle('opacity-40', !has)
+          $('c-bpm-val').disabled = !has; $('c-bpm-down').disabled = !has; $('c-bpm-up').disabled = !has
+          $('c-bpm-val').value = has ? cBaseBpm : ''
+          $('c-bpm-rate').textContent = ''; $('c-seek').value = 0; $('c-cur').textContent = '0:00'; $('c-dur').textContent = '0:00'; $('c-toggle').textContent = '▶'
+          startChartLoop(); chartConnect().catch(() => {}) // 미리 연결해 첫 재생 지연/자동재생 차단 방지
+        }
         $('common-score').classList.remove('hidden')
         syncEl.textContent = ''
       } catch (e) { syncEl.textContent = ''; alert('공용 악보 생성 실패: ' + (e?.message || e)) }
     }
-    $('chart-close').onclick = () => $('common-score').classList.add('hidden')
+    $('chart-close').onclick = closeChart
     $('chart-export').onclick = () => { if (chartModel) exportChartHTML(chartModel) }
-    $('common-score').onclick = (e) => { if (e.target.id === 'common-score') $('common-score').classList.add('hidden') }
+    $('common-score').onclick = (e) => { if (e.target.id === 'common-score') closeChart() }
 
     // ===== 곡 열기 → 재생 =====
     let pdfDoc = null, project = null, playSeq = [], playSteps = []
