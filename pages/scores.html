@@ -105,7 +105,7 @@
 
   <!-- ===================== 곡 정보 수정 모달 ===================== -->
   <div id="edit-modal" class="hidden fixed inset-0 z-[58] flex items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+    <div class="w-full max-w-2xl max-h-[90vh] overflow-auto rounded-2xl bg-white p-6 shadow-xl">
       <h2 class="text-base font-black mb-4">곡 정보 수정</h2>
       <div class="flex flex-col gap-3">
         <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">곡명</span>
@@ -115,6 +115,9 @@
         <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">유튜브 링크</span>
           <input id="e-youtube" type="text" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain">
           <span id="e-yt-hint" class="text-[11px] opacity-50"></span></label>
+        <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">가사 / 타임라인 <span class="normal-case font-medium opacity-70">— <code>[구간]</code> 헤더(선택) + <code>00:01:04 가사</code> 줄</span></span>
+          <textarea id="e-lyrics" rows="9" placeholder="[인트로]&#10;00:00:27 모든 것이 멈춘 채&#10;00:00:33 시간은 또 조용히 흐르네&#10;&#10;[후렴]&#10;00:01:04 너 없이 견디는 이 시간도" class="bg-brandCream/60 text-xs font-mono leading-relaxed rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain resize-y"></textarea>
+          <span id="e-lyrics-hint" class="text-[11px] opacity-50"></span></label>
       </div>
       <p id="e-status" class="text-xs opacity-80 mt-3 min-h-[1rem]"></p>
       <div class="flex justify-end gap-2 mt-4">
@@ -194,20 +197,30 @@
       <div id="perf-meta" class="text-sm font-semibold tabular-nums"></div>
       <div class="ml-auto flex items-center gap-3">
         <div class="w-24 aspect-video overflow-hidden rounded bg-black/60"><div id="yt-host" class="w-full h-full"></div></div>
-        <div id="perf-time" class="text-xs tabular-nums text-zinc-400 whitespace-nowrap"></div>
         <button id="perf-toggle" class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-zinc-900 active:scale-95">▶</button>
       </div>
+    </div>
+    <div class="flex shrink-0 items-center gap-2 border-b border-white/10 px-3 py-1.5">
+      <span id="perf-cur" class="w-10 shrink-0 text-right text-[11px] tabular-nums text-zinc-400">0:00</span>
+      <input id="perf-seek" type="range" min="0" max="1000" value="0" step="1" class="perf-seek h-1.5 flex-1 cursor-pointer accent-emerald-400" title="재생 위치 조정">
+      <span id="perf-dur" class="w-10 shrink-0 text-[11px] tabular-nums text-zinc-400">0:00</span>
     </div>
     <div id="perf-body" class="flex min-h-0 flex-1 flex-col cursor-pointer">
       <div id="slot-top" class="relative flex min-h-0 flex-1 items-center justify-center p-2 sm:p-3">
         <span class="slot-label absolute left-2 top-2 z-10 rounded px-2 py-0.5 text-[11px] font-bold"></span>
-        <div class="cropwrap relative"><canvas></canvas><div class="playhead absolute top-0 bottom-0 w-[2px] bg-emerald-400 hidden"></div></div>
+        <div class="cropwrap relative"><canvas></canvas><div class="playhead absolute top-0 bottom-0 w-[2px] bg-emerald-400 hidden"></div><div class="cutmark absolute top-0 bottom-0 w-[3px] bg-rose-500 hidden"><span class="absolute top-0 right-1 text-[10px] font-bold text-rose-200 whitespace-nowrap bg-zinc-900/80 px-1 rounded">✂ 점프</span></div><div class="startmark absolute top-0 bottom-0 w-[3px] bg-sky-400 hidden"><span class="absolute top-0 left-1 text-[10px] font-bold text-sky-100 whitespace-nowrap bg-zinc-900/80 px-1 rounded">▶ 시작</span></div></div>
       </div>
       <div class="h-px bg-white/10"></div>
       <div id="slot-bottom" class="relative flex min-h-0 flex-1 items-center justify-center p-2 sm:p-3">
         <span class="slot-label absolute left-2 top-2 z-10 rounded px-2 py-0.5 text-[11px] font-bold"></span>
-        <div class="cropwrap relative"><canvas></canvas><div class="playhead absolute top-0 bottom-0 w-[2px] bg-emerald-400 hidden"></div></div>
+        <div class="cropwrap relative"><canvas></canvas><div class="playhead absolute top-0 bottom-0 w-[2px] bg-emerald-400 hidden"></div><div class="cutmark absolute top-0 bottom-0 w-[3px] bg-rose-500 hidden"><span class="absolute top-0 right-1 text-[10px] font-bold text-rose-200 whitespace-nowrap bg-zinc-900/80 px-1 rounded">✂ 점프</span></div><div class="startmark absolute top-0 bottom-0 w-[3px] bg-sky-400 hidden"><span class="absolute top-0 left-1 text-[10px] font-bold text-sky-100 whitespace-nowrap bg-zinc-900/80 px-1 rounded">▶ 시작</span></div></div>
       </div>
+    </div>
+    <div id="perf-lyrics" class="hidden shrink-0 border-t border-white/10 px-4 py-2.5 text-center">
+      <div id="lyric-section" class="text-[10px] font-bold uppercase tracking-widest text-amber-400/80 min-h-[0.9rem]"></div>
+      <div id="lyric-prev" class="text-sm text-zinc-500 truncate min-h-[1.25rem]"></div>
+      <div id="lyric-cur" class="text-lg sm:text-2xl font-bold text-emerald-300 truncate min-h-[1.75rem] sm:min-h-[2rem]"></div>
+      <div id="lyric-next" class="text-sm text-zinc-400 truncate min-h-[1.25rem]"></div>
     </div>
   </div>
 
@@ -320,6 +333,40 @@
       const end = ans + 1 < rec.length ? rec[ans + 1].start : (lastEnd > 0 ? lastEnd : undefined)
       if (end != null && t >= end) return -1
       return rec[ans].step
+    }
+
+    // ===== 가사(타임라인) 파싱/직렬화/조회 =====
+    // 입력 형식: "[구간 이름]" 헤더(선택) + "HH:MM:SS 가사" 또는 "MM:SS 가사" 줄
+    function parseLyricsInput(text) {
+      const out = []; let section = ''
+      for (const raw of String(text || '').split(/\r?\n/)) {
+        const line = raw.trim(); if (!line) continue
+        const sec = line.match(/^\[(.+)\]$/); if (sec) { section = sec[1].trim(); continue }
+        const m = line.match(/^(?:(\d{1,2}):)?(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\s+(.+)$/)
+        if (!m) continue
+        const h = m[1] ? +m[1] : 0, frac = m[4] ? +(`0.${m[4]}`) : 0
+        const time = h * 3600 + (+m[2]) * 60 + (+m[3]) + frac
+        out.push({ time, text: m[5].trim(), section: section || undefined })
+      }
+      return out.sort((a, b) => a.time - b.time)
+    }
+    const hms = (sec) => { let t = Math.max(0, Math.floor(Number(sec) || 0)); const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` }
+    function lyricsToText(lyrics) {
+      if (!Array.isArray(lyrics) || !lyrics.length) return ''
+      const out = []; let lastSec = null
+      for (const l of lyrics) {
+        const sec = l.section || ''
+        if (sec !== (lastSec ?? '')) { if (out.length) out.push(''); if (sec) out.push(`[${sec}]`); lastSec = sec }
+        out.push(`${hms(l.time)} ${l.text}`)
+      }
+      return out.join('\n')
+    }
+    // 재생 시간 t에서 표시할 가사 줄 index (이전 줄 중 가장 가까운 것; 첫 줄 이전이면 -1)
+    function findLyricIdx(lyrics, t) {
+      if (!lyrics || !lyrics.length) return -1
+      let idx = -1
+      for (let i = 0; i < lyrics.length; i++) { if (lyrics[i].time <= t) idx = i; else break }
+      return idx
     }
 
     function extractVideoId(input) {
@@ -447,7 +494,7 @@
           const p = JSON.parse(await m.text())
           const mm = buildStepModel(p)
           const synced = !!(p.measures?.length && mm.steps.some((s) => typeof s === 'number'))
-          return { id, title: p.title || id, artist: p.artist || '', youtube: p.youtubeVideoId || '', synced, updatedAt: p.updatedAt || 0 }
+          return { id, title: p.title || id, artist: p.artist || '', youtube: p.youtubeVideoId || '', synced, lyrics: Array.isArray(p.lyrics) ? p.lyrics : [], updatedAt: p.updatedAt || 0 }
         } catch { return null }
       }))
       const songs = items.filter(Boolean).sort((a, b) => b.updatedAt - a.updatedAt)
@@ -460,7 +507,7 @@
           <div class="silvana-card bg-white p-6 border border-brandGray/40 shadow-sm flex flex-col gap-3">
             <div class="flex items-start justify-between"><span class="text-2xl">🎼</span>${del}</div>
             <div><h3 class="text-lg font-black leading-tight break-all">${s.title}</h3>${s.artist ? `<p class="text-xs opacity-50 mt-0.5">${s.artist}</p>` : ''}</div>
-            <div class="text-[10px] font-bold">${s.synced ? '<span class="bg-emerald-500 text-white px-2 py-0.5 rounded-full">싱크됨</span>' : '<span class="bg-amber-400 text-zinc-900 px-2 py-0.5 rounded-full">싱크 전</span>'}</div>
+            <div class="text-[10px] font-bold flex gap-1">${s.synced ? '<span class="bg-emerald-500 text-white px-2 py-0.5 rounded-full">싱크됨</span>' : '<span class="bg-amber-400 text-zinc-900 px-2 py-0.5 rounded-full">싱크 전</span>'}${s.lyrics?.length ? '<span class="bg-sky-500 text-white px-2 py-0.5 rounded-full">가사</span>' : ''}</div>
             <div class="flex flex-wrap gap-2 mt-1">
               ${playBtn}
               <button data-edit="${s.id}" class="px-3 py-2 bg-violet-600 text-white rounded-full text-xs font-bold hover:bg-violet-700 transition">✎ 싱크</button>
@@ -502,15 +549,17 @@
     }
 
     // ===== 노래방 재생 루프 =====
-    let rafId = 0, lines = []
+    let rafId = 0, lines = [], isSeeking = false, activeSlotKey = 'bottom'
     const perfEl = $('perf')
-    const slots = {
-      top: { box: $('slot-top'), wrap: $('slot-top').querySelector('.cropwrap'), canvas: $('slot-top').querySelector('canvas'), bar: $('slot-top').querySelector('.playhead'), label: $('slot-top').querySelector('.slot-label'), lineIdx: -1 },
-      bottom: { box: $('slot-bottom'), wrap: $('slot-bottom').querySelector('.cropwrap'), canvas: $('slot-bottom').querySelector('canvas'), bar: $('slot-bottom').querySelector('.playhead'), label: $('slot-bottom').querySelector('.slot-label'), lineIdx: -1 },
-    }
+    const mkSlot = (id) => ({ box: $(id), wrap: $(id).querySelector('.cropwrap'), canvas: $(id).querySelector('canvas'), bar: $(id).querySelector('.playhead'), cut: $(id).querySelector('.cutmark'), start: $(id).querySelector('.startmark'), label: $(id).querySelector('.slot-label'), lineIdx: -1 })
+    const slots = { top: mkSlot('slot-top'), bottom: mkSlot('slot-bottom') }
     async function openPerformance(vid) {
       lines = groupLines(project.measures)
-      slots.top.lineIdx = -1; slots.bottom.lineIdx = -1
+      slots.top.lineIdx = -1; slots.bottom.lineIdx = -1; activeSlotKey = 'bottom'
+      isSeeking = false; $('perf-seek').value = 0; $('perf-cur').textContent = '0:00'; $('perf-dur').textContent = '0:00'
+      const hasLyrics = Array.isArray(project.lyrics) && project.lyrics.length > 0
+      $('perf-lyrics').classList.toggle('hidden', !hasLyrics)
+      if (hasLyrics) { $('lyric-section').textContent = ''; $('lyric-prev').textContent = ''; $('lyric-cur').textContent = ''; $('lyric-next').textContent = project.lyrics[0]?.text || '' }
       perfEl.classList.remove('hidden')
       await yt.connect(vid); yt.play(); startLoop()
     }
@@ -527,8 +576,12 @@
       if (!line || !current) return null
       return Math.max(0, Math.min(1, (current.x + progress * current.width - line.x) / line.width))
     }
+    // 라인 안에서 마디 m의 좌/우 끝 위치(0~1). right=true면 오른쪽 끝.
+    const measureFrac = (line, m, right) => Math.max(0, Math.min(1, ((right ? m.x + m.width : m.x) - line.x) / line.width))
     function startLoop() {
       const total = project.measures.length
+      const lyricsArr = Array.isArray(project.lyrics) ? project.lyrics : []
+      let lastLyricIdx = -2
       let sampleYt = yt.getTime(), samplePerf = performance.now(), lastResync = samplePerf
       function estTime() {
         const now = performance.now()
@@ -554,19 +607,60 @@
           const ended = project.lastMeasureEndTime > 0 && time >= project.lastMeasureEndTime
           if (ended && lines.length) { activeLineIdx = lines.length - 1; frac = 1; status = 'ended' } else { activeLineIdx = 0; status = 'waiting' }
         } else frac = lineFraction(lines[activeLineIdx], current, progress)
-        const activeIsTop = activeLineIdx % 2 === 0
-        renderSlotLine(slots.top, activeIsTop ? activeLineIdx : activeLineIdx + 1)
-        renderSlotLine(slots.bottom, activeIsTop ? activeLineIdx + 1 : activeLineIdx)
+        // ── 다음 라인 = 재생 순서상 현재 라인 다음에 나오는 '다른 라인'. 점프면 목적지가 자동 반영됨. ──
+        let nextLineIdx = -1, jumpStartIndex = -1, breakFromIndex = -1, isJump = false
+        if (stepIdx >= 0) {
+          let prevIdx = currentIndex
+          for (let k = stepIdx + 1; k < playSeq.length; k++) {
+            const idx = playSeq[k]
+            const li = lines.findIndex((l) => l.measures.some((m) => m.index === idx))
+            if (li >= 0 && li !== activeLineIdx) { nextLineIdx = li; jumpStartIndex = idx; breakFromIndex = prevIdx; isJump = idx !== prevIdx + 1; break }
+            prevIdx = idx
+          }
+        } else nextLineIdx = activeLineIdx + 1 // 대기/끝: 문서 순서 다음 (기존 동작)
+
+        // 슬롯 배치: 이미 현재 라인을 띄우고 있는 슬롯을 유지(연속성). 어느 쪽에도 없으면 직전 active의 반대편에 배치.
+        // → 점프 목적지가 하단에 미리보기되던 경우, 그 줄이 그대로 하단에서 '현재'로 이어짐(상단으로 튀지 않음).
+        let activeKey = slots.top.lineIdx === activeLineIdx ? 'top' : slots.bottom.lineIdx === activeLineIdx ? 'bottom' : (activeSlotKey === 'top' ? 'bottom' : 'top')
+        activeSlotKey = activeKey
+        renderSlotLine(activeKey === 'top' ? slots.top : slots.bottom, activeLineIdx)
+        renderSlotLine(activeKey === 'top' ? slots.bottom : slots.top, nextLineIdx)
         for (const slot of [slots.top, slots.bottom]) {
           const isActive = slot.lineIdx === activeLineIdx
-          slot.label.textContent = isActive ? '현재' : (lines[slot.lineIdx] ? '다음' : (status === 'ended' ? '끝' : ''))
-          slot.label.className = 'slot-label absolute left-2 top-2 z-10 rounded px-2 py-0.5 text-[11px] font-bold ' + (isActive ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-zinc-900')
+          const isNext = !isActive && nextLineIdx >= 0 && slot.lineIdx === nextLineIdx
+          const line = lines[slot.lineIdx]
+          slot.label.textContent = isActive ? '현재' : isNext ? (isJump ? `↪ 점프 → 마디 ${jumpStartIndex + 1}` : '다음') : (status === 'ended' ? '끝' : '')
+          slot.label.className = 'slot-label absolute left-2 top-2 z-10 rounded px-2 py-0.5 text-[11px] font-bold ' + (isActive ? 'bg-emerald-500 text-white' : isNext && isJump ? 'bg-violet-600 text-white' : 'bg-amber-400 text-zinc-900')
           slot.canvas.style.opacity = isActive ? '1' : '0.45'
-          if (isActive && frac != null && lines[slot.lineIdx]) { slot.bar.classList.remove('hidden'); slot.bar.style.left = (frac * slot.wrap.clientWidth) + 'px' } else slot.bar.classList.add('hidden')
+          const wrapW = slot.wrap.clientWidth
+          // 재생바: 현재 라인에만
+          if (isActive && frac != null && line) { slot.bar.classList.remove('hidden'); slot.bar.style.left = (frac * wrapW) + 'px' } else slot.bar.classList.add('hidden')
+          // ✂ 끊을 지점: 점프가 걸린 현재 라인의 발동 마디 오른쪽 끝
+          const fm = isActive && isJump && line ? line.measures.find((m) => m.index === breakFromIndex) : null
+          if (fm) { slot.cut.classList.remove('hidden'); slot.cut.style.left = (measureFrac(line, fm, true) * wrapW) + 'px' } else slot.cut.classList.add('hidden')
+          // ▶ 시작지점: 점프 목적지 라인의 착지 마디 왼쪽 끝
+          const sm = isNext && isJump && line ? line.measures.find((m) => m.index === jumpStartIndex) : null
+          if (sm) { slot.start.classList.remove('hidden'); slot.start.style.left = (measureFrac(line, sm, false) * wrapW) + 'px' } else slot.start.classList.add('hidden')
         }
         $('perf-meta').innerHTML = current ? `마디 <span class="text-emerald-400">${currentIndex + 1}</span> / ${total}` : `<span class="text-zinc-400">${status === 'ended' ? '끝' : status === 'waiting' ? '대기' : ''} · ${total}마디</span>`
-        $('perf-time').textContent = `${formatTime(time)} / ${formatTime(yt.getDuration())}`
+        const dur = yt.getDuration()
+        $('perf-dur').textContent = formatTime(dur)
+        if (!isSeeking) {
+          $('perf-cur').textContent = formatTime(time)
+          $('perf-seek').value = dur > 0 ? Math.round((time / dur) * 1000) : 0
+        }
         $('perf-toggle').textContent = yt.playing ? '❚❚' : '▶'
+        if (lyricsArr.length) {
+          const li = findLyricIdx(lyricsArr, time)
+          if (li !== lastLyricIdx) {
+            lastLyricIdx = li
+            const cur = lyricsArr[li], prev = lyricsArr[li - 1], next = lyricsArr[li + 1]
+            $('lyric-section').textContent = cur?.section || ''
+            $('lyric-prev').textContent = prev?.text || ''
+            $('lyric-cur').textContent = cur?.text || ''
+            $('lyric-next').textContent = next?.text || ''
+          }
+        }
         rafId = requestAnimationFrame(frame)
       }
       rafId = requestAnimationFrame(frame)
@@ -581,6 +675,10 @@
     $('perf-exit').onclick = closePerformance
     $('perf-toggle').onclick = (e) => { e.stopPropagation(); togglePlay() }
     $('perf-body').onclick = togglePlay
+    // 재생 위치 조정(seek): 드래그 중엔 루프가 값을 덮어쓰지 않도록 isSeeking으로 보호
+    const seekTimeFromBar = () => (yt.getDuration() > 0 ? (Number($('perf-seek').value) / 1000) * yt.getDuration() : 0)
+    $('perf-seek').addEventListener('input', () => { isSeeking = true; $('perf-cur').textContent = formatTime(seekTimeFromBar()) })
+    $('perf-seek').addEventListener('change', () => { const t = seekTimeFromBar(); if (yt.getDuration() > 0) yt.seekTo(t); isSeeking = false })
 
     // ===== 셋리스트 / 곡 정보 (구글 시트) =====
     let setlistLoaded = false
@@ -1062,6 +1160,8 @@
       $('e-artist').value = s?.artist || ''
       $('e-youtube').value = s?.youtube ? `https://youtu.be/${s.youtube}` : ''
       $('e-yt-hint').textContent = s?.youtube ? `현재 영상 ID: ${s.youtube}` : ''
+      $('e-lyrics').value = lyricsToText(s?.lyrics)
+      updateLyricsHint()
       $('e-status').textContent = ''
       $('edit-modal').classList.remove('hidden')
     }
@@ -1069,6 +1169,13 @@
       const id = extractVideoId(e.target.value)
       $('e-yt-hint').textContent = e.target.value ? (id ? `✓ 영상 ID: ${id}` : '⚠️ 유튜브 링크를 인식하지 못했습니다') : ''
     })
+    function updateLyricsHint() {
+      const txt = $('e-lyrics').value
+      if (!txt.trim()) { $('e-lyrics-hint').textContent = '비워두면 재생 화면에 가사가 표시되지 않습니다.'; return }
+      const n = parseLyricsInput(txt).length
+      $('e-lyrics-hint').textContent = n ? `✓ ${n}줄 인식됨` : '⚠️ 인식된 가사 줄이 없습니다 (형식: 00:01:04 가사)'
+    }
+    $('e-lyrics').addEventListener('input', updateLyricsHint)
     async function saveEdit() {
       const title = $('e-title').value.trim(), artist = $('e-artist').value.trim(), ytRaw = $('e-youtube').value.trim()
       if (!title) { $('e-status').textContent = '⚠️ 곡명을 입력하세요.'; return }
@@ -1087,7 +1194,7 @@
         const { data: mf, error: e1 } = await supabase.storage.from(BUCKET).download(`${editId}/project.json`)
         if (e1) throw new Error('project.json 없음')
         const p = JSON.parse(await mf.text())
-        p.title = title; p.artist = artist; p.youtubeVideoId = ytId; p.updatedAt = Date.now()
+        p.title = title; p.artist = artist; p.youtubeVideoId = ytId; p.lyrics = parseLyricsInput($('e-lyrics').value); p.updatedAt = Date.now()
         const { error: e2 } = await supabase.storage.from(BUCKET).upload(`${editId}/project.json`, new Blob([JSON.stringify(p)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
         if (e2) throw new Error(e2.message)
         $('edit-modal').classList.add('hidden')
