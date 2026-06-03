@@ -294,6 +294,7 @@
 
     <!-- 본문: PDF 페이지 + (싱크) 시간표. 모바일은 세로 스택, 데스크톱은 좌우 분할 -->
     <div class="flex flex-1 min-h-0 flex-col sm:flex-row">
+      <div id="grid-ref" class="hidden h-40 w-full shrink-0 overflow-auto border-b border-zinc-300 bg-white sm:h-auto sm:w-56 sm:border-b-0 sm:border-r"></div>
       <div id="author-pages" class="flex-1 overflow-auto p-2 sm:p-4 flex flex-col items-center gap-4"></div>
       <div id="sync-table-wrap" class="hidden h-44 w-full shrink-0 overflow-auto border-t border-zinc-300 bg-white sm:h-auto sm:w-64 sm:border-t-0 sm:border-l"></div>
     </div>
@@ -763,6 +764,19 @@
       }
       const lyrics = Array.isArray(P.lyrics) ? P.lyrics : []
       for (const l of lyrics) if (l.time > duration) duration = l.time
+      // 기준 그리드 레인(있으면 맨 위에 참고용으로) — 세션이 없어도 공용 악보에서 노드 번호를 볼 수 있게
+      const g = P.grid
+      if (g && g.bpm > 0 && g.beats > 0) {
+        const gsec = (g.beats * 60) / g.bpm, gstart = Number(g.start) || 0
+        let gcount = g.count > 0 ? g.count : (gsec > 0 ? Math.ceil(Math.max(0, duration - SD - gstart) / gsec) : 0)
+        if (gcount > 0) {
+          const gblocks = []
+          for (let i = 0; i < gcount; i++) gblocks.push({ start: gstart + i * gsec + SD, end: gstart + (i + 1) * gsec + SD, active: true, mi: i })
+          lanes.unshift({ label: '기준', color: '#334155', blocks: gblocks, synced: true })
+          const gend = gstart + gcount * gsec + SD
+          if (gend > duration) duration = gend
+        }
+      }
       const sections = []; let last = null
       for (const l of lyrics) { const sec = l.section || ''; if (sec && sec !== last) { sections.push({ time: l.time, name: sec }); last = sec } }
       const sortedLyr = lyrics.slice().sort((a, b) => a.time - b.time)
@@ -904,7 +918,7 @@
       syncEl.textContent = '공용 악보 생성 중…'
       try {
         const m = await buildChartModel(id)
-        if (!m.duration) { syncEl.textContent = ''; alert('타이밍 싱크된 세션이 없어 공용 악보를 만들 수 없습니다.\n먼저 세션을 ✎ 싱크하세요.'); return }
+        if (!m.duration) { syncEl.textContent = ''; alert('표시할 내용이 없습니다.\n곡 정보에서 기준 그리드를 저장하거나, 세션을 ✎ 싱크하세요.'); return }
         m.kind = '공용 악보'; showChart(m); syncEl.textContent = ''
       } catch (e) { syncEl.textContent = ''; alert('공용 악보 생성 실패: ' + (e?.message || e)) }
     }
@@ -1418,32 +1432,51 @@
     function redrawLayer(i) {
       const layer = pageLayers[i].layer; layer.innerHTML = ''
       const pageMeasures = aproj.measures.filter((m) => m.page === i)
+      const lineStarts = new Set(groupRows(pageMeasures).map((row) => Math.min(...row.indices))) // 각 줄의 첫 마디 index
+      // 싱크 모드: 점프(반복)를 고려한 연주 순서(스텝) 번호. 한 마디가 여러 번 연주되면 위치를 모두 표시(예: 5→2 점프면 마디2 = 2·6)
+      const seqPos = new Map()
+      if (aMode === 'sync') aseq.forEach((mi, k) => { if (!seqPos.has(mi)) seqPos.set(mi, []); seqPos.get(mi).push(k + 1) })
       pageMeasures.forEach((m) => {
         const sel = toDelete.has(m.index)
+        const pos = aMode === 'sync' ? seqPos.get(m.index) : null // 연주 순서 번호(점프 반영). 여러 번이면 ·로 이어 표시
+        const skipped = aMode === 'sync' && !pos // 점프로 한 번도 연주되지 않는 마디(앞으로 건너뛰는 점프 등)
         const box = document.createElement('div')
         box.dataset.mi = m.index
         const boxCls = sel ? 'border-rose-500 bg-rose-500/30'
+          : skipped ? 'border-zinc-400/60 bg-zinc-200/20 border-dashed opacity-50'
           : m.active === true ? 'border-emerald-500/80 bg-emerald-400/15'
           : m.active === false ? 'border-zinc-400/70 bg-zinc-300/25'
           : 'border-blue-500/80 bg-blue-400/15'
         box.className = 'absolute rounded-sm border-2 ' + boxCls
         box.style.cssText = `left:${m.x * 100}%;top:${m.y * 100}%;width:${m.width * 100}%;height:${m.height * 100}%`
         const lab = document.createElement('span')
-        const labCls = sel ? 'bg-rose-600' : m.active === true ? 'bg-emerald-600' : m.active === false ? 'bg-zinc-500' : 'bg-blue-600'
-        lab.className = 'absolute -left-1.5 -top-2.5 flex h-5 min-w-5 cursor-pointer items-center justify-center rounded-full px-1 text-[11px] font-bold text-white shadow ' + labCls
-        lab.textContent = (m.index + 1) + (m.active === true ? ' ♪' : m.active === false ? ' ·' : '')
-        lab.title = (m.noteDensity != null ? `음표 밀도 ${(m.noteDensity * 100).toFixed(1)}% · ` : '') + '클릭: 활성/비활성 토글'
+        const labCls = sel ? 'bg-rose-600' : skipped ? 'bg-zinc-400' : m.active === true ? 'bg-emerald-600' : m.active === false ? 'bg-zinc-500' : 'bg-blue-600'
+        lab.className = 'absolute -left-1.5 -top-2.5 flex h-5 min-w-5 cursor-pointer items-center justify-center whitespace-nowrap rounded-full px-1 text-[11px] font-bold leading-none text-white shadow ' + labCls
+        const actMark = m.active === true ? ' ♪' : m.active === false ? ' ·' : ''
+        lab.textContent = (skipped ? '⊘' + (m.index + 1) : pos ? pos.join('·') : (m.index + 1)) + actMark
+        lab.title = (skipped ? `마디 ${m.index + 1} · 🚫 점프로 건너뜀(연주 안 함) · ` : pos ? `마디 ${m.index + 1} · 연주 순서 ${pos.join(', ')}번${pos.length > 1 ? ' (점프로 반복)' : ''} · ` : '') + (m.noteDensity != null ? `음표 밀도 ${(m.noteDensity * 100).toFixed(1)}% · ` : '') + '클릭: 활성/비활성 토글'
         lab.onpointerdown = (e) => e.stopPropagation()
         lab.onclick = (e) => { e.stopPropagation(); m.active = !(m.active === true); redrawLayer(i) }
         box.appendChild(lab)
         if (Array.isArray(aproj.nodeMap) && typeof aproj.nodeMap[m.index] === 'number') {
-          const gb = document.createElement('button')
-          gb.className = 'absolute -left-1.5 -bottom-2.5 cursor-pointer rounded-full bg-sky-600 px-1.5 text-[10px] font-bold text-white shadow'
-          gb.textContent = '기준 ' + (aproj.nodeMap[m.index] + 1)
-          gb.title = '클릭: 이 마디의 기준 마디 번호 변경 (이후 마디 자동 정렬)'
-          gb.onpointerdown = (e) => e.stopPropagation()
-          gb.onclick = (e) => { e.stopPropagation(); reanchorNode(m.index) }
-          box.appendChild(gb)
+          if (aMode === 'sync' && lineStarts.has(m.index)) {
+            // 줄의 첫 마디: 이 줄을 기준 몇 번부터 채울지 지정 → 그 줄(및 이후)이 순차로 정렬
+            const wrap = document.createElement('div')
+            wrap.className = 'absolute -left-1.5 -bottom-3.5 z-20 flex items-center gap-1 rounded-md bg-sky-700 px-1.5 py-1 text-[10px] font-bold text-white shadow'
+            wrap.onpointerdown = (e) => e.stopPropagation()
+            const t = document.createElement('span'); t.textContent = '줄→기준'
+            const inp = document.createElement('input'); inp.type = 'number'; inp.min = '1'; inp.value = aproj.nodeMap[m.index] + 1
+            inp.className = 'w-10 rounded px-1 text-center text-zinc-900'
+            inp.title = '이 줄의 첫 마디를 기준 몇 번에 놓을지 (이후 마디 자동 정렬)'
+            inp.onpointerdown = (e) => e.stopPropagation(); inp.onclick = (e) => e.stopPropagation()
+            inp.onchange = () => { const v = parseInt(inp.value, 10); if (v >= 1) setLineAnchor(m.index, v) }
+            wrap.append(t, inp); box.appendChild(wrap)
+          } else {
+            const gb = document.createElement('span')
+            gb.className = 'absolute -left-1.5 -bottom-3 z-10 rounded-full bg-sky-600/85 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white shadow'
+            gb.textContent = '기준 ' + (aproj.nodeMap[m.index] + 1)
+            box.appendChild(gb)
+          }
         }
         if (aMode === 'mark') {
           const del = document.createElement('button')
@@ -1462,7 +1495,7 @@
           const allSel = row.indices.every((ix) => toDelete.has(ix))
           const h = document.createElement('button')
           h.className = 'absolute z-20 flex items-center whitespace-nowrap rounded-md px-1.5 py-1 text-[11px] font-bold text-white shadow active:scale-90 ' + (allSel ? 'bg-zinc-500' : 'bg-rose-600')
-          h.style.cssText = `left:${row.x * 100}%;top:${(row.y + row.height / 2) * 100}%;transform:translate(-50%,-50%)`
+          h.style.cssText = `left:${row.x * 100}%;top:${row.y * 100}%;transform:translate(-50%,-120%)`
           h.textContent = allSel ? '↺ 줄' : '✕ 줄'
           h.title = `이 줄(마디 ${row.indices.length}개) 삭제 토글`
           h.onpointerdown = (e) => e.stopPropagation()
@@ -1483,6 +1516,20 @@
             attachBoundaryDrag(handle, layer, a, b, i)
             layer.appendChild(handle)
           }
+
+          // 줄 양 끝 드래그 핸들 — 첫 마디 왼쪽 끝 / 마지막 마디 오른쪽 끝만 늘이고 줄임(emerald = 끝, amber = 내부 경계)
+          const endHandle = (m, side) => {
+            const ex = side === 'left' ? m.x : m.x + m.width
+            const handle = document.createElement('div')
+            handle.className = 'absolute z-30 cursor-ew-resize group'
+            handle.style.cssText = `left:${ex * 100}%;top:${row.y * 100}%;height:${row.height * 100}%;width:14px;transform:translateX(-50%)`
+            handle.innerHTML = '<div class="mx-auto h-full w-[3px] rounded bg-emerald-500/80 group-hover:w-[4px] group-hover:bg-emerald-600"></div>'
+            handle.title = side === 'left' ? '드래그로 줄 왼쪽 끝 조정' : '드래그로 줄 오른쪽 끝 조정'
+            attachEndDrag(handle, layer, m, side, i)
+            layer.appendChild(handle)
+          }
+          if (ms[0]) endHandle(ms[0], 'left')
+          if (ms.length && ms[ms.length - 1]) endHandle(ms[ms.length - 1], 'right')
         })
       }
     }
@@ -1500,6 +1547,25 @@
           if (bA) bA.style.width = a.width * 100 + '%'
           if (bB) { bB.style.left = b.x * 100 + '%'; bB.style.width = b.width * 100 + '%' }
           handle.style.left = nx * 100 + '%'
+        }
+        const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); redrawLayer(pageIndex) }
+        window.addEventListener('pointermove', move)
+        window.addEventListener('pointerup', up)
+      }
+    }
+    // 줄의 바깥 끝(첫 마디 왼쪽 / 마지막 마디 오른쪽)을 드래그로 이동 — 반대쪽 끝은 고정, 해당 마디 너비만 변경
+    function attachEndDrag(handle, layer, m, side, pageIndex) {
+      handle.onpointerdown = (e) => {
+        e.stopPropagation(); e.preventDefault()
+        const fixed = side === 'left' ? m.x + m.width : m.x // 고정되는 반대쪽 모서리
+        const move = (ev) => {
+          const r = layer.getBoundingClientRect()
+          let nx = (ev.clientX - r.left) / r.width
+          if (side === 'left') { nx = Math.max(0, Math.min(fixed - MIN_SIZE, nx)); m.x = nx; m.width = fixed - nx }
+          else { nx = Math.max(fixed + MIN_SIZE, Math.min(1, nx)); m.width = nx - fixed }
+          const box = layer.querySelector(`[data-mi="${m.index}"]`)
+          if (box) { box.style.left = m.x * 100 + '%'; box.style.width = m.width * 100 + '%' }
+          handle.style.left = (side === 'left' ? m.x : m.x + m.width) * 100 + '%'
         }
         const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); redrawLayer(pageIndex) }
         window.addEventListener('pointermove', move)
@@ -1535,9 +1601,11 @@
       $('mark-ctrl').classList.toggle('hidden', m !== 'mark')
       $('sync-ctrl').classList.toggle('hidden', m !== 'sync')
       $('sync-table-wrap').classList.toggle('hidden', m !== 'sync')
+      $('grid-ref').classList.toggle('hidden', m !== 'sync')
+      if (m === 'sync') renderGridRef()
       pageLayers.forEach((p) => { p.layer.style.pointerEvents = m === 'mark' ? 'auto' : 'none'; p.layer.style.cursor = m === 'mark' ? 'crosshair' : 'default' })
       redrawAllLayers(); updateMarkCount(); updateDeleteBtn()
-      if (m === 'sync') { ensureAuthorSource(); rebuildSeq(); renderJumpList(); renderTable(); updateTap(); startAuthorLoop() }
+      if (m === 'sync') { ensureAuthorSource(); rebuildSeq(); redrawAllLayers(); renderJumpList(); renderTable(); updateTap(); startAuthorLoop() }
       else stopAuthorLoop()
     }
 
@@ -1625,7 +1693,7 @@
     function renderJumpList() {
       const el = $('r-list')
       el.innerHTML = (aproj.jumps || []).map((j, i) => `<span class="inline-flex items-center gap-1 rounded-full bg-violet-100 text-violet-800 px-2 py-0.5">마디${j.from}→${j.to}${j.skip > 0 ? ' (첫' + j.skip + '무시)' : ''}${j.times > 1 ? ' ×' + j.times : ''}<button data-rr="${i}" class="font-bold">✕</button></span>`).join('')
-      el.querySelectorAll('[data-rr]').forEach((b) => b.onclick = () => { aproj.jumps.splice(+b.dataset.rr, 1); rebuildSeq(); renderJumpList(); renderTable(); updateTap() })
+      el.querySelectorAll('[data-rr]').forEach((b) => b.onclick = () => { aproj.jumps.splice(+b.dataset.rr, 1); rebuildSeq(); redrawAllLayers(); renderJumpList(); renderTable(); updateTap() })
     }
     function renderTable() {
       const n = aseq.length, wrap = $('sync-table-wrap')
@@ -1732,15 +1800,23 @@
       aproj.lastMeasureEndTime = s + aseq.length * sec
       renderTable(); updateTap()
     }
-    $('reset-timings').onclick = () => { if (!confirm('타이밍을 모두 지울까요?')) return; astep = new Array(aseq.length).fill(undefined); aproj.lastMeasureEndTime = 0; aproj.nodeMap = undefined; renderTable(); updateTap(); redrawAllLayers() }
+    $('reset-timings').onclick = () => { if (!confirm('타이밍을 모두 지울까요?')) return; astep = new Array(aseq.length).fill(undefined); aproj.lastMeasureEndTime = 0; aproj.nodeMap = undefined; renderTable(); updateTap(); redrawAllLayers(); renderGridRef() }
     // ===== 기준 그리드 매칭: 추출 마디 → 기준 마디(nodeMap) → 그리드 BPM으로 타이밍 자동 =====
     const gridMeasSec = () => { const g = aproj?.grid; return (g && g.bpm > 0 && g.beats > 0) ? (g.beats * 60) / g.bpm : 0 }
     function regenStepFromNodeMap() {
       const sec = gridMeasSec(); if (!sec || !Array.isArray(aproj.nodeMap)) return false
       const start = Number(aproj.grid.start) || 0
-      astep = aseq.map((mi) => { const g = aproj.nodeMap[mi]; return typeof g === 'number' ? start + g * sec : undefined })
-      const nums = aproj.nodeMap.filter((x) => typeof x === 'number')
-      aproj.lastMeasureEndTime = nums.length ? start + (Math.max(...nums) + 1) * sec : 0
+      // 점프(반복) 고려: 시퀀스를 따라가며 마디의 '첫 등장'은 매칭된 기준 노드, 반복 등장은 이전 노드에서 이어서 증가
+      const firstSeen = new Set(); let lastNode = -1
+      const nodes = aseq.map((mi) => {
+        if (!firstSeen.has(mi)) { firstSeen.add(mi); if (typeof aproj.nodeMap[mi] !== 'number') return undefined; lastNode = aproj.nodeMap[mi]; return lastNode }
+        if (lastNode < 0) return undefined
+        lastNode += 1; return lastNode
+      })
+      astep = nodes.map((n) => (n == null ? undefined : start + n * sec))
+      const valid = nodes.filter((n) => n != null)
+      aproj.nodeUsed = new Set(valid)
+      aproj.lastMeasureEndTime = valid.length ? start + (Math.max(...valid) + 1) * sec : 0
       return true
     }
     function applyGridMatch() {
@@ -1750,16 +1826,49 @@
       if (!n) { $('g-hint').textContent = '⚠️ 먼저 마디를 그리세요'; return }
       const from = Math.max(1, parseInt($('g-from').value, 10) || 1)
       aproj.nodeMap = Array.from({ length: n }, (_, i) => (from - 1) + i) // 마디 index i → 기준 마디(0-based)
-      regenStepFromNodeMap(); renderTable(); updateTap(); redrawAllLayers()
-      $('g-hint').textContent = `✓ 기준 ${from}~${from + n - 1}마디로 매칭 (1마디 ${sec.toFixed(2)}초). 배지 클릭으로 개별 보정`
+      regenStepFromNodeMap(); renderTable(); updateTap(); redrawAllLayers(); renderGridRef()
+      $('g-hint').textContent = `✓ 기준 ${from}~${from + n - 1}마디로 매칭 (1마디 ${sec.toFixed(2)}초). 각 줄의 "줄→기준 N"으로 줄 단위 조정`
     }
-    function reanchorNode(i) {
-      const cur = (Array.isArray(aproj.nodeMap) && typeof aproj.nodeMap[i] === 'number' ? aproj.nodeMap[i] : i) + 1
-      const v = parseInt(window.prompt(`추출 ${i + 1}번 마디를 기준 몇 번 마디로 맞출까요? (이후 마디는 자동으로 +1씩)`, cur), 10)
-      if (!(v >= 1)) return
-      if (!Array.isArray(aproj.nodeMap)) aproj.nodeMap = aproj.measures.map((_, k) => k)
-      for (let j = i; j < aproj.measures.length; j++) aproj.nodeMap[j] = (v - 1) + (j - i)
-      regenStepFromNodeMap(); renderTable(); updateTap(); redrawAllLayers()
+    // 싱크 화면 옆 '기준 노드 악보' 패널: 번호·시간·그 시점 가사/구간, 이 세션이 쓰는 노드는 파랗게
+    function renderGridRef() {
+      const el = $('grid-ref'); if (!el) return
+      const g = aproj?.grid
+      if (!(g && g.bpm > 0 && g.beats > 0 && g.count > 0)) {
+        el.innerHTML = '<div class="p-3 text-xs leading-relaxed text-zinc-400">기준 노드 악보가 없습니다.<br>곡 정보에서 BPM·박자·오디오 길이를 저장하면 여기에 표시됩니다.</div>'
+        return
+      }
+      const sec = (g.beats * 60) / g.bpm, start = Number(g.start) || 0, count = g.count
+      const lyr = (Array.isArray(aproj.lyrics) ? aproj.lyrics : []).slice().sort((a, b) => a.time - b.time)
+      const used = (aproj.nodeUsed instanceof Set) ? aproj.nodeUsed : new Set(Array.isArray(aproj.nodeMap) ? aproj.nodeMap.filter((x) => typeof x === 'number') : [])
+      const fmt = (s) => { s = Math.max(0, Math.floor(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` }
+      const at = (t, key) => { let cur = ''; for (const l of lyr) { if (l.time <= t + 0.01) { if (l[key]) cur = l[key] } else break } return cur }
+      let rows = '', lastSec = ' '
+      for (let i = 0; i < count; i++) {
+        const t = start + i * sec, section = at(t, 'section')
+        if (section !== lastSec) { rows += `<div class="bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700">${escHtml(section || '—')}</div>`; lastSec = section }
+        const u = used.has(i)
+        rows += `<div class="flex items-center gap-1.5 border-b border-zinc-100 px-2 py-1 text-[11px] ${u ? 'bg-sky-100' : ''}"><span class="w-6 shrink-0 text-right font-bold ${u ? 'text-sky-700' : 'text-zinc-400'}">${i + 1}</span><span class="w-7 shrink-0 tabular-nums text-zinc-400">${fmt(t)}</span><span class="truncate text-zinc-600">${escHtml(at(t, 'text'))}</span></div>`
+      }
+      el.innerHTML = `<div class="sticky top-0 z-10 bg-zinc-800 px-2 py-1.5 text-[11px] font-bold text-white">기준 노드 (${count}개) · <span class="text-sky-300">파랑=이 세션</span></div>${rows}`
+    }
+    // 한 줄(첫 마디 firstIdx)의 마디 index들을 읽기 순서로 반환
+    function lineMeasures(firstIdx) {
+      const m0 = aproj.measures.find((x) => x.index === firstIdx); if (!m0) return []
+      const pageMeasures = aproj.measures.filter((x) => x.page === m0.page)
+      const row = groupRows(pageMeasures).find((r) => Math.min(...r.indices) === firstIdx)
+      if (!row) return [firstIdx]
+      return row.indices.map((ix) => aproj.measures.find((x) => x.index === ix)).filter(Boolean).sort((a, b) => a.x - b.x).map((x) => x.index)
+    }
+    // 줄의 첫 마디를 기준 v1based번에 놓음 — 이 줄만 설정(전파 X). 다른 줄과 겹치면 거부.
+    function setLineAnchor(firstIdx, v1based) {
+      const idxs = lineMeasures(firstIdx); if (!idxs.length) return
+      const newNodes = idxs.map((_, k) => (v1based - 1) + k)
+      const inLine = new Set(idxs), others = new Set()
+      aproj.measures.forEach((x) => { if (!inLine.has(x.index) && typeof aproj.nodeMap?.[x.index] === 'number') others.add(aproj.nodeMap[x.index]) })
+      if (newNodes.some((n) => others.has(n))) { alert(`기준 ${v1based}~${v1based + idxs.length - 1}번에 다른 줄과 겹치는 노드가 있어 설정할 수 없습니다.`); redrawAllLayers(); return }
+      if (!Array.isArray(aproj.nodeMap)) aproj.nodeMap = []
+      idxs.forEach((ix, k) => { aproj.nodeMap[ix] = newNodes[k] })
+      regenStepFromNodeMap(); renderTable(); updateTap(); redrawAllLayers(); renderGridRef()
     }
     $('g-apply').onclick = applyGridMatch
     $('r-add').onclick = () => {
@@ -1767,7 +1876,7 @@
       const skip = Math.max(0, parseInt($('r-skip').value, 10) || 0), times = Math.max(1, parseInt($('r-times').value, 10) || 1)
       const count = aproj.measures.length
       if (!(from >= 1 && from <= count && to >= 1 && to <= count)) return alert(`마디 번호가 올바르지 않습니다 (1~${count}).`)
-      aproj.jumps.push({ from, to, skip, times }); rebuildSeq(); renderJumpList(); renderTable(); updateTap()
+      aproj.jumps.push({ from, to, skip, times }); rebuildSeq(); redrawAllLayers(); renderJumpList(); renderTable(); updateTap()
     }
     window.addEventListener('keydown', (e) => {
       if ($('author').classList.contains('hidden') || aMode !== 'sync' || e.code !== 'Space') return
@@ -1894,7 +2003,9 @@
       $('calc-bpm').value = (g?.bpm > 0 ? g.bpm : Number($('e-bpm').value) || 120)
       $('calc-beats').value = g?.beats > 0 ? g.beats : 4
       $('calc-start').value = g?.start || 0
-      $('calc-dur').value = ''; calcMeasures()
+      // 저장된 그리드에 마디 수(count)가 있으면 길이를 역산해 채움
+      $('calc-dur').value = (g?.count > 0 && g.bpm > 0 && g.beats > 0) ? Math.round(((g.start || 0) + g.count * (g.beats * 60 / g.bpm)) * 10) / 10 : ''
+      calcMeasures()
     }
     $('calc-preview').onclick = openBaseGridPreview
     function updateLyricsHint() {
@@ -1956,9 +2067,10 @@ ${origLyrics || '(원곡 가사를 넣어주세요)'}`
         if (e1) throw new Error('project.json 없음')
         const p = JSON.parse(await mf.text())
         const bpm = parseInt($('e-bpm').value, 10), aoff = parseFloat($('e-audio-offset').value)
-        const gb = Number($('calc-bpm').value), gbeats = Number($('calc-beats').value), gstart = Number($('calc-start').value) || 0
+        const gb = Number($('calc-bpm').value), gbeats = Number($('calc-beats').value), gstart = Number($('calc-start').value) || 0, gdur = Number($('calc-dur').value)
+        const gcount = (gb > 0 && gbeats > 0 && gdur > gstart) ? Math.round((gdur - gstart) / (gbeats * 60 / gb)) : (p.grid?.count)
         p.title = title; p.artist = artist; p.youtubeVideoId = ytId || p.youtubeVideoId || ''; p.defaultBpm = bpm > 0 ? bpm : undefined; p.audioOffset = (isFinite(aoff) && aoff !== 0) ? aoff : undefined
-        p.grid = (gb > 0 && gbeats > 0) ? { bpm: gb, beats: gbeats, start: gstart } : undefined
+        p.grid = (gb > 0 && gbeats > 0) ? { bpm: gb, beats: gbeats, start: gstart, count: gcount } : undefined
         p.lyrics = parseLyricsInput($('e-lyrics').value); p.updatedAt = Date.now()
         const audioFile = $('e-audio').files?.[0]
         if (audioFile) {
