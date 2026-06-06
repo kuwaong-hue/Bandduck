@@ -98,9 +98,59 @@
 
     <!-- ===================== 셋리스트 / 곡 정보 ===================== -->
     <section id="panel-setlist" class="hidden">
-      <p class="text-xs opacity-60 mb-6">공연 셋리스트와 곡별 정보(보컬·키·상태·메모)를 구글 시트에서 불러옵니다.</p>
-      <div id="setlist-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-      <div id="setlist-empty" class="hidden mt-2 bg-white/80 backdrop-blur-md p-8 rounded-[2rem] border border-brandGray/50 shadow-sm text-sm leading-relaxed"></div>
+      <!-- ===== 셋리스트 게시글 목록 ===== -->
+      <div id="sl-posts-view">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <p class="text-xs opacity-60 max-w-xl">공연 셋리스트를 게시글로 만들고, 등록된 악보를 원하는 순서대로 담아 세션별로 순서대로 재생하세요.</p>
+          <button id="sl-new" class="shrink-0 px-4 py-2 bg-textMain text-white hover:bg-black rounded-full text-xs font-bold transition shadow-sm">➕ 새 셋리스트</button>
+        </div>
+        <div id="sl-posts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="sl-posts-empty" class="hidden mt-2 bg-white/80 backdrop-blur-md p-8 rounded-[2rem] border border-brandGray/50 shadow-sm text-sm leading-relaxed"></div>
+
+        <!-- 곡 정보 (구글 시트) -->
+        <details class="mt-10 bg-white/60 backdrop-blur-md rounded-[2rem] border border-brandGray/50 shadow-sm">
+          <summary class="cursor-pointer select-none px-6 py-4 text-sm font-black">📋 곡 정보 (시트) <span class="font-medium opacity-50 text-xs">— 보컬·키·상태·메모를 구글 시트에서 불러옵니다</span></summary>
+          <div class="px-6 pb-6">
+            <div id="setlist-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="setlist-empty" class="hidden mt-2 text-sm leading-relaxed"></div>
+          </div>
+        </details>
+      </div>
+
+      <!-- ===== 셋리스트 편집 ===== -->
+      <div id="sl-editor-view" class="hidden">
+        <button id="sl-back" class="mb-4 px-3 py-1.5 bg-white text-textMain border border-brandGray rounded-full text-xs font-bold hover:bg-brandGray transition">← 목록으로</button>
+
+        <div class="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-brandGray/50 shadow-sm mb-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+            <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">셋리스트 제목 *</span>
+              <input id="sl-title" type="text" placeholder="예: 2026 봄 정기공연" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
+            <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">메모 <span class="normal-case font-medium opacity-70">(날짜·장소 등 · 선택)</span></span>
+              <input id="sl-memo" type="text" placeholder="예: 6/20 홍대 클럽" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-brandGray/40 pt-4 mb-3">
+            <h2 class="text-sm font-black flex items-center gap-2">🎵 곡 순서 <span id="sl-count" class="text-[10px] font-bold text-zinc-500"></span></h2>
+            <button id="sl-play" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-bold transition shadow-sm">▶ 순서대로 재생</button>
+          </div>
+          <div id="sl-list" class="flex flex-col gap-2"></div>
+          <div id="sl-empty" class="text-xs opacity-50 py-6 text-center">아직 곡이 없습니다. 아래에서 곡을 담아 순서를 정하세요.</div>
+        </div>
+
+        <div class="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-brandGray/50 shadow-sm mb-8">
+          <h2 class="text-sm font-black flex items-center gap-2 mb-4">➕ 곡 추가 <span class="font-medium opacity-60">— 등록된 악보를 담고, 항목에서 세션을 고르세요</span></h2>
+          <div id="sl-pool" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+          <div id="sl-pool-empty" class="hidden text-xs opacity-50 py-4"></div>
+        </div>
+
+        <div class="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-brandGray/50 shadow-sm mb-10">
+          <div class="flex flex-wrap items-end gap-3">
+            <label class="flex flex-col gap-1 flex-1 min-w-[180px]"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">업로드 비밀번호 * <span class="normal-case font-medium opacity-70">— 저장할 때만 필요</span></span>
+              <input id="sl-pass" type="password" placeholder="••••••" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2.5 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
+            <button id="sl-save" class="px-6 py-2.5 bg-textMain text-white hover:bg-black rounded-full text-xs font-bold transition shadow-sm">💾 저장</button>
+          </div>
+          <p id="sl-status" class="text-xs opacity-80 mt-2 min-h-[1rem] whitespace-pre-line"></p>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -177,6 +227,11 @@
           <input id="pt-custom" type="text" placeholder="예: 코러스, 색소폰" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
         <label class="flex flex-col gap-1"><span id="pt-file-label" class="text-[10px] font-bold opacity-50 uppercase tracking-widest">PDF 악보 *</span>
           <input id="pt-file" type="file" accept="application/pdf,.pdf" class="text-xs file:mr-2 file:rounded-full file:border-0 file:bg-textMain file:text-white file:px-3 file:py-1.5 file:text-xs file:font-bold"></label>
+        <div class="flex flex-col gap-1.5 rounded-xl border border-rose-200 bg-rose-50/60 p-2.5">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-rose-500">또는 유튜브 화면에서 캡쳐 <span class="normal-case font-medium text-rose-400">— 영상 속 악보를 잘라 PDF로</span></span>
+          <input id="pt-youtube" type="text" placeholder="https://www.youtube.com/watch?v=..." class="bg-white text-sm font-medium rounded-lg px-3 py-2 border border-rose-200 focus:outline-none focus:border-rose-400">
+          <button id="pt-capture" type="button" class="self-start px-3 py-1.5 bg-rose-500 text-white rounded-full text-xs font-bold hover:bg-rose-600 transition">📸 화면 캡쳐로 PDF 만들기</button>
+        </div>
         <label class="flex flex-col gap-1"><span class="text-[10px] font-bold opacity-50 uppercase tracking-widest">업로드 비밀번호 *</span>
           <input id="pt-pass" type="password" placeholder="••••••" class="bg-brandCream/60 text-sm font-medium rounded-xl px-3 py-2 border border-brandGray/50 focus:outline-none focus:border-textMain"></label>
       </div>
@@ -245,6 +300,12 @@
         <button id="split-dec" class="h-8 w-8 rounded bg-white text-lg font-bold shadow">−</button>
         <span id="split-n" class="w-8 text-center tabular-nums">4</span>등분
         <button id="split-inc" class="h-8 w-8 rounded bg-white text-lg font-bold shadow">+</button>
+      </span>
+      <span class="flex w-full items-center gap-1.5 border-t border-blue-200 pt-2 sm:w-auto sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0" title="전체 마디의 높이를 위/아래 독립적으로 조정">
+        <span class="font-medium text-blue-900">📏 높이</span>
+        위<button id="h-top-dec" class="h-8 w-8 rounded bg-white text-lg font-bold shadow" title="위쪽 줄이기">−</button><button id="h-top-inc" class="h-8 w-8 rounded bg-white text-lg font-bold shadow" title="위쪽 늘리기">+</button>
+        아래<button id="h-bot-dec" class="h-8 w-8 rounded bg-white text-lg font-bold shadow" title="아래쪽 줄이기">−</button><button id="h-bot-inc" class="h-8 w-8 rounded bg-white text-lg font-bold shadow" title="아래쪽 늘리기">+</button>
+        <label class="flex items-center gap-1 text-xs">간격<input id="h-step" type="number" step="0.5" min="0.1" value="1" class="w-14 rounded border px-2 py-1.5 tabular-nums">%</label>
       </span>
       <span id="mark-count" class="text-xs text-blue-800 tabular-nums"></span>
       <span class="flex w-full items-center gap-2 border-t border-blue-200 pt-2 sm:w-auto sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0">
@@ -342,9 +403,96 @@
     </div>
   </div>
 
+  <!-- ===================== 영상 화면 캡쳐 → 악보 PDF ===================== -->
+  <div id="capture" class="hidden fixed inset-0 z-[61] flex flex-col bg-zinc-900 text-white">
+    <div class="flex items-center gap-2 border-b border-white/10 px-3 py-2">
+      <button id="cap-close" class="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium hover:bg-white/20 active:scale-95">✕<span class="hidden sm:inline"> 닫기</span></button>
+      <span id="cap-title" class="min-w-0 flex-1 truncate text-sm font-bold"></span>
+      <span id="cap-status" class="shrink-0 text-[11px] text-zinc-400"></span>
+    </div>
+    <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
+      <!-- 좌: 영상 + 공유 미리보기 -->
+      <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-3">
+        <p class="text-[11px] leading-relaxed text-zinc-400">① 아래 영상을 재생하고 ② <b>이 탭 화면 공유</b>를 누른 뒤(<b>이 탭</b> 선택) ③ 캡쳐하세요. 기본값은 <b>유튜브 화면 영역에 자동 고정</b>이라 따로 드래그할 필요 없이 페이지가 넘어갈 때마다(또는 일정 간격으로) 캡쳐됩니다. 고정을 끄면 미리보기에서 직접 영역을 드래그할 수 있어요.</p>
+        <div id="cap-yt-wrap" class="relative aspect-video w-full max-w-5xl shrink-0 overflow-hidden rounded bg-black/60">
+          <div id="cap-yt" class="h-full w-full"></div>
+          <div id="cap-yt-rsurface" class="absolute inset-0 z-10 hidden cursor-crosshair touch-none bg-black/10"></div>
+          <div id="cap-yt-rbox" class="pointer-events-none absolute z-10 hidden border-2 border-emerald-400 bg-emerald-400/10"><span class="absolute left-0 top-0 rounded-br bg-emerald-500 px-1 text-[10px] font-bold text-white whitespace-nowrap">🎬 캡쳐 영역</span></div>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">공유 미리보기 <span class="normal-case font-medium">— 캡쳐 영역(🎯) 확인용</span></span>
+        <div class="relative block w-full max-w-md shrink-0 select-none">
+          <video id="cap-video" class="block w-full min-h-[140px] rounded bg-black" muted playsinline></video>
+          <div id="cap-cropsurface" class="absolute inset-0 touch-none"></div>
+          <div id="cap-cropbox" class="pointer-events-none absolute hidden border-2 border-emerald-400 bg-emerald-400/10"><span class="absolute -top-5 left-0 rounded bg-emerald-500 px-1 text-[10px] font-bold text-white whitespace-nowrap">🎯 캡쳐 영역</span></div>
+          <div id="cap-noshare" class="absolute inset-0 flex items-center justify-center rounded bg-black/70 text-center text-xs text-zinc-400">화면 공유를 시작하면 여기에 미리보기가 표시됩니다</div>
+        </div>
+      </div>
+      <!-- 우: 컨트롤 + 썸네일 -->
+      <div class="flex w-full shrink-0 flex-col gap-3 overflow-auto border-t border-white/10 p-3 lg:w-80 lg:border-l lg:border-t-0">
+        <button id="cap-share" class="rounded-lg bg-sky-600 px-3 py-2.5 text-sm font-bold text-white hover:bg-sky-700 active:scale-95">🖥 이 탭 화면 공유 시작</button>
+        <label class="flex items-center gap-2 rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-2 py-2 text-xs text-emerald-200"><input type="checkbox" id="cap-fixed" checked class="h-4 w-4"> 🎯 캡쳐 영역을 유튜브 화면으로 고정</label>
+        <div class="flex items-center gap-2 rounded-lg border border-white/10 px-2 py-2 text-xs">
+          <span class="text-zinc-300 shrink-0">🎬 캡쳐 영역</span>
+          <span id="cap-region-state" class="text-emerald-300">유튜브 전체</span>
+          <button id="cap-region-pick" class="ml-auto shrink-0 rounded bg-emerald-700 px-2.5 py-1 font-bold text-white hover:bg-emerald-600 active:scale-95">영역 좁히기</button>
+          <button id="cap-region-reset" class="hidden shrink-0 rounded bg-white/10 px-2.5 py-1 font-bold text-zinc-200 hover:bg-white/20">전체로</button>
+        </div>
+        <div class="flex flex-col gap-2 rounded-lg border border-white/10 px-2 py-2 text-xs">
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span class="text-zinc-300">자동 캡쳐 방식</span>
+            <label class="flex items-center gap-1"><input type="radio" name="cap-mode" value="interval" checked class="h-3.5 w-3.5"> 간격마다</label>
+            <label class="flex items-center gap-1"><input type="radio" name="cap-mode" value="change" class="h-3.5 w-3.5"> 변경될 때마다</label>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="cap-interval-wrap" class="flex items-center gap-1"><input id="cap-interval" type="number" min="1" value="8" class="w-14 rounded bg-white/10 px-2 py-1 text-center tabular-nums outline-none">초 간격</span>
+            <button id="cap-auto" class="ml-auto rounded bg-violet-600 px-3 py-1.5 font-bold text-white hover:bg-violet-700 active:scale-95">⏺ 자동 시작</button>
+          </div>
+        </div>
+        <button id="cap-shot" class="rounded-lg bg-emerald-600 px-3 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 active:scale-95">📷 지금 캡쳐</button>
+        <label class="flex items-center gap-2 text-xs text-zinc-300"><input type="checkbox" id="cap-dedup" checked class="h-4 w-4"> 비슷한 화면 자동 건너뛰기</label>
+        <div class="flex items-center justify-between text-xs">
+          <span id="cap-count" class="font-bold text-zinc-300">0장</span>
+          <button id="cap-clear" class="rounded bg-white/10 px-2.5 py-1 font-bold text-rose-300 hover:bg-white/20">전체 비우기</button>
+        </div>
+        <button id="cap-cropall" class="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-zinc-900 hover:bg-amber-400 active:scale-95">✂ 전체 자르기 — 모든 이미지에서 특정 영역만 남기기</button>
+        <p class="text-[10px] text-zinc-500">썸네일을 클릭하면 크게 보고(확대) 개별 삭제·자르기를 할 수 있어요.</p>
+        <div id="cap-thumbs" class="grid grid-cols-3 gap-1.5"></div>
+        <button id="cap-make" class="mt-1 rounded-lg bg-white px-3 py-2.5 text-sm font-black text-zinc-900 hover:bg-zinc-200 active:scale-95">📄 PDF로 묶어 악보 등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 캡쳐 이미지 뷰어/에디터 (확대·삭제·전체 자르기) ===================== -->
+  <div id="cap-viewer" class="hidden fixed inset-0 z-[62] flex flex-col bg-black/95 text-white">
+    <div class="flex items-center gap-2 border-b border-white/10 px-3 py-2">
+      <button id="cv-close" class="shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium hover:bg-white/20 active:scale-95">✕<span class="hidden sm:inline"> 닫기</span></button>
+      <span id="cv-idx" class="text-sm font-bold tabular-nums"></span>
+      <div class="ml-auto flex shrink-0 items-center gap-2">
+        <button id="cv-del" class="rounded-lg bg-rose-600/90 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-600 active:scale-95">🗑 이 이미지 삭제</button>
+      </div>
+    </div>
+    <div class="relative flex min-h-0 flex-1 items-center justify-center overflow-auto p-3">
+      <button id="cv-prev" class="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 px-3 py-2 text-xl hover:bg-white/20 active:scale-95">‹</button>
+      <div class="relative inline-block select-none">
+        <img id="cv-img" class="block max-h-[80vh] max-w-full rounded" alt="">
+        <div id="cv-cropsurface" class="absolute inset-0 hidden cursor-crosshair touch-none"></div>
+        <div id="cv-cropbox" class="pointer-events-none absolute hidden border-2 border-amber-400 bg-amber-400/10"><span class="absolute -top-5 left-0 rounded bg-amber-500 px-1 text-[10px] font-bold text-black whitespace-nowrap">✂ 남길 영역</span></div>
+      </div>
+      <button id="cv-next" class="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 px-3 py-2 text-xl hover:bg-white/20 active:scale-95">›</button>
+    </div>
+    <div class="flex flex-wrap items-center gap-2 border-t border-white/10 px-3 py-2 text-xs">
+      <button id="cv-crop" class="rounded-lg bg-amber-500 px-3 py-1.5 font-bold text-black hover:bg-amber-400 active:scale-95">✂ 자르기 영역 지정</button>
+      <button id="cv-crop-all" class="hidden rounded-lg bg-emerald-600 px-3 py-1.5 font-bold text-white hover:bg-emerald-700 active:scale-95">✅ 이 영역만 남기기 (전체 적용)</button>
+      <button id="cv-crop-cancel" class="hidden rounded-lg bg-white/10 px-3 py-1.5 font-bold text-zinc-200 hover:bg-white/20">취소</button>
+      <span id="cv-hint" class="text-zinc-400"></span>
+      <button id="cv-undo" class="hidden ml-auto rounded-lg bg-white/10 px-3 py-1.5 font-bold text-amber-300 hover:bg-white/20">↩ 전체 자르기 되돌리기</button>
+    </div>
+  </div>
+
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
     import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4/+esm'
+    import { jsPDF } from 'https://cdn.jsdelivr.net/npm/jspdf@2.5.2/+esm'
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4/build/pdf.worker.min.mjs'
 
     const cfg = window.BAND_DUCK_CONFIG || {}
@@ -362,7 +510,7 @@
         const tab = btn.dataset.tab
         $('panel-songs').classList.toggle('hidden', tab !== 'songs')
         $('panel-setlist').classList.toggle('hidden', tab !== 'setlist')
-        if (tab === 'setlist') loadSetlist() // 들어올 때마다 최신 시트 반영
+        if (tab === 'setlist') { setlistEnter(); loadSetlist() } // 셋리스트 게시글 + 최신 시트 반영
       }
     })
 
@@ -665,7 +813,7 @@
       const signedIn = !!session.session
       const { data, error } = await supabase.storage.from(BUCKET).list('', { limit: 300 })
       if (error) { syncEl.textContent = '실패'; $('songs-empty').classList.remove('hidden'); $('songs-empty').innerHTML = '<b>목록 실패:</b> ' + error.message; return }
-      const folders = (data || []).filter((f) => f && f.id === null).map((f) => f.name)
+      const folders = (data || []).filter((f) => f && f.id === null && f.name !== '__setlists').map((f) => f.name)
       if (!folders.length) { syncEl.textContent = '0곡'; $('songs-empty').classList.remove('hidden'); $('songs-empty').textContent = '아직 등록된 곡이 없습니다. 위에서 첫 곡을 등록해 보세요.'; return }
       const items = await Promise.all(folders.map(async (id) => {
         try { const { data: m } = await supabase.storage.from(BUCKET).download(`${id}/project.json`); if (!m) return null
@@ -703,6 +851,7 @@
             <div class="flex flex-col gap-1.5 mt-1">${partRows}</div>
             <div class="flex flex-wrap gap-2 mt-1 border-t border-brandGray/40 pt-3">
               <button data-addpart="${s.id}" class="px-3 py-2 bg-textMain text-white rounded-full text-xs font-bold hover:bg-black transition">➕ 세션 악보 추가</button>
+              ${s.youtube ? `<button data-capture="${s.id}" class="px-3 py-2 bg-rose-500 text-white rounded-full text-xs font-bold hover:bg-rose-600 transition" title="유튜브 화면을 공유해 악보를 캡쳐 → PDF 악보로 등록">📸 영상 캡쳐</button>` : ''}
               <button data-chart="${s.id}" class="px-3 py-2 bg-amber-500 text-white rounded-full text-xs font-bold hover:bg-amber-600 transition">📊 공용 악보</button>
               <button data-info="${s.id}" class="px-3 py-2 bg-brandCream text-textMain rounded-full text-xs font-bold border border-brandGray hover:bg-brandGray transition">✏️ 곡 정보</button>
             </div>
@@ -723,13 +872,15 @@
         try { const { data: mf } = await supabase.storage.from(BUCKET).download(`${sid}/project.json`); const P = JSON.parse(await mf.text()); P.parts = (P.parts || []).filter((x) => x.key !== key); P.updatedAt = Date.now(); await supabase.storage.from(BUCKET).upload(`${sid}/project.json`, new Blob([JSON.stringify(P)], { type: 'application/json' }), { contentType: 'application/json', upsert: true }) } catch (e) { return alert('세션 삭제 실패: ' + (e?.message || e)) }
         loadSongs()
       })
-      $('song-grid').querySelectorAll('[data-play]').forEach((b) => b.onclick = () => { const [sid, key] = split(b.dataset.play); openSong(sid, key) })
+      $('song-grid').querySelectorAll('[data-play]').forEach((b) => b.onclick = () => { const [sid, key] = split(b.dataset.play); auto.idx = -1; auto.items = []; nowPlayingKey = null; slPlayingPostId = null; openSong(sid, key) })
       $('song-grid').querySelectorAll('[data-edit]').forEach((b) => b.onclick = () => { const [sid, key] = split(b.dataset.edit); openAuthor(sid, key) })
       $('song-grid').querySelectorAll('[data-editpart]').forEach((b) => b.onclick = () => { const [sid, key] = split(b.dataset.editpart); openPartModal(sid, key) })
       $('song-grid').querySelectorAll('[data-addpart]').forEach((b) => b.onclick = () => openPartModal(b.dataset.addpart))
+      $('song-grid').querySelectorAll('[data-capture]').forEach((b) => b.onclick = () => openCapture(b.dataset.capture))
       $('song-grid').querySelectorAll('[data-chart]').forEach((b) => b.onclick = () => openCommonScore(b.dataset.chart))
       $('song-grid').querySelectorAll('[data-info]').forEach((b) => b.onclick = () => openEdit(b.dataset.info))
       syncEl.textContent = `${songs.length}곡`
+      if (!$('panel-setlist').classList.contains('hidden')) setlistEnter() // 곡/세션 변경을 셋리스트 화면에 반영
     }
 
     // ===== 공용 악보: 세션별 활성 구간을 시간축에 그린 편곡 맵 =====
@@ -843,7 +994,7 @@
     }
     // ===== 공용 악보 재생(트랜스포트 + BPM + 진행바 + 차트 위 재생 헤드) =====
     const ytC = makeYT('yt-host-chart'), audioSrcC = makeAudioSrc('chart-audio')
-    let srcC = ytC, cRaf = 0, cSeeking = false, cBaseBpm = 0, cConnected = false, cHasSource = false
+    let srcC = ytC, cRaf = 0, cSeeking = false, cBaseBpm = 0, cConnected = false, cHasSource = false, cEndedFired = false
     let chartPlayhead = null
     function ensureChartPlayhead() {
       if (!chartPlayhead) { chartPlayhead = document.createElement('div'); chartPlayhead.style.cssText = 'position:absolute;top:0;bottom:0;width:2px;background:#10b981;box-shadow:0 0 5px rgba(16,185,129,.9);pointer-events:none;z-index:5' }
@@ -871,6 +1022,8 @@
         if (!cSeeking) { $('c-cur').textContent = formatTime(t); $('c-seek').value = dur > 0 ? Math.round((t / dur) * 1000) : 0 }
         $('c-toggle').textContent = srcC.playing ? '❚❚' : '▶'
         positionChartPlayhead(t)
+        // 셋리스트 자동 재생: 공용 악보가 끝까지 재생되면 다음 곡으로 (재예약 금지)
+        if (auto.idx >= 0 && !cEndedFired && dur > 0 && t >= dur - 0.5) { cEndedFired = true; srcC.pause(); autoAdvance(); return }
         cRaf = requestAnimationFrame(tick)
       }
       cRaf = requestAnimationFrame(tick)
@@ -892,13 +1045,15 @@
     $('c-seek').addEventListener('input', () => { cSeeking = true; $('c-cur').textContent = formatTime(cSeekTime()) })
     $('c-seek').addEventListener('change', () => { const t = cSeekTime(); if (srcC.getDuration() > 0) srcC.seekTo(t); cSeeking = false })
     function closeChart() { stopChartLoop(); ytC.pause(); $('chart-audio').pause(); $('common-score').classList.add('hidden') }
+    // 사용자가 직접 공용 악보를 닫으면 셋리스트 자동 재생도 중단하고 하이라이트 해제
+    function chartCloseManual() { closeChart(); if (auto.idx >= 0 || nowPlayingKey || slPlayingPostId) { auto.idx = -1; auto.items = []; nowPlayingKey = null; slPlayingPostId = null; refreshSetlistUI() } }
     // 모델(m) → 공용 악보 화면 렌더 + 트랜스포트 셋업 (공용 악보·기준 노드 미리보기 공용)
     function showChart(m) {
       chartModel = m
       $('chart-title').textContent = `${m.title}${m.artist ? ' · ' + m.artist : ''} — ${m.kind || '공용 악보'}`
       $('chart-body').innerHTML = chartHTML(m)
       stopChartLoop(); ytC.pause(); $('chart-audio').pause()
-      cConnected = false; cSeeking = false; srcC = m.audioPath ? audioSrcC : ytC
+      cConnected = false; cSeeking = false; cEndedFired = false; srcC = m.audioPath ? audioSrcC : ytC
       cHasSource = !!(m.audioPath || extractVideoId(m.youtube))
       cBaseBpm = m.defaultBpm > 0 ? m.defaultBpm : 0
       $('chart-transport').classList.toggle('hidden', !cHasSource)
@@ -910,7 +1065,7 @@
         $('c-bpm-val').disabled = !has; $('c-bpm-down').disabled = !has; $('c-bpm-up').disabled = !has
         $('c-bpm-val').value = has ? cBaseBpm : ''
         $('c-bpm-rate').textContent = ''; $('c-seek').value = 0; $('c-cur').textContent = '0:00'; $('c-dur').textContent = '0:00'; $('c-toggle').textContent = '▶'
-        startChartLoop(); chartConnect().catch(() => {})
+        startChartLoop(); chartConnect().then(() => { if (m.autoplay) srcC.play() }).catch(() => {})
       }
       $('common-score').classList.remove('hidden')
     }
@@ -938,9 +1093,317 @@
       closeInfoPreview()
       showChart({ id: editId, title: s.title || editId, artist: s.artist || '', kind: `기준 노드 · ${bpm}BPM·${beats}박자·${count}마디`, duration, lanes: [{ label: '기준 노드', color: '#0ea5e9', blocks, synced: true }], sections, lyrics: lyr, youtube: s.youtube || '', audioPath: s.audioPath || '', defaultBpm: s.defaultBpm, audioOffset: s.audioOffset })
     }
-    $('chart-close').onclick = closeChart
+    $('chart-close').onclick = chartCloseManual
     $('chart-export').onclick = () => { if (chartModel) exportChartHTML(chartModel) }
-    $('common-score').onclick = (e) => { if (e.target.id === 'common-score') closeChart() }
+    $('common-score').onclick = (e) => { if (e.target.id === 'common-score') chartCloseManual() }
+
+    // ===== 영상 화면 캡쳐 → 악보 PDF =====
+    // 유튜브 임베드 픽셀은 직접 못 읽으므로(교차 출처) 화면 공유 스트림에서 프레임을 잡아 크롭.
+    const ytCap = makeYT('cap-yt')
+    let capStream = null, capCrop = null, capShots = [], capAutoTimer = 0, capLastSig = null, capSongId = null, capDrag = null, capReturnToModal = false
+    // ytOverride: 명시한 유튜브 링크/ID로 캡쳐(세션 모달에서 입력한 링크). returnToModal: 완료 후 열려 있던 파트 모달로 복귀
+    async function openCapture(id, ytOverride, returnToModal = false) {
+      capSongId = id; capReturnToModal = returnToModal
+      const s = (window.__songs || {})[id]
+      $('cap-title').textContent = `📸 영상에서 악보 캡쳐 — ${s?.title || id}`
+      capShots = []; capCrop = null; capLastSig = null; capUndo = null; capYtSub = null; renderCapShots()
+      $('cap-status').textContent = ''; $('cap-cropbox').classList.add('hidden')
+      $('cap-region-state').textContent = '유튜브 전체'; $('cap-region-reset').classList.add('hidden'); $('cap-yt-rsurface').classList.add('hidden'); updateRegionBox()
+      stopCapAuto()
+      $('capture').classList.remove('hidden')
+      const vid = extractVideoId(ytOverride || s?.youtube)
+      $('cap-yt-wrap').classList.toggle('hidden', !vid)
+      if (vid) { try { await ytCap.connect(vid) } catch {} }
+    }
+    function stopCapShare() { if (capStream) { capStream.getTracks().forEach((t) => t.stop()); capStream = null } const v = $('cap-video'); v.srcObject = null; $('cap-noshare').classList.remove('hidden') }
+    function closeCapture() { stopCapAuto(); stopCapShare(); try { ytCap.pause() } catch {}; $('cap-viewer').classList.add('hidden'); $('capture').classList.add('hidden') }
+    async function startCapShare() {
+      if (!navigator.mediaDevices?.getDisplayMedia) { $('cap-status').textContent = '이 브라우저는 화면 공유를 지원하지 않습니다'; return }
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 8 }, audio: false, preferCurrentTab: true })
+        capStream = stream
+        const v = $('cap-video'); v.srcObject = stream; await v.play().catch(() => {})
+        $('cap-noshare').classList.add('hidden')
+        v.onloadedmetadata = () => updateFixedBox()
+        updateFixedBox()
+        stream.getVideoTracks()[0].addEventListener('ended', () => { $('cap-status').textContent = '화면 공유가 종료되었습니다'; stopCapShare(); stopCapAuto() })
+        const ds = stream.getVideoTracks()[0].getSettings?.().displaySurface
+        if ($('cap-fixed').checked && ds && ds !== 'browser') $('cap-status').textContent = '⚠️ 유튜브 화면 고정은 "이 탭" 공유에서만 정확합니다. 탭을 공유하거나 고정을 끄고 직접 드래그하세요.'
+        else $('cap-status').textContent = $('cap-fixed').checked ? '공유 중 — 유튜브 화면 영역으로 자동 고정됨' : '공유 중 — 미리보기에서 악보 영역을 드래그하세요'
+      } catch { $('cap-status').textContent = '화면 공유가 취소되었습니다' }
+    }
+    // 크롭 영역 선택 (미리보기 비디오 위 드래그 → 정규화 좌표 0~1)
+    const capSurf = $('cap-cropsurface')
+    capSurf.addEventListener('pointerdown', (e) => { if ($('cap-fixed').checked) return; const r = capSurf.getBoundingClientRect(); capDrag = { x0: e.clientX - r.left, y0: e.clientY - r.top, r }; capSurf.setPointerCapture(e.pointerId); e.preventDefault() })
+    capSurf.addEventListener('pointermove', (e) => {
+      if (!capDrag) return
+      const r = capDrag.r
+      const x = Math.max(0, Math.min(r.width, e.clientX - r.left)), y = Math.max(0, Math.min(r.height, e.clientY - r.top))
+      const left = Math.min(x, capDrag.x0), top = Math.min(y, capDrag.y0), w = Math.abs(x - capDrag.x0), h = Math.abs(y - capDrag.y0)
+      const box = $('cap-cropbox'); box.classList.remove('hidden'); box.style.left = left + 'px'; box.style.top = top + 'px'; box.style.width = w + 'px'; box.style.height = h + 'px'
+    })
+    capSurf.addEventListener('pointerup', () => {
+      if (!capDrag) return
+      const box = $('cap-cropbox'), r = capDrag.r, w = box.offsetWidth, h = box.offsetHeight
+      if (w < 8 || h < 8) { capCrop = null; box.classList.add('hidden') } else capCrop = { x: box.offsetLeft / r.width, y: box.offsetTop / r.height, w: w / r.width, h: h / r.height }
+      capDrag = null
+    })
+    // 프레임 시그니처(16x16 회색조)로 연속 중복 컷 자동 스킵
+    function frameSig(canvas) {
+      const n = 48, t = document.createElement('canvas'); t.width = n; t.height = n
+      const cx = t.getContext('2d'); cx.drawImage(canvas, 0, 0, n, n)
+      const d = cx.getImageData(0, 0, n, n).data, sig = new Uint8Array(n * n)
+      for (let i = 0; i < n * n; i++) sig[i] = (d[i * 4] * 0.3 + d[i * 4 + 1] * 0.59 + d[i * 4 + 2] * 0.11)
+      return sig
+    }
+    // 악보는 대부분 흰 배경이라 평균차로는 페이지 전환을 못 잡음 → '뚜렷이 변한 셀 비율'로 비교(작게 잡아 캡쳐를 더 자주)
+    function sigSimilar(a, b) {
+      let changed = 0
+      for (let i = 0; i < a.length; i++) if (Math.abs(a[i] - b[i]) > 20) changed++
+      return changed / a.length < 0.01
+    }
+    // 이 탭 공유 스트림 = 뷰포트 전체. 유튜브 플레이어의 화면(getBoundingClientRect)을 뷰포트 분수로 환산 → 스트림/미리보기 공용 좌표.
+    let capYtSub = null // 유튜브 화면 안에서 캡쳐할 부분 영역(플레이어 기준 정규화). null이면 전체.
+    function computeYtCrop() {
+      const wrap = $('cap-yt-wrap')
+      if (!wrap || wrap.classList.contains('hidden')) return null
+      const r = wrap.getBoundingClientRect(), W = window.innerWidth || 1, H = window.innerHeight || 1
+      let x = r.left / W, y = r.top / H, w = r.width / W, h = r.height / H
+      if (capYtSub) { x = x + capYtSub.x * w; y = y + capYtSub.y * h; w = capYtSub.w * w; h = capYtSub.h * h } // 영상 일부만
+      const cl = (v) => Math.max(0, Math.min(1, v))
+      const x1 = cl(x), y1 = cl(y), x2 = cl(x + w), y2 = cl(y + h)
+      const fw = x2 - x1, fh = y2 - y1
+      return (fw > 0.005 && fh > 0.005) ? { x: x1, y: y1, w: fw, h: fh } : null
+    }
+    // 선택 박스는 캡쳐(화면 공유)에 찍히면 안 되므로 '드래그 중'에만 보이고, 지정이 끝나면 숨긴다.
+    // 좁혀진 영역은 미리보기의 캡쳐영역 박스(updateFixedBox)로 확인한다.
+    function updateRegionBox() { $('cap-yt-rbox').classList.add('hidden') }
+    // 고정 모드일 때 미리보기 위에 자동 캡쳐 영역(=유튜브 화면)을 박스로 표시
+    function updateFixedBox() {
+      const box = $('cap-cropbox'), v = $('cap-video')
+      if (!$('cap-fixed').checked || !capStream || !v.clientWidth) return
+      const c = computeYtCrop()
+      if (!c) { box.classList.add('hidden'); return }
+      box.classList.remove('hidden')
+      box.style.left = (c.x * v.clientWidth) + 'px'; box.style.top = (c.y * v.clientHeight) + 'px'
+      box.style.width = (c.w * v.clientWidth) + 'px'; box.style.height = (c.h * v.clientHeight) + 'px'
+    }
+    // 현재 캡쳐 영역(고정=유튜브(부분), 수동=드래그)을 캔버스로 추출
+    function grabRegionCanvas() {
+      const v = $('cap-video')
+      if (!capStream || !v.videoWidth) return null
+      const r = $('cap-fixed').checked ? computeYtCrop() : capCrop
+      const sx = r ? Math.round(r.x * v.videoWidth) : 0, sy = r ? Math.round(r.y * v.videoHeight) : 0
+      const sw = r ? Math.round(r.w * v.videoWidth) : v.videoWidth, sh = r ? Math.round(r.h * v.videoHeight) : v.videoHeight
+      if (sw < 2 || sh < 2) return null
+      const c = document.createElement('canvas'); c.width = sw; c.height = sh
+      c.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, sw, sh)
+      return c
+    }
+    function pushShot(c) { capShots.push({ dataUrl: c.toDataURL('image/jpeg', 0.85), w: c.width, h: c.height }); renderCapShots() }
+    function capShot(auto) {
+      const c = grabRegionCanvas()
+      if (!c) { if (!auto) $('cap-status').textContent = '먼저 화면 공유를 시작하세요'; return }
+      if ($('cap-dedup').checked) { const sig = frameSig(c); if (capLastSig && sigSimilar(sig, capLastSig)) { $('cap-status').textContent = `⏭ 같은 화면이라 건너뜀 · ${capShots.length}장 (${auto ? '자동' : '수동'})`; return } capLastSig = sig }
+      pushShot(c); $('cap-status').textContent = `📷 캡쳐됨 · ${capShots.length}장${auto ? ' (자동)' : ''}`
+    }
+    // 변경 감지 자동 캡쳐: 영역이 직전 저장본과 달라지고 '안정화'되면 1장 캡쳐
+    let capChangePrev = null
+    function capChangePoll() {
+      const c = grabRegionCanvas(); if (!c) return
+      const sig = frameSig(c)
+      if (!capLastSig) { pushShot(c); capLastSig = sig; capChangePrev = sig; $('cap-status').textContent = `📷 캡쳐됨 · ${capShots.length}장 (변경감지)`; return }
+      // 직전 저장본과 다르고(=새 화면), 직전 폴링과 같으면(=전환 끝나 안정) 캡쳐
+      if (!sigSimilar(sig, capLastSig) && capChangePrev && sigSimilar(sig, capChangePrev)) {
+        pushShot(c); capLastSig = sig; $('cap-status').textContent = `✨ 변경 감지 → 캡쳐 · ${capShots.length}장`
+      }
+      capChangePrev = sig
+    }
+    const capMode = () => document.querySelector('input[name="cap-mode"]:checked')?.value || 'interval'
+    function startCapAuto() {
+      if (!capStream) { $('cap-status').textContent = '먼저 화면 공유를 시작하세요'; return }
+      stopCapAuto()
+      $('cap-auto').textContent = '⏹ 정지'; $('cap-auto').dataset.on = '1'
+      if (capMode() === 'change') {
+        capChangePrev = null
+        capAutoTimer = setInterval(capChangePoll, 400)
+        $('cap-status').textContent = '✨ 변경 감지 자동 캡쳐 중 — 화면이 바뀌면 자동으로 찍습니다'
+        capChangePoll() // 시작 시 현재 화면(없으면 1장) 평가
+      } else {
+        const sec = Math.max(1, Number($('cap-interval').value) || 8)
+        capAutoTimer = setInterval(() => capShot(true), sec * 1000)
+        capShot(true)
+      }
+    }
+    function stopCapAuto() { if (capAutoTimer) { clearInterval(capAutoTimer); capAutoTimer = 0 } $('cap-auto').textContent = '⏺ 자동 시작'; $('cap-auto').dataset.on = '' }
+    function renderCapShots() {
+      $('cap-count').textContent = `${capShots.length}장`
+      $('cap-thumbs').innerHTML = capShots.map((sh, i) => `<div class="relative overflow-hidden rounded border border-white/10"><img src="${sh.dataUrl}" data-capview="${i}" class="block w-full cursor-zoom-in"><button data-capdel="${i}" class="absolute right-0.5 top-0.5 h-5 w-5 rounded-full bg-black/70 text-[11px] font-bold text-rose-300 hover:bg-black">✕</button><span class="absolute bottom-0 left-0 bg-black/60 px-1 text-[9px] tabular-nums">${i + 1}</span></div>`).join('')
+      $('cap-thumbs').querySelectorAll('[data-capview]').forEach((im) => im.onclick = () => openCapViewer(+im.dataset.capview))
+      $('cap-thumbs').querySelectorAll('[data-capdel]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); capShots.splice(+b.dataset.capdel, 1); capLastSig = null; renderCapShots() })
+    }
+    async function capMakePdf() {
+      if (!capShots.length) { $('cap-status').textContent = '캡쳐된 이미지가 없습니다'; return }
+      $('cap-status').textContent = 'PDF 만드는 중…'
+      try {
+        const f = capShots[0]
+        const doc = new jsPDF({ unit: 'px', format: [f.w, f.h], orientation: f.w >= f.h ? 'landscape' : 'portrait' })
+        capShots.forEach((sh, i) => { if (i > 0) doc.addPage([sh.w, sh.h], sh.w >= sh.h ? 'landscape' : 'portrait'); doc.addImage(sh.dataUrl, 'JPEG', 0, 0, sh.w, sh.h) })
+        const blob = doc.output('blob')
+        const file = new File([blob], `capture_${Date.now()}.pdf`, { type: 'application/pdf' })
+        const n = capShots.length, returnToModal = capReturnToModal
+        closeCapture()
+        // 세션 모달에서 시작했으면 이미 열려 있는 모달로 복귀(세션 선택 유지), 아니면 새로 연다
+        if (!returnToModal) openPartModal(capSongId)
+        const dt = new DataTransfer(); dt.items.add(file); $('pt-file').files = dt.files
+        $('pt-status').textContent = returnToModal ? `📄 캡쳐 PDF ${n}쪽 준비됨 — 등록을 누르세요.` : `📄 캡쳐 PDF ${n}쪽 준비됨 — 세션과 비밀번호를 입력하고 등록하세요.`
+      } catch (e) { $('cap-status').textContent = '❌ PDF 생성 실패: ' + (e?.message || e) }
+    }
+    $('cap-close').onclick = closeCapture
+    $('cap-share').onclick = startCapShare
+    $('cap-shot').onclick = () => capShot(false)
+    $('cap-auto').onclick = () => ($('cap-auto').dataset.on ? stopCapAuto() : startCapAuto())
+    $('cap-clear').onclick = () => { capShots = []; capLastSig = null; renderCapShots() }
+    $('cap-make').onclick = capMakePdf
+    $('cap-fixed').onchange = () => {
+      const fixed = $('cap-fixed').checked
+      $('cap-cropsurface').classList.toggle('cursor-crosshair', !fixed)
+      if (fixed) { updateFixedBox(); $('cap-status').textContent = capStream ? '유튜브 화면 영역으로 자동 고정됨' : '' }
+      else { $('cap-cropbox').classList.add('hidden'); capCrop = null; $('cap-status').textContent = capStream ? '미리보기에서 악보 영역을 드래그하세요' : '' }
+    }
+    window.addEventListener('resize', () => { if (!$('capture').classList.contains('hidden')) { updateFixedBox(); updateRegionBox() } })
+    $('capture').addEventListener('click', (e) => { if (e.target.id === 'capture') closeCapture() })
+    // 캡쳐 방식(간격 / 변경 시) 전환
+    document.querySelectorAll('input[name="cap-mode"]').forEach((rb) => rb.onchange = () => {
+      if ($('cap-auto').dataset.on) stopCapAuto()
+      $('cap-interval-wrap').classList.toggle('hidden', capMode() === 'change')
+    })
+    // 유튜브 영상 안에서 캡쳐할 부분 영역 지정 (플레이어 위 오버레이로 드래그)
+    let capRegionDrag = null
+    const rsurf = $('cap-yt-rsurface')
+    function startRegionPick() {
+      if (!$('cap-fixed').checked) { $('cap-status').textContent = '유튜브 고정 모드일 때만 영역을 좁힐 수 있어요'; return }
+      rsurf.classList.remove('hidden'); $('cap-status').textContent = '유튜브 화면에서 캡쳐할 영역을 드래그하세요'
+    }
+    function resetRegion() { capYtSub = null; $('cap-region-state').textContent = '유튜브 전체'; $('cap-region-reset').classList.add('hidden'); updateRegionBox(); updateFixedBox() }
+    rsurf.addEventListener('pointerdown', (e) => { const r = rsurf.getBoundingClientRect(); capRegionDrag = { x0: e.clientX - r.left, y0: e.clientY - r.top, r }; rsurf.setPointerCapture(e.pointerId); e.preventDefault() })
+    rsurf.addEventListener('pointermove', (e) => {
+      if (!capRegionDrag) return
+      const r = capRegionDrag.r
+      const x = Math.max(0, Math.min(r.width, e.clientX - r.left)), y = Math.max(0, Math.min(r.height, e.clientY - r.top))
+      const left = Math.min(x, capRegionDrag.x0), top = Math.min(y, capRegionDrag.y0), w = Math.abs(x - capRegionDrag.x0), h = Math.abs(y - capRegionDrag.y0)
+      const box = $('cap-yt-rbox'); box.classList.remove('hidden'); box.style.left = left + 'px'; box.style.top = top + 'px'; box.style.width = w + 'px'; box.style.height = h + 'px'
+    })
+    rsurf.addEventListener('pointerup', () => {
+      if (!capRegionDrag) return
+      const box = $('cap-yt-rbox'), r = capRegionDrag.r, w = box.offsetWidth, h = box.offsetHeight
+      rsurf.classList.add('hidden') // 지정 끝 → 플레이어 컨트롤 다시 사용 가능
+      if (w >= 8 && h >= 8) { capYtSub = { x: box.offsetLeft / r.width, y: box.offsetTop / r.height, w: w / r.width, h: h / r.height }; $('cap-region-state').textContent = '영상 일부'; $('cap-region-reset').classList.remove('hidden'); $('cap-status').textContent = '캡쳐 영역을 영상 일부로 좁혔습니다' }
+      capRegionDrag = null; updateRegionBox(); updateFixedBox()
+    })
+    $('cap-region-pick').onclick = startRegionPick
+    $('cap-region-reset').onclick = resetRegion
+
+    // ===== 캡쳐 이미지 뷰어/에디터 (확대·삭제·전체 자르기) =====
+    let capViewIdx = 0, capUndo = null, cvCrop = null, cvDrag = null
+    function openCapViewer(i, cropMode) {
+      if (!capShots.length) { $('cap-status').textContent = '캡쳐된 이미지가 없습니다'; return }
+      capViewIdx = Math.max(0, Math.min(capShots.length - 1, i || 0))
+      $('cap-viewer').classList.remove('hidden')
+      cvExitCrop(); cvRender()
+      if (cropMode) cvEnterCrop()
+    }
+    function closeCapViewer() { $('cap-viewer').classList.add('hidden'); cvExitCrop() }
+    function cvRender() {
+      if (!capShots.length) { closeCapViewer(); return }
+      capViewIdx = Math.max(0, Math.min(capShots.length - 1, capViewIdx))
+      const sh = capShots[capViewIdx]
+      $('cv-img').src = sh.dataUrl
+      $('cv-idx').textContent = `${capViewIdx + 1} / ${capShots.length}  ·  ${sh.w}×${sh.h}`
+      $('cv-prev').style.visibility = capViewIdx > 0 ? 'visible' : 'hidden'
+      $('cv-next').style.visibility = capViewIdx < capShots.length - 1 ? 'visible' : 'hidden'
+      $('cv-undo').classList.toggle('hidden', !capUndo)
+    }
+    function cvGo(d) { capViewIdx += d; cvExitCrop(); cvRender() }
+    function cvDelete() {
+      if (!capShots.length) return
+      capShots.splice(capViewIdx, 1); capLastSig = null; renderCapShots()
+      if (!capShots.length) { closeCapViewer(); return }
+      cvRender()
+    }
+    function cvEnterCrop() {
+      cvCrop = null; $('cv-cropbox').classList.add('hidden')
+      $('cv-cropsurface').classList.remove('hidden')
+      $('cv-crop').classList.add('hidden'); $('cv-crop-all').classList.remove('hidden'); $('cv-crop-cancel').classList.remove('hidden')
+      $('cv-hint').textContent = '이미지 위에서 남길 영역을 드래그하세요 (모든 이미지에 동일 적용)'
+    }
+    function cvExitCrop() {
+      cvCrop = null; cvDrag = null; $('cv-cropbox').classList.add('hidden')
+      $('cv-cropsurface').classList.add('hidden')
+      $('cv-crop').classList.remove('hidden'); $('cv-crop-all').classList.add('hidden'); $('cv-crop-cancel').classList.add('hidden')
+      $('cv-hint').textContent = ''
+    }
+    // 단일 이미지(dataUrl)를 정규화 사각형으로 크롭 → 새 {dataUrl,w,h}
+    function cropOneShot(sh, rect) {
+      return new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => {
+          const W = img.naturalWidth, H = img.naturalHeight
+          const sx = Math.round(rect.x * W), sy = Math.round(rect.y * H)
+          const sw = Math.max(1, Math.round(rect.w * W)), sh2 = Math.max(1, Math.round(rect.h * H))
+          const c = document.createElement('canvas'); c.width = sw; c.height = sh2
+          c.getContext('2d').drawImage(img, sx, sy, sw, sh2, 0, 0, sw, sh2)
+          resolve({ dataUrl: c.toDataURL('image/jpeg', 0.85), w: sw, h: sh2 })
+        }
+        img.onerror = () => resolve(sh)
+        img.src = sh.dataUrl
+      })
+    }
+    async function cvCropAll() {
+      if (!cvCrop) { $('cv-hint').textContent = '먼저 남길 영역을 드래그하세요'; return }
+      const rect = cvCrop, snap = capShots.slice()
+      $('cv-hint').textContent = '자르는 중…'; $('cv-crop-all').disabled = true
+      try {
+        const out = []
+        for (const sh of capShots) out.push(await cropOneShot(sh, rect))
+        capUndo = snap; capShots = out; capLastSig = null
+        renderCapShots(); cvExitCrop(); cvRender()
+        $('cap-status').textContent = `✂ 전체 ${out.length}장을 같은 영역으로 잘랐습니다`
+      } finally { $('cv-crop-all').disabled = false }
+    }
+    function cvUndoCrop() { if (!capUndo) return; capShots = capUndo; capUndo = null; capLastSig = null; renderCapShots(); cvRender(); $('cap-status').textContent = '↩ 전체 자르기를 되돌렸습니다' }
+    // 뷰어 위 크롭 드래그 (cv-img 표시 영역 기준 정규화)
+    const cvSurf = $('cv-cropsurface')
+    cvSurf.addEventListener('pointerdown', (e) => { const r = cvSurf.getBoundingClientRect(); cvDrag = { x0: e.clientX - r.left, y0: e.clientY - r.top, r }; cvSurf.setPointerCapture(e.pointerId); e.preventDefault() })
+    cvSurf.addEventListener('pointermove', (e) => {
+      if (!cvDrag) return
+      const r = cvDrag.r
+      const x = Math.max(0, Math.min(r.width, e.clientX - r.left)), y = Math.max(0, Math.min(r.height, e.clientY - r.top))
+      const left = Math.min(x, cvDrag.x0), top = Math.min(y, cvDrag.y0), w = Math.abs(x - cvDrag.x0), h = Math.abs(y - cvDrag.y0)
+      const box = $('cv-cropbox'); box.classList.remove('hidden'); box.style.left = left + 'px'; box.style.top = top + 'px'; box.style.width = w + 'px'; box.style.height = h + 'px'
+    })
+    cvSurf.addEventListener('pointerup', () => {
+      if (!cvDrag) return
+      const box = $('cv-cropbox'), r = cvDrag.r, w = box.offsetWidth, h = box.offsetHeight
+      if (w < 8 || h < 8) { cvCrop = null; box.classList.add('hidden'); $('cv-hint').textContent = '영역이 너무 작아요 — 다시 드래그하세요' }
+      else { cvCrop = { x: box.offsetLeft / r.width, y: box.offsetTop / r.height, w: w / r.width, h: h / r.height }; $('cv-hint').textContent = '✅ 적용을 누르면 모든 이미지가 이 영역으로 잘립니다' }
+      cvDrag = null
+    })
+    $('cv-close').onclick = closeCapViewer
+    $('cv-del').onclick = cvDelete
+    $('cv-prev').onclick = () => cvGo(-1)
+    $('cv-next').onclick = () => cvGo(1)
+    $('cv-crop').onclick = cvEnterCrop
+    $('cv-crop-cancel').onclick = cvExitCrop
+    $('cv-crop-all').onclick = cvCropAll
+    $('cv-undo').onclick = cvUndoCrop
+    $('cap-cropall').onclick = () => openCapViewer(0, true)
+    document.addEventListener('keydown', (e) => {
+      if ($('cap-viewer').classList.contains('hidden')) return
+      if (e.key === 'ArrowLeft') cvGo(-1)
+      else if (e.key === 'ArrowRight') cvGo(1)
+      else if (e.key === 'Escape') closeCapViewer()
+    })
 
     // ===== 곡 열기 → 재생 =====
     let pdfDoc = null, project = null, playSeq = [], playSteps = []
@@ -978,6 +1441,9 @@
     const mkSlot = (id) => ({ box: $(id), wrap: $(id).querySelector('.cropwrap'), canvas: $(id).querySelector('canvas'), bar: $(id).querySelector('.playhead'), cut: $(id).querySelector('.cutmark'), start: $(id).querySelector('.startmark'), label: $(id).querySelector('.slot-label'), lineIdx: -1 })
     const slots = { top: mkSlot('slot-top'), bottom: mkSlot('slot-bottom') }
     async function openPerformance(vid, audioUrl) {
+      // 이전 곡 루프/소스 정리 (셋리스트 자동 전환 시 중첩 방지)
+      cancelAnimationFrame(rafId); rafId = 0
+      try { yt.pause() } catch {}; try { audioSrc.pause() } catch {}; $('perf-audio').pause()
       lines = groupLines(project.measures)
       slots.top.lineIdx = -1; slots.bottom.lineIdx = -1; activeSlotKey = 'bottom'
       isSeeking = false; $('perf-seek').value = 0; $('perf-cur').textContent = '0:00'; $('perf-dur').textContent = '0:00'
@@ -993,7 +1459,8 @@
       setupBpm() // 기본 BPM 기준으로 BPM 컨트롤 초기화 + 배속 적용
       src.play(); startLoop()
     }
-    function closePerformance() { cancelAnimationFrame(rafId); rafId = 0; src.pause(); $('perf-audio').pause(); perfEl.classList.add('hidden') }
+    function hidePerf() { cancelAnimationFrame(rafId); rafId = 0; try { src.pause() } catch {}; $('perf-audio').pause(); perfEl.classList.add('hidden') }
+    function closePerformance() { hidePerf(); auto.idx = -1; auto.items = []; nowPlayingKey = null; slPlayingPostId = null; refreshSetlistUI() }
     async function renderSlotLine(slot, lineIdx) {
       if (slot.lineIdx === lineIdx) return
       slot.lineIdx = lineIdx
@@ -1014,6 +1481,7 @@
       const SD = Number(project.scoreDelay) || 0 // 악보(마디) 진행만 이만큼 늦춤 (가사·진행바는 그대로)
       let lastLyricIdx = -2
       let sampleYt = src.getTime(), samplePerf = performance.now(), lastResync = samplePerf
+      let endedFired = false // 셋리스트 자동 재생: 곡 끝 1회만 다음 곡으로
       function estTime() {
         const now = performance.now()
         if (src.playing) { let est = sampleYt + (now - samplePerf) / 1000 * src.getRate(); if (now - lastResync > 250) { const r = src.getTime(); sampleYt = r; samplePerf = now; lastResync = now; est = r } return est }
@@ -1082,6 +1550,8 @@
           $('perf-seek').value = dur > 0 ? Math.round((time / dur) * 1000) : 0
         }
         $('perf-toggle').textContent = src.playing ? '❚❚' : '▶'
+        // 셋리스트 자동 재생: 곡(미디어)이 끝까지 재생되면 다음 곡으로 (이 프레임 종료 — 재예약 금지)
+        if (auto.idx >= 0 && !endedFired && dur > 0 && time >= dur - 0.5) { endedFired = true; src.pause(); autoAdvance(); return }
         if (lyricsArr.length) {
           const li = findLyricIdx(lyricsArr, time)
           if (li !== lastLyricIdx) {
@@ -1178,6 +1648,244 @@
       }).join('')
       grid.innerHTML = cards || ''
       if (!cards) { empty.classList.remove('hidden'); empty.textContent = '표시할 곡이 없습니다.' }
+    }
+
+    // ===== 공연 셋리스트 (게시글: Supabase 저장 · 곡 순서/세션 지정 · 순서대로 자동 재생) =====
+    const SETLIST_DIR = '__setlists'
+    let nowPlayingKey = null            // 현재 재생 중 항목 키(songId::partKey) — 편집 화면 하이라이트
+    let slPlayingPostId = null          // 현재 재생 중 게시글 id — 목록 카드 하이라이트
+    let slDraft = null                  // 편집 중인 셋리스트 (메모리). { id,title,memo,items,createdAt,isNew }
+    let slPostsCache = []               // 마지막으로 불러온 게시글 목록
+    const auto = { items: [], idx: -1 } // 자동 재생 큐. idx>=0 이면 자동 재생 중
+    const slEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
+    // 곡에서 셋리스트로 담아 재생할 수 있는 옵션: 싱크된 세션들 + (가능하면) 공용 악보.
+    // window.__songs 기준이라 곡/세션 삭제·이름변경이 반영됨.
+    const COMMON_KEY = '__common'
+    // 공용 악보 재생 가능 여부: 재생 소스(유튜브/오디오) + 표시할 내용(기준 그리드 또는 싱크된 세션)
+    const songCommonAvailable = (s) => { if (!s) return false; const media = !!(s.youtube || s.audioPath); const grid = !!(s.grid && s.grid.bpm > 0 && s.grid.beats > 0); return media && (grid || s.parts.some((p) => p.synced)) }
+    function slPlayOptions(songId) {
+      const s = (window.__songs || {})[songId]; if (!s) return []
+      const opts = s.parts.filter((p) => p.synced).map((p) => ({ key: p.key, label: p.label }))
+      if (songCommonAvailable(s)) opts.push({ key: COMMON_KEY, label: '📊 공용 악보' })
+      return opts
+    }
+    const slPostPath = (id) => `${SETLIST_DIR}/${id}.json`
+
+    // ----- 화면 전환 -----
+    const inSetlistEditor = () => !$('sl-editor-view').classList.contains('hidden')
+    function setlistEnter() { inSetlistEditor() ? renderSetlist() : loadSetlistPosts() }   // 탭 진입/곡목록 갱신(목록은 재요청)
+    function refreshSetlistUI() { inSetlistEditor() ? renderSetlist() : renderSetlistPosts() } // 캐시 기반 가벼운 재렌더(하이라이트용)
+
+    // ----- 게시글 목록 -----
+    async function loadSetlistPosts() {
+      const grid = $('sl-posts'), empty = $('sl-posts-empty')
+      if (!grid) return
+      empty.classList.add('hidden')
+      if (!cfg.SUPABASE_URL) { grid.innerHTML = ''; empty.classList.remove('hidden'); empty.innerHTML = '<b>Supabase 설정이 없습니다.</b> config.js를 확인하세요.'; return }
+      const { data, error } = await supabase.storage.from(BUCKET).list(SETLIST_DIR, { limit: 300 })
+      if (error) { grid.innerHTML = ''; empty.classList.remove('hidden'); empty.textContent = '셋리스트를 불러오지 못했습니다: ' + error.message; return }
+      const files = (data || []).filter((f) => f && f.name && f.name.endsWith('.json'))
+      const posts = await Promise.all(files.map(async (f) => {
+        try { const { data: d } = await supabase.storage.from(BUCKET).download(`${SETLIST_DIR}/${f.name}`); if (!d) return null; const p = JSON.parse(await d.text()); return p && p.id ? p : null } catch { return null }
+      }))
+      slPostsCache = posts.filter(Boolean).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+      renderSetlistPosts()
+    }
+    function renderSetlistPosts() {
+      const grid = $('sl-posts'), empty = $('sl-posts-empty'), songs = window.__songs || {}
+      if (!grid) return
+      if (!slPostsCache.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); empty.textContent = '아직 셋리스트가 없습니다. "➕ 새 셋리스트"로 첫 게시글을 만들어 보세요.'; return }
+      empty.classList.add('hidden')
+      grid.innerHTML = slPostsCache.map((p) => {
+        const items = Array.isArray(p.items) ? p.items : []
+        const preview = items.slice(0, 5).map((it, i) => `${i + 1}. ${slEsc(songs[it.songId]?.title || '(삭제된 곡)')}`).join('<br>')
+        const more = items.length > 5 ? `<div class="opacity-50">…외 ${items.length - 5}곡</div>` : ''
+        const playing = p.id === slPlayingPostId
+        return `<div class="silvana-card bg-white p-6 border ${playing ? 'border-emerald-500' : 'border-brandGray/40'} shadow-sm flex flex-col gap-3">
+          <div class="flex items-start justify-between gap-2">
+            <span class="text-2xl">🎵</span>
+            <span class="text-[10px] font-bold ${playing ? 'text-emerald-600' : 'text-zinc-400'}">${playing ? '▶ 재생 중' : items.length + '곡'}</span>
+          </div>
+          <div><h3 class="text-lg font-black leading-tight break-all">${slEsc(p.title || '(제목 없음)')}</h3>${p.memo ? `<p class="text-xs opacity-50 mt-0.5 break-all">${slEsc(p.memo)}</p>` : ''}</div>
+          <div class="text-[11px] opacity-70 leading-relaxed min-h-[1rem]">${preview || '<span class="opacity-50">담긴 곡이 없습니다</span>'}${more}</div>
+          <div class="flex flex-wrap gap-2 mt-1 border-t border-brandGray/40 pt-3">
+            <button data-slplaypost="${p.id}" class="px-3 py-2 bg-emerald-600 text-white rounded-full text-xs font-bold hover:bg-emerald-700 transition">▶ 순서대로 재생</button>
+            <button data-sledit="${p.id}" class="px-3 py-2 bg-brandCream text-textMain rounded-full text-xs font-bold border border-brandGray hover:bg-brandGray transition">✏️ 편집</button>
+            <button data-sldelpost="${p.id}" class="px-3 py-2 bg-white text-red-500 rounded-full text-xs font-bold border border-brandGray hover:bg-red-50 transition">🗑 삭제</button>
+          </div>
+        </div>`
+      }).join('')
+      grid.querySelectorAll('[data-slplaypost]').forEach((b) => b.onclick = () => { const p = slPostsCache.find((x) => x.id === b.dataset.slplaypost); if (p) playSetlistPost(p) })
+      grid.querySelectorAll('[data-sledit]').forEach((b) => b.onclick = () => { const p = slPostsCache.find((x) => x.id === b.dataset.sledit); if (p) openSetlistEditor(p) })
+      grid.querySelectorAll('[data-sldelpost]').forEach((b) => b.onclick = () => deleteSetlistPost(b.dataset.sldelpost))
+    }
+
+    // ----- 편집 -----
+    const slGenId = () => `set_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+    function openSetlistEditor(post) {
+      slDraft = post
+        ? { id: post.id, title: post.title || '', memo: post.memo || '', items: (post.items || []).map((it) => ({ songId: it.songId, partKey: it.partKey })), createdAt: post.createdAt || Date.now(), isNew: false }
+        : { id: slGenId(), title: '', memo: '', items: [], createdAt: Date.now(), isNew: true }
+      $('sl-title').value = slDraft.title; $('sl-memo').value = slDraft.memo
+      $('sl-pass').value = ''; $('sl-status').textContent = ''
+      $('sl-posts-view').classList.add('hidden'); $('sl-editor-view').classList.remove('hidden')
+      renderSetlist()
+    }
+    function closeSetlistEditor() {
+      slDraft = null
+      $('sl-editor-view').classList.add('hidden'); $('sl-posts-view').classList.remove('hidden')
+      loadSetlistPosts()
+    }
+    $('sl-new').onclick = () => openSetlistEditor(null)
+    $('sl-back').onclick = closeSetlistEditor
+    $('sl-title').addEventListener('input', () => { if (slDraft) slDraft.title = $('sl-title').value })
+    $('sl-memo').addEventListener('input', () => { if (slDraft) slDraft.memo = $('sl-memo').value })
+
+    function renderSetlist() { renderSetlistPool(); renderSetlistItems() }
+    function renderSetlistItems() {
+      const wrap = $('sl-list'); if (!wrap || !slDraft) return
+      const list = slDraft.items, songs = window.__songs || {}
+      $('sl-count').textContent = list.length ? `${list.length}곡` : ''
+      $('sl-empty').classList.toggle('hidden', list.length > 0)
+      wrap.innerHTML = list.map((it, i) => {
+        const s = songs[it.songId], parts = slPlayOptions(it.songId)
+        const title = s ? s.title : '(삭제된 곡)', artist = s?.artist || ''
+        const hasPart = parts.some((p) => p.key === it.partKey)
+        const playing = `${it.songId}::${it.partKey}` === nowPlayingKey
+        const sel = parts.length
+          ? `<select data-slpart="${i}" class="bg-brandCream/60 text-xs font-bold rounded-lg px-2 py-1.5 border border-brandGray/50 focus:outline-none focus:border-textMain">${parts.map((p) => `<option value="${slEsc(p.key)}" ${p.key === it.partKey ? 'selected' : ''}>${slEsc(p.label)}</option>`).join('')}</select>`
+          : `<span class="text-[11px] font-bold text-amber-600">재생 옵션 없음</span>`
+        const playBtn = (parts.length && hasPart)
+          ? `<button data-slplay="${i}" title="이 세션 재생" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-[11px] font-bold">▶</button>`
+          : `<span class="px-2.5 py-1.5 bg-zinc-200 text-zinc-400 rounded-full text-[11px] font-bold" title="재생할 수 없음">▶</span>`
+        return `<div class="flex items-center gap-2 rounded-xl border ${playing ? 'border-emerald-500 bg-emerald-50' : 'border-brandGray/40 bg-brandCream/40'} px-3 py-2">
+          <span class="w-6 shrink-0 text-center text-xs font-mono opacity-40">${String(i + 1).padStart(2, '0')}</span>
+          <div class="min-w-0 flex-1">
+            <div class="truncate text-sm font-bold ${s ? '' : 'text-red-500'}">${slEsc(title)}${playing ? ' <span class="text-[10px] text-emerald-600">▶ 재생 중</span>' : ''}</div>
+            ${artist ? `<div class="truncate text-[10px] opacity-50">${slEsc(artist)}</div>` : ''}
+          </div>
+          ${sel}
+          <div class="flex shrink-0 items-center gap-1">
+            ${playBtn}
+            <button data-slup="${i}" ${i === 0 ? 'disabled' : ''} title="위로" class="h-7 w-7 rounded-full bg-white border border-brandGray text-xs font-bold disabled:opacity-30">↑</button>
+            <button data-sldown="${i}" ${i === list.length - 1 ? 'disabled' : ''} title="아래로" class="h-7 w-7 rounded-full bg-white border border-brandGray text-xs font-bold disabled:opacity-30">↓</button>
+            <button data-slrm="${i}" title="삭제" class="h-7 w-7 rounded-full bg-white border border-brandGray text-xs font-bold text-red-500 hover:bg-red-50">✕</button>
+          </div>
+        </div>`
+      }).join('')
+      wrap.querySelectorAll('[data-slplay]').forEach((b) => b.onclick = () => { const it = slDraft.items[+b.dataset.slplay]; if (it) playSingleFromSetlist(it) })
+      wrap.querySelectorAll('[data-slpart]').forEach((sel) => sel.onchange = () => { const it = slDraft.items[+sel.dataset.slpart]; if (it) { it.partKey = sel.value; renderSetlistItems() } })
+      wrap.querySelectorAll('[data-slup]').forEach((b) => b.onclick = () => moveSetlistItem(+b.dataset.slup, -1))
+      wrap.querySelectorAll('[data-sldown]').forEach((b) => b.onclick = () => moveSetlistItem(+b.dataset.sldown, 1))
+      wrap.querySelectorAll('[data-slrm]').forEach((b) => b.onclick = () => { slDraft.items.splice(+b.dataset.slrm, 1); renderSetlistItems() })
+    }
+    function moveSetlistItem(i, dir) {
+      if (!slDraft) return
+      const l = slDraft.items, j = i + dir
+      if (j < 0 || j >= l.length) return
+      ;[l[i], l[j]] = [l[j], l[i]]; renderSetlistItems()
+    }
+    function renderSetlistPool() {
+      const pool = $('sl-pool'), empty = $('sl-pool-empty'), songs = Object.values(window.__songs || {})
+      if (!pool) return
+      if (!songs.length) { pool.innerHTML = ''; empty.classList.remove('hidden'); empty.textContent = '등록된 곡이 없습니다. "🎼 곡 / 재생" 탭에서 곡과 세션 악보를 먼저 등록하세요.'; return }
+      empty.classList.add('hidden')
+      pool.innerHTML = songs.map((s) => {
+        const opts = slPlayOptions(s.id), synced = s.parts.filter((p) => p.synced), hasCommon = opts.some((o) => o.key === COMMON_KEY)
+        const badge = synced.length
+          ? `<span class="text-[10px] font-bold text-emerald-600">싱크 ${synced.length}세션${hasCommon ? ' · 공용' : ''}</span>`
+          : hasCommon ? `<span class="text-[10px] font-bold text-amber-600">📊 공용 악보</span>`
+          : `<span class="text-[10px] font-bold text-amber-600">싱크/공용 없음</span>`
+        const btn = opts.length
+          ? `<button data-sladd="${s.id}" class="shrink-0 px-3 py-1.5 bg-textMain text-white rounded-full text-[11px] font-bold hover:bg-black transition">+ 담기</button>`
+          : `<span class="shrink-0 px-3 py-1.5 bg-zinc-200 text-zinc-400 rounded-full text-[11px] font-bold" title="싱크 또는 공용 악보(기준 노드)가 필요해요">담을 수 없음</span>`
+        return `<div class="flex items-center justify-between gap-2 rounded-xl border border-brandGray/40 bg-white px-3 py-2.5">
+          <div class="min-w-0"><div class="truncate text-sm font-bold">${slEsc(s.title)}</div>${s.artist ? `<div class="truncate text-[10px] opacity-50">${slEsc(s.artist)}</div>` : ''}<div class="mt-0.5">${badge}</div></div>
+          ${btn}</div>`
+      }).join('')
+      pool.querySelectorAll('[data-sladd]').forEach((b) => b.onclick = () => addToSetlist(b.dataset.sladd))
+    }
+    function addToSetlist(songId) {
+      if (!slDraft) return
+      const opts = slPlayOptions(songId); if (!opts.length) return
+      slDraft.items.push({ songId, partKey: opts[0].key }); renderSetlistItems()
+    }
+
+    // ----- 저장 / 삭제 (업로드 비밀번호 필요) -----
+    async function saveSetlistPost() {
+      if (!slDraft) return
+      const title = $('sl-title').value.trim(), pass = $('sl-pass').value
+      const st = (t) => ($('sl-status').textContent = t)
+      if (!cfg.SUPABASE_URL) return st('⚠️ config.js의 Supabase 설정이 없습니다.')
+      if (!title) return st('⚠️ 셋리스트 제목을 입력하세요.')
+      if (!pass) return st('⚠️ 업로드 비밀번호를 입력하세요.')
+      $('sl-save').disabled = true
+      try {
+        st('로그인 중…')
+        const { error: authErr } = await supabase.auth.signInWithPassword({ email: cfg.UPLOAD_EMAIL, password: pass })
+        if (authErr) { st('❌ 비밀번호가 올바르지 않습니다.'); return }
+        const now = Date.now()
+        const post = { id: slDraft.id, title, memo: $('sl-memo').value.trim(), items: slDraft.items.map((it) => ({ songId: it.songId, partKey: it.partKey })), createdAt: slDraft.createdAt || now, updatedAt: now }
+        st('저장 중…')
+        const { error } = await supabase.storage.from(BUCKET).upload(slPostPath(post.id), new Blob([JSON.stringify(post)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
+        if (error) { st('❌ 저장 실패: ' + error.message); return }
+        closeSetlistEditor()
+      } catch (e) { st('❌ 오류: ' + (e?.message || e)) } finally { $('sl-save').disabled = false }
+    }
+    $('sl-save').onclick = saveSetlistPost
+    async function deleteSetlistPost(id) {
+      const p = slPostsCache.find((x) => x.id === id)
+      if (!confirm(`셋리스트 "${p?.title || id}" 을(를) 삭제할까요?`)) return
+      const pass = prompt('삭제하려면 업로드 비밀번호를 입력하세요.')
+      if (!pass) return
+      try {
+        const { error: authErr } = await supabase.auth.signInWithPassword({ email: cfg.UPLOAD_EMAIL, password: pass })
+        if (authErr) { alert('비밀번호가 올바르지 않습니다.'); return }
+        const { error } = await supabase.storage.from(BUCKET).remove([slPostPath(id)])
+        if (error) { alert('삭제 실패: ' + error.message); return }
+        loadSetlistPosts()
+      } catch (e) { alert('오류: ' + (e?.message || e)) }
+    }
+
+    // ----- 재생 -----
+    // 한 항목 재생: 공용 악보(__common)면 공용 악보 화면, 아니면 노래방 재생 화면
+    async function playSetlistEntry(it) {
+      if (it.partKey === COMMON_KEY) { hidePerf(); await openCommonScoreForSetlist(it.songId) }
+      else { closeChart(); await openSong(it.songId, it.partKey) }
+    }
+    async function playSingleFromSetlist(it) {
+      auto.idx = -1; auto.items = []; slPlayingPostId = null
+      nowPlayingKey = `${it.songId}::${it.partKey}`; renderSetlistItems()
+      await playSetlistEntry(it)
+    }
+    function playSetlistItems(items, postId) {
+      const list = items.filter((it) => slPlayOptions(it.songId).some((o) => o.key === it.partKey))
+      if (!list.length) { alert('재생할 수 있는 곡이 없습니다. (싱크된 세션 또는 공용 악보가 지정된 곡이 필요합니다)'); return }
+      slPlayingPostId = postId || null
+      auto.items = list; auto.idx = 0; playAutoCurrent()
+    }
+    $('sl-play').onclick = () => { if (slDraft) playSetlistItems(slDraft.items, null) }
+    function playSetlistPost(p) { playSetlistItems(Array.isArray(p.items) ? p.items : [], p.id) }
+    async function playAutoCurrent() {
+      const it = auto.items[auto.idx]
+      if (!it) { auto.idx = -1; return }
+      nowPlayingKey = `${it.songId}::${it.partKey}`; refreshSetlistUI()
+      await playSetlistEntry(it)
+    }
+    function autoAdvance() {
+      if (auto.idx < 0) return
+      auto.idx++
+      if (auto.idx >= auto.items.length) { endSetlistAuto(); return } // 마지막 곡 끝 → 종료
+      playAutoCurrent()
+    }
+    function endSetlistAuto() { auto.idx = -1; auto.items = []; nowPlayingKey = null; slPlayingPostId = null; hidePerf(); closeChart(); refreshSetlistUI() }
+    // 셋리스트용 공용 악보 재생: 차트 모델을 만들어 공용 악보 화면에서 자동 재생
+    async function openCommonScoreForSetlist(id) {
+      try {
+        const m = await buildChartModel(id)
+        if (!m.duration || !(m.audioPath || extractVideoId(m.youtube))) { if (auto.idx >= 0) autoAdvance(); else alert('이 곡은 공용 악보를 재생할 수 없습니다. (기준 노드/싱크와 재생 소스가 필요합니다)'); return }
+        m.kind = '공용 악보'; m.autoplay = true; showChart(m)
+      } catch (e) { if (auto.idx >= 0) autoAdvance(); else alert('공용 악보 생성 실패: ' + (e?.message || e)) }
     }
 
     // ===================== 마디 마킹 + 싱크 저작 =====================
@@ -1316,6 +2024,9 @@
 
     // 저작 상태
     let aproj = null, aPdf = null, aId = null, aPart = null, aMode = 'mark', splitOn = false, splitN = 4, pageLayers = []
+    let aPdfBytes = null, aPdfDirty = false // 작업 중 PDF 바이트 / 페이지 삭제로 변경됨 여부
+    let _pdfLib = null
+    const loadPdfLib = () => (_pdfLib || (_pdfLib = import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm')))
     let aRaf = 0, aSeeking = false // 싱크 페이지 진행바 루프/시킹 상태
     let aseq = [], astep = [] // 재생 순서(마디 index 나열) / 스텝별 시작시간
     function rebuildSeq() {
@@ -1341,12 +2052,13 @@
         { const mm = buildStepModel(aproj); aseq = mm.seq; astep = mm.steps.map((s) => (typeof s === 'number' ? s : undefined)) }
         const { data: pdfBlob, error: e2 } = await supabase.storage.from(BUCKET).download(partPdfPath(id, part))
         if (e2) throw new Error('악보 PDF 없음')
-        aPdf = await pdfjsLib.getDocument({ data: await pdfBlob.arrayBuffer(), verbosity: 0 }).promise
+        aPdfBytes = new Uint8Array(await pdfBlob.arrayBuffer()); aPdfDirty = false
+        aPdf = await pdfjsLib.getDocument({ data: aPdfBytes.slice(0), verbosity: 0 }).promise
         aproj.pageCount = aPdf.numPages; aId = id
         authorSrcKey = ''; ytA.pause(); $('author-audio').pause() // 소스 상태 초기화(곡 전환 대비)
         $('d-bpm').value = aproj.defaultBpm > 0 ? aproj.defaultBpm : 120 // 곡 정보의 기본 BPM을 균등분배 디폴트로
         $('a-delay').value = aproj.scoreDelay ? aproj.scoreDelay : '' // 곡의 악보 시작 지연
-        toDelete.clear(); updateDeleteBtn()
+        toDelete.clear(); updateDeleteBtn(); pageClipboard = null
         $('author-title').textContent = `${P.title || id} · ${part.label}`
         $('author').classList.remove('hidden')
         await renderAuthorPages()
@@ -1385,6 +2097,7 @@
       layer.style.touchAction = 'none'
       layer.onpointerdown = (e) => {
         if (aMode !== 'mark') return
+        if (pasteArmed && rowClipboard) { const rr = layer.getBoundingClientRect(); pasteRowAt(pageIndex, (e.clientY - rr.top) / rr.height); return }
         layer.setPointerCapture(e.pointerId)
         const r = layer.getBoundingClientRect()
         startP = { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height }
@@ -1427,7 +2140,130 @@
     function clearMeasures() {
       if (!confirm('마디를 모두 지울까요?')) return
       aproj.measures = []; aproj.timings = []; aproj.lastMeasureEndTime = 0; aproj.jumps = []; aproj.nodeMap = undefined
-      clearSelection(); rebuildSeq(); redrawAllLayers(); updateMarkCount(); if (aMode === 'sync') { renderJumpList(); renderTable(); updateTap() }
+      setPasteArmed(false); clearSelection(); rebuildSeq(); redrawAllLayers(); updateMarkCount(); if (aMode === 'sync') { renderJumpList(); renderTable(); updateTap() }
+    }
+    // ── 전체 노드 높이 조정: 위/아래 모서리를 독립적으로 늘이거나 줄임(전 페이지 적용, 기하만 변경) ──
+    function nudgeHeights(edge, grow) {
+      const s = (Math.max(0, Number($('h-step').value) || 0) / 100) * (grow ? 1 : -1)
+      if (!s) return
+      for (const m of aproj.measures) {
+        if (edge === 'top') { const y = Math.min(Math.max(0, m.y - s), m.y + m.height - MIN_SIZE); m.height = m.y + m.height - y; m.y = y }
+        else { const bottom = Math.max(Math.min(1, m.y + m.height + s), m.y + MIN_SIZE); m.height = bottom - m.y }
+      }
+      redrawAllLayers()
+    }
+    // ── 줄 단위 노드 복사: 한 줄을 클립보드에 담아 클릭 위치에 같은 가로 배치로 붙여넣기 ──
+    let rowClipboard = null, pasteArmed = false
+    function measuresInReadingOrder() {
+      const ordered = [], byPage = new Map()
+      for (const m of aproj.measures) { if (!byPage.has(m.page)) byPage.set(m.page, []); byPage.get(m.page).push(m) }
+      for (const pg of [...byPage.keys()].sort((a, b) => a - b)) {
+        const pm = byPage.get(pg)
+        for (const row of groupRows(pm)) { const set = new Set(row.indices); pm.filter((m) => set.has(m.index)).sort((a, b) => a.x - b.x).forEach((m) => ordered.push(m)) }
+      }
+      return ordered
+    }
+    function reindexReadingOrder() {
+      aproj.measures = measuresInReadingOrder().map((m, i) => ({ ...m, index: i }))
+      // 마디 번호가 바뀌면 기존 반복/타이밍/그리드 매칭 정합이 깨지므로 초기화 (삭제와 동일)
+      aproj.timings = []; aproj.jumps = []; aproj.nodeMap = undefined; rebuildSeq()
+    }
+    function setPasteArmed(on) {
+      pasteArmed = !!(on && rowClipboard)
+      $('author-pages').classList.toggle('cursor-copy', pasteArmed)
+      if (pasteArmed) $('mark-count').textContent = `📋 ${rowClipboard.items.length}개 마디 복사됨 — 붙여넣을 위치를 클릭 (Esc 취소)`
+      else updateMarkCount()
+    }
+    function copyRow(rowIndices) {
+      const ms = rowIndices.map((ix) => aproj.measures.find((m) => m.index === ix)).filter(Boolean)
+      if (!ms.length) return
+      const top = Math.min(...ms.map((m) => m.y))
+      rowClipboard = { items: ms.map((m) => ({ x: m.x, width: m.width, height: m.height, relY: m.y - top })).sort((a, b) => a.x - b.x) }
+      setPasteArmed(true)
+    }
+    function pasteRowAt(pageIndex, topY) {
+      if (!rowClipboard) return
+      const start = aproj.measures.length
+      const rects = rowClipboard.items.map((it) => ({ page: pageIndex, x: it.x, width: it.width, height: it.height, y: Math.max(0, Math.min(1 - it.height, topY + it.relY)) }))
+      aproj.measures = [...aproj.measures, ...rects.map((r, i) => ({ index: start + i, ...r }))]
+      reindexReadingOrder(); setPasteArmed(false); redrawAllLayers(); updateMarkCount()
+    }
+    // ① 이 페이지의 마디(노드) 전체 삭제
+    function deletePageMeasures(pageIndex) {
+      const ids = aproj.measures.filter((m) => m.page === pageIndex).map((m) => m.index)
+      if (!ids.length) return
+      if (!confirm(`${pageIndex + 1}페이지의 마디 ${ids.length}개를 모두 지울까요?`)) return
+      deleteMeasures(ids)
+    }
+    // 페이지별 마디 복사/붙여넣기: 한 페이지의 마디 전체를 담아 다른 페이지의 같은 위치에 붙여넣기
+    let pageClipboard = null
+    function copyPageMeasures(pageIndex) {
+      const ms = aproj.measures.filter((m) => m.page === pageIndex)
+      if (!ms.length) return
+      pageClipboard = ms.map((m) => ({ x: m.x, y: m.y, width: m.width, height: m.height })).sort((a, b) => a.y - b.y || a.x - b.x)
+      redrawAllLayers()
+      $('mark-count').textContent = `📋 ${pageIndex + 1}페이지 마디 ${pageClipboard.length}개 복사됨 — 다른 페이지의 '📥 붙여넣기'를 누르세요`
+    }
+    function pastePageMeasures(pageIndex) {
+      if (!pageClipboard || !pageClipboard.length) return
+      let tmp = aproj.measures.reduce((mx, m) => Math.max(mx, m.index), -1) + 1
+      const added = pageClipboard.map((it) => ({ index: tmp++, page: pageIndex, x: it.x, y: it.y, width: it.width, height: it.height }))
+      aproj.measures = [...aproj.measures, ...added]
+      reindexReadingOrder(); redrawAllLayers(); updateMarkCount()
+      $('mark-count').textContent = `📥 ${added.length}개 마디를 ${pageIndex + 1}페이지에 붙여넣었습니다`
+    }
+    // 페이지 자체 삭제: PDF에서 페이지를 제거(저장 시 PDF도 갱신) + 측정값 페이지 번호 보정
+    async function deletePage(pageIndex) {
+      if (!aPdf || aPdf.numPages <= 1) { alert('마지막 한 페이지는 삭제할 수 없습니다.'); return }
+      if (!confirm(`${pageIndex + 1}페이지를 통째로 삭제할까요?\nPDF에서 제거되며 저장 시 반영됩니다. (이 페이지의 마디도 함께 삭제, 싱크는 초기화)`)) return
+      const prevTitle = $('author-title').textContent
+      try {
+        $('author-title').textContent = '페이지 삭제 중…'
+        const { PDFDocument } = await loadPdfLib()
+        const doc = await PDFDocument.load(aPdfBytes)
+        doc.removePage(pageIndex)
+        aPdfBytes = await doc.save(); aPdfDirty = true
+        // 해당 페이지 마디 제거 + 이후 페이지 번호 1 감소
+        aproj.measures = aproj.measures.filter((m) => m.page !== pageIndex).map((m) => (m.page > pageIndex ? { ...m, page: m.page - 1 } : m))
+        aPdf = await pdfjsLib.getDocument({ data: aPdfBytes.slice(0), verbosity: 0 }).promise
+        aproj.pageCount = aPdf.numPages
+        reindexReadingOrder()
+        await renderAuthorPages()
+        updateMarkCount()
+      } catch (e) { alert('페이지 삭제 실패: ' + (e?.message || e)) } finally { if ($('author-title').textContent === '페이지 삭제 중…') $('author-title').textContent = prevTitle }
+    }
+    // ② 한 줄을 복사해 다른 모든 페이지의 같은 (x,y) 위치에 배치
+    function copyRowToAllPages(rowIndices, srcPage) {
+      const ms = rowIndices.map((ix) => aproj.measures.find((m) => m.index === ix)).filter(Boolean)
+      if (!ms.length) return
+      const items = ms.map((m) => ({ x: m.x, y: m.y, width: m.width, height: m.height })).sort((a, b) => a.x - b.x)
+      const targets = []
+      for (let p = 0; p < aPdf.numPages; p++) if (p !== srcPage) targets.push(p)
+      if (!targets.length) { alert('복제할 다른 페이지가 없습니다.'); return }
+      let tmp = aproj.measures.reduce((mx, m) => Math.max(mx, m.index), -1) + 1
+      const added = []
+      for (const p of targets) for (const it of items) added.push({ index: tmp++, page: p, x: it.x, y: it.y, width: it.width, height: it.height })
+      aproj.measures = [...aproj.measures, ...added]
+      reindexReadingOrder(); redrawAllLayers(); updateMarkCount()
+      $('mark-count').textContent = `⇊ ${items.length}개 마디를 ${targets.length}개 페이지에 같은 위치로 복제했습니다`
+    }
+    // ③ 기존 한 줄을 N등분으로 다시 나누기 (줄의 가로 범위를 N개의 같은 폭 마디로 교체)
+    function resplitRow(rowIndices, pageIndex) {
+      const ms = rowIndices.map((ix) => aproj.measures.find((m) => m.index === ix)).filter(Boolean)
+      if (!ms.length) return
+      const ans = prompt('이 줄을 몇 등분할까요?', splitN)
+      if (ans == null) return
+      const n = parseInt(ans, 10)
+      if (!(n >= 1) || n > 64) { alert('1~64 사이의 숫자를 입력하세요.'); return }
+      const left = Math.min(...ms.map((m) => m.x)), right = Math.max(...ms.map((m) => m.x + m.width))
+      const top = Math.min(...ms.map((m) => m.y)), bottom = Math.max(...ms.map((m) => m.y + m.height))
+      const pieces = splitRow({ x: left, y: top, width: right - left, height: bottom - top }, n)
+      const removeSet = new Set(rowIndices)
+      aproj.measures = aproj.measures.filter((m) => !removeSet.has(m.index))
+      let tmp = aproj.measures.reduce((mx, m) => Math.max(mx, m.index), -1) + 1
+      const added = pieces.map((p) => ({ index: tmp++, page: pageIndex, ...p }))
+      aproj.measures = [...aproj.measures, ...added]
+      reindexReadingOrder(); redrawAllLayers(); updateMarkCount()
     }
     function redrawLayer(i) {
       const layer = pageLayers[i].layer; layer.innerHTML = ''
@@ -1491,16 +2327,49 @@
       })
       if (aMode === 'mark') {
         groupRows(pageMeasures).forEach((row) => {
-          // 줄 단위 선택 핸들 (✕ 줄)
+          // 줄 단위 툴바 (✥ 이동 + ✕ 줄) — 줄 왼쪽 위에 배치
           const allSel = row.indices.every((ix) => toDelete.has(ix))
+          const bar = document.createElement('div')
+          bar.className = 'absolute z-20 flex items-center gap-1'
+          bar.style.cssText = `left:${row.x * 100}%;top:${row.y * 100}%;transform:translate(0,-120%)`
+          const mv = document.createElement('button')
+          mv.className = 'flex items-center whitespace-nowrap rounded-md bg-zinc-700 px-1.5 py-1 text-[11px] font-bold text-white shadow cursor-move active:scale-90'
+          mv.textContent = '✥ 이동'
+          mv.title = '드래그로 이 줄 전체 이동 (바로 윗줄과 왼쪽이 맞으면 정렬 보조선 표시)'
+          attachRowDrag(mv, layer, row.indices, i)
           const h = document.createElement('button')
-          h.className = 'absolute z-20 flex items-center whitespace-nowrap rounded-md px-1.5 py-1 text-[11px] font-bold text-white shadow active:scale-90 ' + (allSel ? 'bg-zinc-500' : 'bg-rose-600')
-          h.style.cssText = `left:${row.x * 100}%;top:${row.y * 100}%;transform:translate(-50%,-120%)`
+          h.className = 'flex items-center whitespace-nowrap rounded-md px-1.5 py-1 text-[11px] font-bold text-white shadow active:scale-90 ' + (allSel ? 'bg-zinc-500' : 'bg-rose-600')
           h.textContent = allSel ? '↺ 줄' : '✕ 줄'
           h.title = `이 줄(마디 ${row.indices.length}개) 삭제 토글`
           h.onpointerdown = (e) => e.stopPropagation()
           h.onclick = (e) => { e.stopPropagation(); toggleDelete(row.indices) }
-          layer.appendChild(h)
+          // ③ 줄 재등분
+          const rs = document.createElement('button')
+          rs.className = 'flex items-center whitespace-nowrap rounded-md bg-amber-600 px-1.5 py-1 text-[11px] font-bold text-white shadow active:scale-90'
+          rs.textContent = '⊟ 등분'
+          rs.title = '이 줄을 N등분으로 다시 나누기'
+          rs.onpointerdown = (e) => e.stopPropagation()
+          rs.onclick = (e) => { e.stopPropagation(); resplitRow(row.indices, i) }
+          bar.append(mv, h, rs); layer.appendChild(bar)
+
+          // 줄 복사 핸들 (⧉ 복사 + ⇊ 전페이지) — 줄 오른쪽 끝 위에 배치
+          const cp = document.createElement('button')
+          cp.className = 'absolute z-20 flex items-center whitespace-nowrap rounded-md bg-indigo-600 px-1.5 py-1 text-[11px] font-bold text-white shadow active:scale-90'
+          cp.style.cssText = `left:${(row.x + row.width) * 100}%;top:${row.y * 100}%;transform:translate(-100%,-120%)`
+          cp.textContent = '⧉ 복사'
+          cp.title = `이 줄(마디 ${row.indices.length}개)을 복사 → 붙여넣을 위치를 클릭`
+          cp.onpointerdown = (e) => e.stopPropagation()
+          cp.onclick = (e) => { e.stopPropagation(); copyRow(row.indices) }
+          layer.appendChild(cp)
+          // ② 전 페이지 같은 위치 복제 — 복사 버튼 위에 배치
+          const cpa = document.createElement('button')
+          cpa.className = 'absolute z-20 flex items-center whitespace-nowrap rounded-md bg-indigo-800 px-1.5 py-1 text-[11px] font-bold text-white shadow active:scale-90'
+          cpa.style.cssText = `left:${(row.x + row.width) * 100}%;top:${row.y * 100}%;transform:translate(-100%,-240%)`
+          cpa.textContent = '⇊ 전페이지'
+          cpa.title = '이 줄을 다른 모든 페이지의 같은 위치에 복제'
+          cpa.onpointerdown = (e) => e.stopPropagation()
+          cpa.onclick = (e) => { e.stopPropagation(); copyRowToAllPages(row.indices, i) }
+          layer.appendChild(cpa)
 
           // 마디 경계선 드래그 핸들 — 인접(연속)한 마디 사이를 드래그로 세밀 조정
           const ms = row.indices.map((ix) => pageMeasures.find((m) => m.index === ix)).sort((a, b) => a.x - b.x)
@@ -1531,6 +2400,21 @@
           if (ms[0]) endHandle(ms[0], 'left')
           if (ms.length && ms[ms.length - 1]) endHandle(ms[ms.length - 1], 'right')
         })
+        // 페이지 우상단 컨트롤: [📋 복사] [📥 붙여넣기] [🗑 마디 비우기] [✕ 페이지 삭제]
+        const pctrl = document.createElement('div')
+        pctrl.className = 'absolute right-1 top-1 z-40 flex items-center gap-1'
+        pctrl.onpointerdown = (e) => e.stopPropagation()
+        const mkBtn = (txt, cls, title, fn) => { const b = document.createElement('button'); b.className = 'rounded-md px-2 py-1 text-[11px] font-bold text-white shadow active:scale-90 ' + cls; b.textContent = txt; b.title = title; b.onclick = (e) => { e.stopPropagation(); fn() }; return b }
+        if (pageMeasures.length) pctrl.appendChild(mkBtn('📋 복사', 'bg-indigo-600 hover:bg-indigo-700', `${i + 1}페이지의 마디 전체를 복사`, () => copyPageMeasures(i)))
+        if (pageClipboard && pageClipboard.length) pctrl.appendChild(mkBtn(`📥 붙여넣기(${pageClipboard.length})`, 'bg-emerald-600 hover:bg-emerald-700', `복사한 마디 ${pageClipboard.length}개를 ${i + 1}페이지의 같은 위치에 붙여넣기`, () => pastePageMeasures(i)))
+        if (pageMeasures.length) pctrl.appendChild(mkBtn('🗑 마디', 'bg-red-600/90 hover:bg-red-700', `${i + 1}페이지의 마디 전체 삭제`, () => deletePageMeasures(i)))
+        const ppage = document.createElement('button')
+        ppage.className = 'flex h-6 w-6 items-center justify-center rounded-full bg-red-700 text-sm font-bold text-white shadow hover:bg-red-800 active:scale-90'
+        ppage.textContent = '✕'
+        ppage.title = `${i + 1}페이지 자체를 삭제 (PDF에서 제거)`
+        ppage.onclick = (e) => { e.stopPropagation(); deletePage(i) }
+        pctrl.appendChild(ppage)
+        layer.appendChild(pctrl)
       }
     }
     // 두 인접 마디 사이 경계를 드래그로 이동 (왼쪽 너비 ↔ 오른쪽 시작/너비)
@@ -1572,6 +2456,49 @@
         window.addEventListener('pointerup', up)
       }
     }
+    // 줄 전체를 자유롭게 끌어 이동. 바로 윗줄과 왼쪽(x)이 맞으면 스냅 + 정렬 보조선(Figma식) 표시.
+    function attachRowDrag(handle, layer, rowIndices, pageIndex) {
+      handle.onpointerdown = (e) => {
+        e.stopPropagation(); e.preventDefault()
+        const orig = rowIndices.map((ix) => aproj.measures.find((m) => m.index === ix)).filter(Boolean).map((m) => ({ m, x: m.x, y: m.y }))
+        if (!orig.length) return
+        const r0 = layer.getBoundingClientRect(), startX = e.clientX, startY = e.clientY
+        const rowLeft0 = Math.min(...orig.map((o) => o.x)), rowTop0 = Math.min(...orig.map((o) => o.y))
+        const rowRight0 = Math.max(...orig.map((o) => o.x + o.m.width)), rowBottom0 = Math.max(...orig.map((o) => o.y + o.m.height))
+        // 같은 페이지에서 바로 위의 줄(중심이 더 위) 찾기 — 왼쪽 정렬 기준
+        const rows = groupRows(aproj.measures.filter((m) => m.page === pageIndex))
+        const myRow = rows.find((row) => row.indices.includes(orig[0].m.index))
+        const myc = myRow ? myRow.y + myRow.height / 2 : rowTop0
+        const above = rows.filter((row) => row !== myRow && row.y + row.height / 2 < myc).sort((a, b) => (b.y + b.height / 2) - (a.y + a.height / 2))[0]
+        const aboveLeft = above ? above.x : null
+        const SNAP = 0.008
+        let guide = null
+        const move = (ev) => {
+          let dx = (ev.clientX - startX) / r0.width, dy = (ev.clientY - startY) / r0.height
+          dx = Math.max(-rowLeft0, Math.min(1 - rowRight0, dx)); dy = Math.max(-rowTop0, Math.min(1 - rowBottom0, dy))
+          let snapped = false
+          if (aboveLeft != null && Math.abs((rowLeft0 + dx) - aboveLeft) < SNAP) { dx = aboveLeft - rowLeft0; snapped = true }
+          for (const o of orig) {
+            o.m.x = o.x + dx; o.m.y = o.y + dy
+            const box = layer.querySelector(`[data-mi="${o.m.index}"]`)
+            if (box) { box.style.left = o.m.x * 100 + '%'; box.style.top = o.m.y * 100 + '%' }
+          }
+          if (snapped) {
+            if (!guide) { guide = document.createElement('div'); guide.className = 'absolute z-40 w-px bg-fuchsia-500 pointer-events-none shadow-[0_0_0_0.5px_rgba(217,70,239,0.6)]'; layer.appendChild(guide) }
+            const top = Math.min(above.y, rowTop0 + dy), bot = Math.max(above.y + above.height, rowBottom0 + dy)
+            guide.style.cssText = `left:${aboveLeft * 100}%;top:${top * 100}%;height:${(bot - top) * 100}%`
+          } else if (guide) { guide.remove(); guide = null }
+        }
+        const up = () => {
+          window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); if (guide) guide.remove()
+          // 줄 순서가 실제로 바뀌었으면 읽기순서로 재인덱싱(타이밍 초기화), 단순 미세 이동이면 그대로 보존
+          if (measuresInReadingOrder().some((m, i) => m.index !== i)) { reindexReadingOrder(); redrawAllLayers() }
+          else redrawLayer(pageIndex)
+        }
+        window.addEventListener('pointermove', move)
+        window.addEventListener('pointerup', up)
+      }
+    }
     const redrawAllLayers = () => pageLayers.forEach((_, i) => redrawLayer(i))
     const updateMarkCount = () => ($('mark-count').textContent = `마디 ${aproj.measures.length}개`)
 
@@ -1596,6 +2523,7 @@
 
     function setMode(m) {
       aMode = m
+      if (m !== 'mark') setPasteArmed(false)
       $('mode-mark').className = 'mode-btn rounded-lg px-3 py-1.5 text-sm font-medium ' + (m === 'mark' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-200')
       $('mode-sync').className = 'mode-btn rounded-lg px-3 py-1.5 text-sm font-medium ' + (m === 'sync' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-200')
       $('mark-ctrl').classList.toggle('hidden', m !== 'mark')
@@ -1731,6 +2659,12 @@
           const { error } = await supabase.auth.signInWithPassword({ email: cfg.UPLOAD_EMAIL, password: pw })
           if (error) { alert('비밀번호가 올바르지 않습니다.'); return }
         }
+        // 페이지를 삭제했으면 PDF도 새로 업로드
+        if (aPdfDirty && aPdfBytes) {
+          const { error: ePdf } = await supabase.storage.from(BUCKET).upload(partPdfPath(aId, aPart), new Blob([aPdfBytes], { type: 'application/pdf' }), { contentType: 'application/pdf', upsert: true })
+          if (ePdf) { alert('PDF 저장 실패: ' + ePdf.message); return }
+          aPdfDirty = false
+        }
         // 세션 싱크는 세션 파일에, 레거시 '기본'은 project.json 자체에 저장
         if (!aPart.legacy) {
           const { error: ep } = await supabase.storage.from(BUCKET).upload(`${aId}/${aPart.key}.json`, new Blob([JSON.stringify(partFields)], { type: 'application/json' }), { contentType: 'application/json', upsert: true })
@@ -1761,6 +2695,11 @@
     $('split-dec').onclick = () => { splitN = Math.max(2, splitN - 1); $('split-n').textContent = splitN }
     $('split-inc').onclick = () => { splitN = Math.min(16, splitN + 1); $('split-n').textContent = splitN }
     $('clear-measures').onclick = clearMeasures
+    $('h-top-dec').onclick = () => nudgeHeights('top', false)
+    $('h-top-inc').onclick = () => nudgeHeights('top', true)
+    $('h-bot-dec').onclick = () => nudgeHeights('bottom', false)
+    $('h-bot-inc').onclick = () => nudgeHeights('bottom', true)
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && pasteArmed) { e.stopPropagation(); setPasteArmed(false) } })
     $('del-selected').onclick = commitDelete
     $('zoom-out').onclick = () => { authorZoomPx = Math.max(280, authorZoomPx * 0.85); applyZoom() }
     $('zoom-in').onclick = () => { authorZoomPx = Math.min(2200, authorZoomPx * 1.18); applyZoom() }
@@ -2117,11 +3056,19 @@ ${origLyrics || '(원곡 가사를 넣어주세요)'}`
       else { if (curFixed) $('pt-session').value = curFixed.key; $('pt-custom').value = '' }
       $('pt-custom-wrap').classList.toggle('hidden', $('pt-session').value !== '__custom')
       $('pt-file').value = ''; $('pt-pass').value = ''; $('pt-status').textContent = ''
+      $('pt-youtube').value = s?.youtube ? 'https://youtu.be/' + s.youtube : ''
       $('part-modal').classList.remove('hidden')
     }
     $('pt-session').addEventListener('change', () => $('pt-custom-wrap').classList.toggle('hidden', $('pt-session').value !== '__custom'))
     $('pt-cancel').onclick = () => $('part-modal').classList.add('hidden')
     $('part-modal').onclick = (e) => { if (e.target.id === 'part-modal') $('part-modal').classList.add('hidden') }
+    // 세션 악보를 PDF 파일 대신 유튜브 화면 캡쳐로 만들기 (완료 후 이 모달로 복귀해 파일 주입)
+    $('pt-capture').onclick = () => {
+      const link = $('pt-youtube').value.trim()
+      if (!link) { $('pt-status').textContent = '⚠️ 유튜브 링크를 입력하세요.'; return }
+      if (!extractVideoId(link)) { $('pt-status').textContent = '⚠️ 유튜브 링크를 인식하지 못했습니다.'; return }
+      openCapture(partSongId, link, true)
+    }
     async function savePart() {
       const sel = $('pt-session').value, editing = !!partEditKey
       const s = (window.__songs || {})[partSongId], parts = s?.parts || []
