@@ -179,7 +179,7 @@
               </div>
             </div>
 
-            <div id="home-summary-list" class="space-y-2.5 flex-1 overflow-y-auto no-scrollbar max-h-[250px] pr-1">
+            <div id="home-summary-list" class="space-y-2.5 flex-1 overflow-y-auto no-scrollbar max-h-[290px] pr-1">
               <!-- JS에서 자동 렌더링 됨 -->
             </div>
           </div>
@@ -247,6 +247,7 @@
           <span class="px-3 py-1 border border-textMain rounded-full text-[10px] uppercase font-bold w-fit mb-4">Board</span>
           <h3 class="text-2xl font-bold mb-2 leading-tight">Notice &<br>Discussions</h3>
           <p class="text-xs opacity-60 font-medium">최근 대화에서 자동 감지된 주요 공지 및 확인(투표, 정산) 사항들입니다.</p>
+          <button onclick="window.addCustomNotice()" class="mt-4 px-4 py-2 bg-textMain text-white rounded-full text-[10px] font-bold hover:bg-black transition w-fit shadow-sm">+ 상단 별도 공지 추가</button>
         </div>
         <div class="md:w-3/4 flex-1">
           <ul id="notice-list" class="space-y-3 h-56 overflow-y-auto custom-scrollbar pr-2">
@@ -299,9 +300,17 @@
 
           <!-- AI 추천 일정 패널 -->
           <div class="xl:w-1/4 w-full bg-brandCream/40 rounded-[1.5rem] p-5 border border-brandGray/40 flex flex-col">
-             <h4 class="text-sm font-black text-textMain mb-1 flex items-center gap-1.5"><span class="text-lg">💡</span> AI 일정 추천</h4>
-             <p class="text-[10px] text-brandDark mb-4 font-bold leading-tight">대화에서 자동 감지된 일정을 클릭하여 캘린더에 간편하게 박제하세요.</p>
-             <div id="ai-suggestion-list" class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2 max-h-[450px]">
+             <div class="flex justify-between items-end mb-4 border-b border-brandGray/50 pb-3">
+               <div>
+                 <h4 class="text-sm font-black text-textMain mb-1 flex items-center gap-1.5"><span class="text-lg">💡</span> AI 일정 추천</h4>
+                 <p class="text-[10px] text-brandDark font-bold leading-tight">자동 감지된 일정입니다.</p>
+               </div>
+               <div class="flex flex-col gap-1.5">
+                 <button onclick="window.addAllSuggestions()" class="text-[9px] bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded shadow-sm transition font-bold">모두 반영</button>
+                 <button onclick="window.deleteAllSuggestions()" class="text-[9px] bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded shadow-sm transition font-bold">모두 삭제</button>
+               </div>
+             </div>
+             <div id="ai-suggestion-list" class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2 max-h-[400px]">
                  <!-- JS 렌더링 -->
              </div>
           </div>
@@ -483,8 +492,12 @@
           </select>
         </div>
         <div>
-          <label class="block text-xs font-bold text-textMain/60 uppercase mb-1.5">날짜 선택</label>
-          <input type="date" id="manual-schedule-date" class="w-full bg-white border border-brandGray/60 rounded-xl p-3 text-xs font-bold focus:outline-none">
+          <label class="block text-xs font-bold text-textMain/60 uppercase mb-1.5">날짜 선택 (시작일 ~ 종료일)</label>
+          <div class="flex items-center gap-2">
+            <input type="date" id="manual-schedule-date" class="w-full bg-white border border-brandGray/60 rounded-xl p-3 text-xs font-bold focus:outline-none">
+            <span class="font-bold text-brandDark">~</span>
+            <input type="date" id="manual-schedule-enddate" class="w-full bg-white border border-brandGray/60 rounded-xl p-3 text-xs font-bold focus:outline-none text-brandDark">
+          </div>
         </div>
         <div>
           <label class="block text-xs font-bold text-textMain/60 uppercase mb-1.5">일정 타이틀</label>
@@ -525,7 +538,8 @@
       transcripts: [],
       summaries: [],
       manualSchedules: [],
-      extractedEvents: []
+      extractedEvents: [],
+      deletedExtractedEvents: []
     };
 
     window.tagRules = {
@@ -635,6 +649,7 @@
           if(data.tagRules) window.tagRules = data.tagRules;
           if(!window.db.manualSchedules) window.db.manualSchedules = [];
           if(!window.db.extractedEvents) window.db.extractedEvents = [];
+          if(!window.db.deletedExtractedEvents) window.db.deletedExtractedEvents = [];
         } 
         
         initApp();
@@ -655,6 +670,7 @@
       if (saved) window.db = JSON.parse(saved);
       if (!window.db.manualSchedules) window.db.manualSchedules = [];
       if (!window.db.extractedEvents) window.db.extractedEvents = [];
+      if (!window.db.deletedExtractedEvents) window.db.deletedExtractedEvents = [];
       initApp();
     }
 
@@ -952,7 +968,6 @@
         }
 
         displayNotices.forEach(notice => {
-          const senderName = window.normalizeSenderName(notice.sender);
           let badge = "알림"; let badgeColor = "bg-gray-200 text-gray-700";
           if (notice.message.includes('[공지]')) { badge = "공지"; badgeColor = "bg-red-100 text-red-700"; }
           else if (notice.message.includes('투표')) { badge = "투표"; badgeColor = "bg-blue-100 text-blue-700"; }
@@ -971,9 +986,12 @@
               <div class="flex items-center gap-2" onclick="window.switchTab('timeline'); window.selectTimelineDate('${notice.date}')">
                 <span class="px-2 py-0.5 rounded text-[9px] font-bold ${badgeColor}">${badge}</span>
                 <span class="text-[10px] opacity-50 font-bold">${notice.date}</span>
-                <span class="text-[10px] font-bold">${senderName}</span>
+                <span class="text-[10px] font-bold">${window.normalizeSenderName(notice.sender)}</span>
               </div>
-              <button onclick="window.editNoticeContent(this, '${notice.date}', '${notice.time}')" class="text-[9px] bg-brandGray text-textMain px-2 py-1 rounded hover:bg-black hover:text-white transition shadow-sm">수정</button>
+              <div class="flex gap-1">
+                <button onclick="window.editNoticeContent(this, '${notice.date}', '${notice.time}')" class="text-[9px] bg-brandGray text-textMain px-2 py-1 rounded hover:bg-black hover:text-white transition shadow-sm">수정</button>
+                <button onclick="window.deleteNotice('${notice.date}', '${notice.time}')" class="text-[9px] bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-500 hover:text-white transition shadow-sm">삭제</button>
+              </div>
             </div>
             <textarea class="w-full text-sm font-medium text-textMain bg-transparent border-b border-transparent focus:border-black resize-none focus:outline-none" rows="1" readonly>${shortMsg}</textarea>
           `;
@@ -981,6 +999,62 @@
         });
       }
     }
+
+    window.addCustomNotice = function() {
+        const container = document.getElementById('notice-list');
+        const pTag = container.querySelector('p');
+        if(pTag) pTag.remove();
+
+        const li = document.createElement('li');
+        li.className = "flex flex-col gap-1 p-3 bg-brandCream border border-brandDark/50 rounded-xl transition";
+        const now = new Date();
+        const dateStr = now.toISOString().substring(0, 10);
+        const timeStr = now.toTimeString().substring(0, 8);
+        
+        li.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700">별도 공지</span>
+              <span class="text-[10px] opacity-50 font-bold">${dateStr}</span>
+              <span class="text-[10px] font-bold text-textMain">직접 작성</span>
+            </div>
+            <div class="flex gap-1">
+              <button class="save-btn text-[9px] bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition shadow-sm">저장</button>
+              <button class="cancel-btn text-[9px] bg-gray-400 text-white px-2 py-1 rounded hover:bg-gray-500 transition shadow-sm">취소</button>
+            </div>
+          </div>
+          <textarea class="w-full text-sm font-bold text-textMain bg-white p-2 border border-brandDark/50 rounded resize-none focus:outline-none mt-2" rows="2" placeholder="공지 내용을 입력하세요..."></textarea>
+        `;
+        container.prepend(li);
+        
+        const textarea = li.querySelector('textarea');
+        textarea.focus();
+        
+        li.querySelector('.save-btn').onclick = async () => {
+            const val = textarea.value.trim();
+            if(!val) return li.remove();
+            window.db.transcripts.push({
+                date: dateStr, time: timeStr, sender: "SYSTEM (수동 추가)", message: `[공지] ${val}`
+            });
+            await window.syncToServer();
+            renderNotices();
+            showToast("상단 공지가 성공적으로 추가되었습니다.");
+        };
+        li.querySelector('.cancel-btn').onclick = () => {
+            li.remove();
+            if(container.children.length === 0) renderNotices();
+        };
+    };
+
+    window.deleteNotice = async function(date, time) {
+        const target = window.db.transcripts.find(t => t.date === date && t.time === time);
+        if (target) {
+            target.message = target.message.replace(/\[공지\]/g, '').trim();
+            await window.syncToServer();
+            renderNotices();
+            showToast("선택하신 공지가 삭제되었습니다.");
+        }
+    };
 
     window.editNoticeContent = async function(btnEl, date, time) {
       const li = btnEl.closest('li');
@@ -1328,7 +1402,7 @@
       return Array.from(eventsMap.values());
     }
 
-    // AI 추출 일정 패널 렌더링
+    // AI 추출 일정 패널 렌더링 (삭제 기능 대응)
     function renderAiSuggestions() {
       const container = document.getElementById('ai-suggestion-list');
       container.innerHTML = '';
@@ -1338,20 +1412,22 @@
          return;
       }
 
-      // 이미 수동 캘린더 일정에 등록된 추천 항목은 안 보이게 필터링
+      // 수동 캘린더 일정에 등록되었거나, 개별적으로 '삭제' 처리된 항목 숨김
       const suggestions = window.db.extractedEvents.filter(ext => {
-          return !window.db.manualSchedules.some(man => man.date === ext.date && man.title === ext.title);
+          const isDeleted = window.db.deletedExtractedEvents && window.db.deletedExtractedEvents.includes(ext.id);
+          const isReflected = window.db.manualSchedules.some(man => man.date === ext.date && man.title === ext.title);
+          return !isDeleted && !isReflected;
       });
 
       if(suggestions.length === 0) {
-         container.innerHTML = `<p class="text-xs font-bold text-green-600">모든 추천 일정이 캘린더에 성공적으로 등록되었습니다!</p>`;
+         container.innerHTML = `<p class="text-xs font-bold text-green-600">현재 대기 중인 추천 일정이 없습니다.</p>`;
          return;
       }
 
       suggestions.sort((a, b) => a.date.localeCompare(b.date)).forEach((ev, idx) => {
           const badgeColor = getScheduleTypeColor(ev.type);
           container.innerHTML += `
-              <div class="bg-white/80 p-4 rounded-2xl border border-brandGray/50 shadow-sm hover:shadow-md hover:border-textMain transition cursor-pointer group" onclick="window.openAddScheduleModalFromSuggestion(${idx})">
+              <div class="bg-white/80 p-4 rounded-2xl border border-brandGray/50 shadow-sm hover:shadow-md hover:border-textMain transition cursor-pointer group" onclick="window.openAddScheduleModalFromSuggestion('${ev.id}')">
                   <div class="flex justify-between items-start mb-2">
                      <span class="px-2 py-0.5 rounded text-[9px] font-bold ${badgeColor}">${ev.type}</span>
                      <span class="text-[10px] font-bold opacity-50">${ev.date}</span>
@@ -1366,13 +1442,57 @@
       });
     }
 
+    // AI 일정 모두 일괄 반영
+    window.addAllSuggestions = async function() {
+        if (!window.db.deletedExtractedEvents) window.db.deletedExtractedEvents = [];
+        const suggestions = window.db.extractedEvents.filter(ext => {
+            const isDeleted = window.db.deletedExtractedEvents.includes(ext.id);
+            const isReflected = window.db.manualSchedules.some(man => man.date === ext.date && man.title === ext.title);
+            return !isDeleted && !isReflected;
+        });
+        if(suggestions.length === 0) {
+            showToast("반영할 추천 일정이 없습니다."); return;
+        }
+        suggestions.forEach(ev => {
+            window.db.manualSchedules.push({
+                id: "manual_auto_" + Date.now() + Math.random().toString(36).substr(2, 9),
+                date: ev.date,
+                type: ev.type,
+                title: ev.title,
+                content: ev.content,
+                checklist: ev.checklist || []
+            });
+        });
+        await window.syncToServer();
+        renderAiSuggestions();
+        renderCalendar();
+        showToast("추천 일정이 모두 캘린더에 반영되었습니다.");
+    };
+
+    // AI 일정 모두 삭제 (숨김 처리)
+    window.deleteAllSuggestions = async function() {
+        if (!window.db.deletedExtractedEvents) window.db.deletedExtractedEvents = [];
+        const suggestions = window.db.extractedEvents.filter(ext => {
+            const isDeleted = window.db.deletedExtractedEvents.includes(ext.id);
+            const isReflected = window.db.manualSchedules.some(man => man.date === ext.date && man.title === ext.title);
+            return !isDeleted && !isReflected;
+        });
+        if(suggestions.length === 0) return;
+        
+        suggestions.forEach(ev => window.db.deletedExtractedEvents.push(ev.id));
+        
+        await window.syncToServer();
+        renderAiSuggestions();
+        showToast("추천 일정이 모두 삭제(숨김)되었습니다.");
+    };
+
     // 추천 일정 클릭 시 수동 모달 연동
-    window.openAddScheduleModalFromSuggestion = function(idx) {
-       const suggestions = window.db.extractedEvents.filter(ext => !window.db.manualSchedules.some(man => man.date === ext.date && man.title === ext.title)).sort((a,b)=>a.date.localeCompare(b.date));
-       const ev = suggestions[idx];
+    window.openAddScheduleModalFromSuggestion = function(eventId) {
+       const ev = window.db.extractedEvents.find(e => e.id === eventId);
        if(!ev) return;
        document.getElementById('manual-schedule-type').value = ev.type;
        document.getElementById('manual-schedule-date').value = ev.date;
+       document.getElementById('manual-schedule-enddate').value = "";
        document.getElementById('manual-schedule-title').value = ev.title;
        document.getElementById('manual-schedule-content').value = ev.content;
        document.getElementById('manual-schedule-checkitems').value = (ev.checklist||[]).join(', ');
@@ -1447,7 +1567,20 @@
         const hasChat = window.db.transcripts.some(t => t.date === dateStr);
         let dayEvents = [];
 
-        const manualEvents = window.db.manualSchedules.filter(s => s.date === dateStr);
+        if (window.db.extractedEvents) {
+          // AI 추천 중에서 캘린더에 아직 수동으로 반영되지 않았고, 삭제 처리되지 않은 항목만 표시
+          const autoExtracted = window.db.extractedEvents.filter(e => e.date === dateStr && (!window.db.deletedExtractedEvents || !window.db.deletedExtractedEvents.includes(e.id)));
+          // dayEvents.push(...autoExtracted); // AI일정을 캘린더 칸 안에 바로 넣고싶지 않다면 이 줄을 주석처리하면 됩니다 (현재는 우측 추천리스트로 분리되어 주석됨)
+        }
+
+        // 장기 일정(endDate)이 있는 경우까지 고려한 필터링 엔진
+        const manualEvents = window.db.manualSchedules.filter(s => {
+          if (s.endDate && s.endDate !== "") {
+            return dateStr >= s.date && dateStr <= s.endDate;
+          }
+          return s.date === dateStr;
+        });
+
         manualEvents.forEach(me => {
           dayEvents.push({ id: me.id, title: me.title, type: me.type || "수동 추가", content: me.content, isManual: true, checklist: me.checklist || [] });
         });
@@ -1480,8 +1613,14 @@
 
     window.handleCalendarDayClick = function(dateStr) {
       const dayEvents = [];
+      
+      const manualEvents = window.db.manualSchedules.filter(s => {
+        if (s.endDate && s.endDate !== "") {
+          return dateStr >= s.date && dateStr <= s.endDate;
+        }
+        return s.date === dateStr;
+      });
 
-      const manualEvents = window.db.manualSchedules.filter(s => s.date === dateStr);
       manualEvents.forEach(me => dayEvents.push({ id: me.id, title: me.title, type: me.type || "수동 추가", content: me.content, isManual: true, checklist: me.checklist || [] }));
 
       const hasChat = window.db.transcripts.some(t => t.date === dateStr);
@@ -1515,8 +1654,11 @@
           contentContainer.innerHTML += `
             <div class="bg-white p-6 rounded-[2rem] border border-brandGray/40 space-y-4 shadow-sm">
               <div class="flex justify-between items-center">
-                <span class="px-2.5 py-1 text-[10px] font-bold rounded-md ${typeBadgeColor}">${ev.type}</span>
-                ${isManualBadge}
+                <div class="flex gap-2 items-center">
+                  <span class="px-2.5 py-1 text-[10px] font-bold rounded-md ${typeBadgeColor}">${ev.type}</span>
+                  ${isManualBadge}
+                </div>
+                <button onclick="window.deleteCalendarEvent('${ev.id}')" class="text-[9px] text-red-500 font-bold hover:underline px-2 py-1 bg-red-50 rounded border border-red-100 shadow-sm transition">일정 삭제</button>
               </div>
               <div>
                 <h4 class="text-xl font-black text-textMain leading-snug">${ev.title}</h4>
@@ -1552,8 +1694,24 @@
 
     window.closeCalDetailModal = function() { document.getElementById('calendar-detail-modal').classList.add('hidden'); };
 
+    // 캘린더 일정 삭제 기능
+    window.deleteCalendarEvent = async function(eventId) {
+        if(eventId.startsWith('manual_')) {
+            window.db.manualSchedules = window.db.manualSchedules.filter(s => s.id !== eventId);
+        } else {
+            if(!window.db.deletedExtractedEvents) window.db.deletedExtractedEvents = [];
+            window.db.deletedExtractedEvents.push(eventId);
+        }
+        await window.syncToServer();
+        window.closeCalDetailModal();
+        renderCalendar();
+        renderAiSuggestions();
+        showToast("캘린더에서 일정이 안전하게 삭제되었습니다.");
+    };
+
     window.openAddScheduleModal = function() {
       document.getElementById('manual-schedule-date').value = new Date().toISOString().substring(0, 10);
+      document.getElementById('manual-schedule-enddate').value = "";
       document.getElementById('manual-schedule-title').value = "";
       document.getElementById('manual-schedule-content').value = "";
       document.getElementById('manual-schedule-checkitems').value = "";
@@ -1565,22 +1723,30 @@
     window.saveManualSchedule = async function() {
       const type = document.getElementById('manual-schedule-type').value;
       const date = document.getElementById('manual-schedule-date').value;
+      const endDate = document.getElementById('manual-schedule-enddate').value;
       const title = document.getElementById('manual-schedule-title').value.trim();
       const content = document.getElementById('manual-schedule-content').value.trim();
       const checkRaw = document.getElementById('manual-schedule-checkitems').value.trim();
 
       if (!date || !title || !content) { showToast("분류, 날짜, 타이틀 및 특이사항은 필수입니다."); return; }
+      if (endDate && endDate < date) { showToast("종료일은 시작일보다 이전일 수 없습니다."); return; }
       
       const newEvent = {
-        id: "manual_" + Date.now(), date: date, type: type, title: title, content: content,
+        id: "manual_" + Date.now() + Math.random().toString(36).substr(2, 9), 
+        date: date, 
+        endDate: endDate,
+        type: type, 
+        title: title, 
+        content: content,
         checklist: checkRaw.split(',').map(s => s.trim()).filter(s => s.length > 0)
       };
 
       window.db.manualSchedules.push(newEvent);
       await window.syncToServer();
       window.closeAddScheduleModal();
+      renderCalendar();
+      renderAiSuggestions();
       showToast("새 일정이 캘린더에 성공적으로 박제되었습니다!");
-      initApp();
     };
 
     window.onclick = function(event) {
