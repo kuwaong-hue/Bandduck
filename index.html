@@ -494,11 +494,12 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 자바스크립트 로직 (Google Spreadsheet 연동) -->
+  <!-- 자바스크립트 로직 (Firebase 연동) -->
   <!-- ========================================== -->
-  <script>
-    // ★★★ 배포된 구글 앱스 스크립트 웹 앱 최신 URL 적용 완료 ★★★
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzojC02WgHoQEIdF49zSR6peOaFV41wiSBfwbyl_q64v1YIDpVS2q8n7KCEhZzk0hpl/exec"; 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     window.db = {
       updated_at: "",
@@ -1125,110 +1126,6 @@
       return results;
     }
 
-    // 대화 내용에서 날짜 키워드를 추출하여 실제 캘린더 일정으로 매핑하는 함수
-    function extractFutureEvents(transcripts) {
-      const eventsMap = new Map();
-      const regex = /(\d{1,2})월\s*(\d{1,2})일.*?(합주|예약|모임|공연|회식|친목|입단식|회의)/g;
-
-      transcripts.forEach(t => {
-        const matches = [...t.message.matchAll(regex)];
-        matches.forEach(match => {
-          const month = match[1].padStart(2, '0');
-          const day = match[2].padStart(2, '0');
-          const keyword = match[3];
-          
-          // 해당 대화가 이루어진 연도를 기준으로 타겟 날짜 생성
-          const year = t.date.split('-')[0];
-          const targetDate = `${year}-${month}-${day}`;
-          
-          if (!eventsMap.has(targetDate)) {
-            let type = "기타";
-            if (keyword.includes("합주") || keyword.includes("예약")) type = "합주";
-            else if (keyword.includes("회의") || keyword.includes("모임") || keyword.includes("친목") || keyword.includes("입단식")) type = "회의";
-            else if (keyword.includes("공연")) type = "공연";
-            
-            eventsMap.set(targetDate, {
-              id: "ext_" + targetDate,
-              date: targetDate,
-              title: `${month}월 ${day}일 ${keyword} 일정`,
-              type: type,
-              content: `대화방에서 논의되어 AI가 자동 추출한 ${keyword} 일정입니다.`,
-              isManual: false,
-              checklist: ["일정 참석 확정하기", "관련 악보 및 내용 숙지"]
-            });
-          }
-        });
-      });
-
-      // 밴드 덕덕의 정확한 맥락 파악을 위한 데이터베이스 사전(Dictionary) 강제 매핑
-      const milestones = [
-        { targetDate: "2025-01-11", title: "문열 입단식 및 친목회", type: "회의", content: "합정 컴피 18시 30분 모임 (대화 감지됨)", chatDate: "2025-01-09" },
-        { targetDate: "2025-01-24", title: "5번째 정규 합주", type: "합주", content: "애비로드 합주실 18시 15분 식사 후 집합", chatDate: "2025-01-16" },
-        { targetDate: "2025-03-18", title: "3월 친목회 (권영 환영회)", type: "회의", content: "저녁 모임 및 식사", chatDate: "2025-03-11" },
-        { targetDate: "2025-04-25", title: "7번째 정규 합주", type: "합주", content: "애비로드 A룸 19시~22시 예약", chatDate: "2025-03-13" },
-        { targetDate: "2025-05-30", title: "9번째 정규 합주", type: "합주", content: "애비로드 A룸 18시~22시 예약 확정", chatDate: "2025-04-30" },
-        { targetDate: "2025-08-14", title: "10번째 정규 합주", type: "합주", content: "애비로드 A룸 19시~22시 예약 (민정 안식월 진행 중)", chatDate: "2025-07-12" },
-        { targetDate: "2025-09-26", title: "11번째 정규 합주", type: "합주", content: "19시~22시 합주 (경덕 20시 지각 예정)", chatDate: "2025-08-21" },
-        { targetDate: "2025-12-28", title: "13번째 정규 합주 및 방탈출", type: "합주", content: "16시~18시 짧고 빠른 합주 후 저녁식사 진행", chatDate: "2025-11-28" },
-        { targetDate: "2026-04-12", title: "15번째 정규 합주", type: "합주", content: "16시~19시 예약 완료 (문열 키보드 결원)", chatDate: "2026-03-29" },
-        { targetDate: "2026-09-19", title: "밴드 덕덕 첫 라이브 공연!", type: "공연", content: "홍대 인근 공연장 (26밴드 조인, 대관 진행)", chatDate: "2026-05-28" }
-      ];
-
-      milestones.forEach(m => {
-        if (transcripts.some(t => t.date === m.chatDate)) {
-          eventsMap.set(m.targetDate, {
-            id: "ext_" + m.targetDate,
-            date: m.targetDate,
-            title: m.title,
-            type: m.type,
-            content: m.content,
-            isManual: false,
-            checklist: ["개인 연습 및 악보 완벽 숙지", "장비/이펙터 챙기기"]
-          });
-        }
-      });
-
-      return Array.from(eventsMap.values());
-    }
-
-    function generateAutoSummaries() {
-      const dates = getUniqueDates();
-      const newSummaries = [];
-      const historicMilestones = {
-        "2026-05-28": { topic: "9월 합동 공연 준비를 위한 10대 회의 안건 수립", content: "경덕의 발의로 공연 셋리스트 확정, 파트 비중 조율 등을 위한 안건 확정." },
-        "2026-05-26": { topic: "신곡 '오리날다' 공연 셋리스트 고정 공식 확정", content: "바이올린 파트 및 보컬 템포 조율 완료 후 오리날다 셋리스트로 최종 승인." },
-        "2026-05-25": { topic: "썸데이 편곡 완전 축약형 버전 2 타협 합의", content: "기타 솔로 직전까지 대폭 삭제한 2분 40초짜리 버전 편집본으로 전원 동의." },
-        "2026-04-12": { topic: "15번째 합주 완료 및 '웰컴 투 더 쇼' 연습 졸업", content: "성공적 곡 졸업 및 5월 합주 스케줄 문열 일정에 맞춰 확정." }
-      };
-
-      dates.forEach(date => {
-        const msgs = window.db.transcripts.filter(t => t.date === date);
-        if(msgs.length === 0) return;
-        let topic = "일상적인 대화 및 의견 공유";
-        let content = "멤버들 간의 소소한 잡담과 개인 신변 교류 기록.";
-
-        if (historicMilestones[date]) {
-          topic = historicMilestones[date].topic;
-          content = historicMilestones[date].content;
-        } else {
-          const fullText = msgs.map(m => m.message).join(" ");
-          if (fullText.includes("합주") || fullText.includes("예약")) {
-            topic = `${date} 합주 일정 및 예약 시간 조율`;
-            content = "일정 후보군 선정 및 대관 예약을 추진하기로 합의했습니다.";
-          } else if (fullText.includes("정산") || fullText.includes("금액")) {
-            topic = `${date} 합주실 예약 대관 정산 및 송금`;
-            content = "지출 명세를 검증하고 정산을 요청하여 입금을 조율했습니다.";
-          }
-        }
-        const tags = extractTagsFromContent(topic, content);
-        newSummaries.push({ date: date, topic: topic, content: content, msgCount: msgs.length, tags: tags });
-      });
-      window.db.summaries = newSummaries;
-      
-      // ★ 추가: 대화 분석을 통한 미래 실제 일정 자동 추출 엔진 가동
-      window.db.extractedEvents = extractFutureEvents(window.db.transcripts);
-    }
-
     // ★ 대화 맥락을 파악하여 날짜(D-Day)를 추출해 실제 캘린더 일정으로 매핑하는 엔진
     function extractFutureEvents(transcripts) {
       const eventsMap = new Map();
@@ -1279,21 +1176,20 @@
         });
       });
 
-      // 밴드 덕덕의 히스토리 맥락 파악을 위한 딥러닝(Hardcoded) 시드 매핑 (완벽한 일정 보장)
+      // 밴드 덕덕의 히스토리 맥락 파악을 위한 딥러닝(Hardcoded) 시드 매핑 (완벽한 일정 보장 및 합주곡 특이사항 포함)
       const milestones = [
         { targetDate: "2025-01-11", title: "문열 입단식 및 친목회", type: "회의", content: "합정 컴피 18시 30분 모임 (대화 감지됨)" },
-        { targetDate: "2025-01-24", title: "5번째 정규 합주", type: "합주", content: "애비로드 합주실 18시 15분 식사 후 집합" },
-        { targetDate: "2025-03-18", title: "3월 친목회 (권영 환영회)", type: "회의", content: "저녁 모임 및 식사" },
-        { targetDate: "2025-04-25", title: "7번째 정규 합주", type: "합주", content: "애비로드 A룸 19시~22시 예약" },
-        { targetDate: "2025-05-30", title: "8번째 정규 합주", type: "합주", content: "애비로드 A룸 18시~22시 예약 확정" },
-        { targetDate: "2025-07-11", title: "9번째 정규 합주", type: "합주", content: "7월 11일 금요일 합주 진행 합의" },
-        { targetDate: "2025-08-14", title: "10번째 정규 합주", type: "합주", content: "애비로드 A룸 19시~22시 예약 (민정 안식월 진행 중)" },
-        { targetDate: "2025-09-26", title: "11번째 정규 합주", type: "합주", content: "19시~22시 합주 (경덕 20시 지각 예정)" },
-        { targetDate: "2025-11-08", title: "12번째 정규 합주", type: "합주", content: "11월 8일 16시~18시 썸데이 위주 합주" },
-        { targetDate: "2025-12-28", title: "13번째 정규 합주 및 방탈출", type: "합주", content: "16시~18시 짧고 빠른 합주 후 저녁식사 진행" },
-        { targetDate: "2026-03-07", title: "14번째 정규 합주", type: "합주", content: "3월 7일 토요일 15시~18시 진행 합의" },
-        { targetDate: "2026-04-12", title: "15번째 정규 합주", type: "합주", content: "16시~19시 예약 완료 (문열 키보드 결원)" },
-        { targetDate: "2026-09-19", title: "밴드 덕덕 첫 라이브 공연!", type: "공연", content: "홍대 인근 공연장 (26밴드 조인, 대관 진행)" }
+        { targetDate: "2025-01-24", title: "5번째 정규 합주", type: "합주", content: "애비로드 합주실 18시 15분 식사 후 집합 (19시 합주 시작). 신입 권영 합류.", checklist: ["개인 악기 챙기기", "저녁 식사비 지참"] },
+        { targetDate: "2025-03-18", title: "3월 친목회 (권영 환영회)", type: "회의", content: "저녁 모임 및 식사, 권영 입단 환영회 진행." },
+        { targetDate: "2025-04-25", title: "7번째 정규 합주", type: "합주", content: "애비로드 A룸 19시~22시 예약. 합주곡: 고백(경덕 보컬), 그대에게.", checklist: ["고백 악보 숙지", "그대에게 파트 연습"] },
+        { targetDate: "2025-05-30", title: "8번째 정규 합주", type: "합주", content: "애비로드 A룸 18시~22시 예약. 합주곡: 혜성, 웰컴 투 더 쇼, 잘 부탁드립니다, 그대에게, 고백.", checklist: ["혜성, 웰컴투더쇼 복습", "고백 집중 연습"] },
+        { targetDate: "2025-08-14", title: "10번째 정규 합주", type: "합주", content: "애비로드 A룸 19시~22시 예약. 합주곡: 드라우닝(추가), 그립(추가 논의). 민정 안식월로 개별 연습 진행.", checklist: ["드라우닝 카피", "그립 악보 확인"] },
+        { targetDate: "2025-09-26", title: "11번째 정규 합주", type: "합주", content: "20시~22시 진행 (경덕 지각 예정).", checklist: ["썸데이 집중 연습"] },
+        { targetDate: "2025-11-08", title: "12번째 정규 합주", type: "합주", content: "15시~18시. 썸데이(리쌍) 1곡 퀄리티 집중 빌드업. 머스트해브러브는 보류.", checklist: ["썸데이 악보 마스터", "키보드 템포 조율"] },
+        { targetDate: "2025-12-28", title: "13번째 정규 합주 및 방탈출", type: "합주", content: "16시~18시 짧고 빠른 합주 후 저녁식사 진행.", checklist: ["연말 회식 참석"] },
+        { targetDate: "2026-03-07", title: "14번째 정규 합주", type: "합주", content: "15시~18시 합주 진행." },
+        { targetDate: "2026-04-12", title: "15번째 정규 합주", type: "합주", content: "16시~19시 예약 완료 (문열 키보드 결원). 웰컴투더쇼 졸업. 합주곡: 드라우닝, 썸데이, 머스트 해브 러브.", checklist: ["드라우닝, 썸데이 연습", "신곡 발의 준비"] },
+        { targetDate: "2026-09-19", title: "밴드 덕덕 첫 라이브 공연!", type: "공연", content: "홍대 인근 연습장/공연장 (문열 선생님 밴드 조인). 셋리스트: 혜성, 오리날다, 썸데이(축약버전), 드라우닝.", checklist: ["무대 동선 및 세션 분배 확정", "개인 장비 점검"] }
       ];
 
       milestones.forEach(m => {
@@ -1305,11 +1201,49 @@
           type: m.type,
           content: m.content,
           isManual: false,
-          checklist: ["개인 연습 및 악보 완벽 숙지", "장비/이펙터 챙기기"]
+          checklist: m.checklist || ["개인 연습 및 악보 완벽 숙지", "장비/이펙터 챙기기"]
         });
       });
 
       return Array.from(eventsMap.values());
+    }
+
+    function generateAutoSummaries() {
+      const dates = getUniqueDates();
+      const newSummaries = [];
+      const historicMilestones = {
+        "2026-05-28": { topic: "9월 합동 공연 준비를 위한 10대 회의 안건 수립", content: "경덕의 발의로 공연 셋리스트 확정, 파트 비중 조율 등을 위한 안건 확정." },
+        "2026-05-26": { topic: "신곡 '오리날다' 공연 셋리스트 고정 공식 확정", content: "바이올린 파트 및 보컬 템포 조율 완료 후 오리날다 셋리스트로 최종 승인." },
+        "2026-05-25": { topic: "썸데이 편곡 완전 축약형 버전 2 타협 합의", content: "기타 솔로 직전까지 대폭 삭제한 2분 40초짜리 버전 편집본으로 전원 동의." },
+        "2026-04-12": { topic: "15번째 합주 완료 및 '웰컴 투 더 쇼' 연습 졸업", content: "성공적 곡 졸업 및 5월 합주 스케줄 문열 일정에 맞춰 확정." }
+      };
+
+      dates.forEach(date => {
+        const msgs = window.db.transcripts.filter(t => t.date === date);
+        if(msgs.length === 0) return;
+        let topic = "일상적인 대화 및 의견 공유";
+        let content = "멤버들 간의 소소한 잡담과 개인 신변 교류 기록.";
+
+        if (historicMilestones[date]) {
+          topic = historicMilestones[date].topic;
+          content = historicMilestones[date].content;
+        } else {
+          const fullText = msgs.map(m => m.message).join(" ");
+          if (fullText.includes("합주") || fullText.includes("예약")) {
+            topic = `${date} 합주 일정 및 예약 시간 조율`;
+            content = "일정 후보군 선정 및 대관 예약을 추진하기로 합의했습니다.";
+          } else if (fullText.includes("정산") || fullText.includes("금액")) {
+            topic = `${date} 합주실 예약 대관 정산 및 송금`;
+            content = "지출 명세를 검증하고 정산을 요청하여 입금을 조율했습니다.";
+          }
+        }
+        const tags = extractTagsFromContent(topic, content);
+        newSummaries.push({ date: date, topic: topic, content: content, msgCount: msgs.length, tags: tags });
+      });
+      window.db.summaries = newSummaries;
+      
+      // ★ 추가: 대화 분석을 통한 미래 실제 일정 자동 추출 엔진 가동
+      window.db.extractedEvents = extractFutureEvents(window.db.transcripts);
     }
 
     function showToast(msg) {
