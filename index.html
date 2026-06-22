@@ -261,12 +261,10 @@
           <div>
             <span class="px-3 py-1 border border-textMain rounded-full text-[10px] uppercase font-bold w-fit mb-2 inline-block">Schedule</span>
             <h3 class="text-2xl font-bold leading-tight">Timeline Calendar</h3>
-            <p class="text-xs opacity-60 font-medium">대화 맥락을 파악하여 <strong>실제 약속이 잡힌 미래 일정(D-Day)</strong>에 뱃지가 자동 표기됩니다.</p>
+            <p class="text-xs opacity-60 font-medium">대화 맥락을 파악하여 찾아낸 <strong>실제 약속 일정(D-Day)</strong>을 확인하고 추가하세요.</p>
           </div>
           <div class="flex flex-wrap items-center gap-3 self-end md:self-auto">
-            <!-- 일정 수동 추가 버튼 -->
             <button onclick="window.openAddScheduleModal()" class="px-4 py-2 bg-textMain text-white hover:bg-black rounded-full text-xs font-bold transition shadow-sm">+ 일정 수동 추가</button>
-            
             <div class="flex items-center gap-4 bg-brandCream px-4 py-2 rounded-full border border-brandGray shadow-inner">
               <button onclick="window.changeCalMonth(-1)" class="hover:text-brandDark transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
               <span id="cal-month-display" class="font-bold text-sm w-24 text-center tracking-wider text-textMain">2026. 05</span>
@@ -275,27 +273,37 @@
           </div>
         </div>
         
-        <div class="w-full">
-          <div class="flex flex-wrap gap-2.5 mb-4 text-xs font-bold text-textMain/75 pb-2 border-b border-brandGray/20">
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> 합주</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500"></span> 회의</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500"></span> 곡 논의</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-rose-500"></span> 정산</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-600"></span> 공연</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-purple-500"></span> 수동 추가</span>
+        <div class="w-full flex flex-col xl:flex-row gap-8">
+          <div class="xl:w-3/4 w-full">
+            <div class="flex flex-wrap gap-2.5 mb-4 text-xs font-bold text-textMain/75 pb-2 border-b border-brandGray/20">
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> 합주</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500"></span> 회의</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500"></span> 곡 논의</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-rose-500"></span> 정산</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-600"></span> 공연</span>
+            </div>
+
+            <div class="grid grid-cols-7 gap-2 mb-3">
+              <div class="text-center text-[10px] font-bold text-red-400 uppercase">Sun</div>
+              <div class="text-center text-[10px] font-bold opacity-50 uppercase">Mon</div>
+              <div class="text-center text-[10px] font-bold opacity-50 uppercase">Tue</div>
+              <div class="text-center text-[10px] font-bold opacity-50 uppercase">Wed</div>
+              <div class="text-center text-[10px] font-bold opacity-50 uppercase">Thu</div>
+              <div class="text-center text-[10px] font-bold opacity-50 uppercase">Fri</div>
+              <div class="text-center text-[10px] font-bold opacity-50 uppercase">Sat</div>
+            </div>
+            <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+              <!-- JS 렌더링 -->
+            </div>
           </div>
 
-          <div class="grid grid-cols-7 gap-2 mb-3">
-            <div class="text-center text-[10px] font-bold text-red-400 uppercase">Sun</div>
-            <div class="text-center text-[10px] font-bold opacity-50 uppercase">Mon</div>
-            <div class="text-center text-[10px] font-bold opacity-50 uppercase">Tue</div>
-            <div class="text-center text-[10px] font-bold opacity-50 uppercase">Wed</div>
-            <div class="text-center text-[10px] font-bold opacity-50 uppercase">Thu</div>
-            <div class="text-center text-[10px] font-bold opacity-50 uppercase">Fri</div>
-            <div class="text-center text-[10px] font-bold opacity-50 uppercase">Sat</div>
-          </div>
-          <div id="calendar-grid" class="grid grid-cols-7 gap-2">
-            <!-- JS를 통해 동적 렌더링 됩니다 -->
+          <!-- AI 추천 일정 패널 -->
+          <div class="xl:w-1/4 w-full bg-brandCream/40 rounded-[1.5rem] p-5 border border-brandGray/40 flex flex-col">
+             <h4 class="text-sm font-black text-textMain mb-1 flex items-center gap-1.5"><span class="text-lg">💡</span> AI 일정 추천</h4>
+             <p class="text-[10px] text-brandDark mb-4 font-bold leading-tight">대화에서 자동 감지된 일정을 클릭하여 캘린더에 간편하게 박제하세요.</p>
+             <div id="ai-suggestion-list" class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2 max-h-[450px]">
+                 <!-- JS 렌더링 -->
+             </div>
           </div>
         </div>
       </div>
@@ -309,6 +317,15 @@
       
       <div class="flex flex-col lg:flex-row gap-6 h-[75vh]">
         <div class="w-full lg:w-1/3 bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-6 h-full flex flex-col border border-white">
+          
+          <!-- 타임라인 전체 검색 기능 -->
+          <div class="mb-4">
+            <div class="flex items-center bg-white border border-brandGray/60 rounded-xl px-3 py-2 shadow-inner">
+              <svg class="w-4 h-4 text-brandDark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" id="timeline-search-input" oninput="window.handleTimelineSearch()" placeholder="전체 타임라인 단어 검색..." class="w-full bg-transparent text-sm font-bold focus:outline-none ml-2 text-textMain placeholder-brandDark">
+            </div>
+          </div>
+
           <h3 class="text-sm font-bold uppercase tracking-widest opacity-50 mb-4 ml-2">대화 일자 선택</h3>
           <div id="timeline-dates-list" class="flex-1 overflow-y-auto no-scrollbar space-y-2 pb-4">
             <!-- JS 렌더링 -->
@@ -461,6 +478,7 @@
             <option value="회의">📋 회의</option>
             <option value="곡 논의">🎵 곡 논의</option>
             <option value="정산">💰 정산</option>
+            <option value="공연">🎤 공연</option>
             <option value="기타">📌 기타</option>
           </select>
         </div>
@@ -513,18 +531,19 @@
     window.tagRules = {
       "일정": ["합주", "예약", "모임", "날짜", "D-Day", "일정", "친목", "시간", "회의", "집합"],
       "정산": ["정산", "금액", "회비", "송금", "대관", "비용", "공금", "분담금"],
-      "악보": ["악보", "곡", "신곡", "연습", "혜성", "썸데이", "오리날다", "드라우닝", "편곡", "졸업"],
+      "악보": ["악보", "곡", "신곡", "연습", "혜성", "썸데이", "오리날다", "드라우닝", "편곡", "졸업", "나무"],
       "공연": ["공연", "대관", "라이브", "홍대", "선생님", "셋리스트", "기획"]
     };
 
-    // 6종으로 업데이트된 셋리스트 특이사항
+    // 6종으로 업데이트된 셋리스트 특이사항 (웰컴투더쇼 -> 나무 반영)
     const setlistNotes = {
       "혜성": "졸업곡 성공! 단, 인트로 템포 밀림 방지를 위한 승빈의 바이올린 피드백 상시 주의할 것.",
       "오리날다": "문열 신디사이저 파트 추가 확정. 보컬 황현지 키 맞춤 완성에 최적화 완료.",
       "썸데이": "리쌍 원곡 기타 솔로 완전 축약 버전(2번 편집본)으로 타협하여 수진&권영 악기 비중 조율 완료.",
       "드라우닝": "보컬 피치가 다소 애매하나 현지 본인 의사에 따라 드랍하지 않고 디벨롭하여 9월 공연 투입 확정.",
       "고백": "경덕 보컬 데뷔곡. 베이스 숙인 불참 시 경덕이 땜빵 투입 예정 및 사운드 조율 합의.",
-      "웰컴 투 더 쇼": "15번째 합주에서 성공적으로 연습 졸업 완료. 공연 앵콜 혹은 예비 스페어 곡으로 편성됨."
+      "나무": "기존 '웰컴 투 더 쇼'에서 대체된 신곡. 잔잔한 무드와 사운드 밸런스에 초점을 맞춰 다음 합주부터 리딩 예정.",
+      "개화": "LUCY 원곡. 새롭게 셋리스트에 편입되어 향후 합주 시 방향성 조율 예정."
     };
 
     const memberProfiles = {
@@ -540,7 +559,20 @@
     let calDate = new Date();
     let selectedHashtagFilter = null;
 
-    // fetch 타임아웃을 지원하는 유틸리티 함수 (무한 로딩 방지)
+    // 발신자 이름 통일화 엔진 (카카오톡 표시명이 달라도 일관된 직책으로 표기)
+    window.normalizeSenderName = function(rawName) {
+      if (!rawName) return "알 수 없음";
+      if (rawName.includes("경덕")) return "경덕 (리더/기타/보컬)";
+      if (rawName.includes("숙인")) return "숙인 (베이스)";
+      if (rawName.includes("민정")) return "민정 (드럼)";
+      if (rawName.includes("권영")) return "권영 (기타)";
+      if (rawName.includes("문열")) return "문열 (키보드)";
+      if (rawName.includes("현지")) return "현지 (보컬)";
+      if (rawName.includes("승빈")) return "승빈 (바이올린)";
+      return rawName;
+    };
+
+    // fetch 타임아웃 지원 함수
     async function fetchWithTimeout(resource, options = {}) {
       const { timeout = 8000 } = options;
       const controller = new AbortController();
@@ -550,7 +582,7 @@
       return response;
     }
 
-    // 스프레드시트 서버 동기화 함수 (비동기 및 타임아웃 8초 적용)
+    // 서버 동기화 함수
     window.syncToServer = async function() {
       if (!SCRIPT_URL || SCRIPT_URL.includes("여기에_웹앱_URL을_붙여넣으세요")) {
         localStorage.setItem("band_duck_db", JSON.stringify(window.db));
@@ -567,7 +599,7 @@
           mode: 'no-cors',
           body: JSON.stringify({ db: window.db, tagRules: window.tagRules }),
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          timeout: 10000 // 10초 타임아웃 방어
+          timeout: 10000
         });
         
         document.getElementById('server-status').innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> 스프레드시트 연동 ON`;
@@ -579,7 +611,7 @@
       }
     };
 
-    // 스프레드시트 서버 데이터 불러오기 함수
+    // 서버 데이터 로드
     async function fetchFromServer() {
       if (!SCRIPT_URL || SCRIPT_URL.includes("여기에_웹앱_URL을_붙여넣으세요")) {
         loadFromLocal();
@@ -602,6 +634,7 @@
           window.db = data.db;
           if(data.tagRules) window.tagRules = data.tagRules;
           if(!window.db.manualSchedules) window.db.manualSchedules = [];
+          if(!window.db.extractedEvents) window.db.extractedEvents = [];
         } 
         
         initApp();
@@ -621,6 +654,7 @@
       const saved = localStorage.getItem("band_duck_db");
       if (saved) window.db = JSON.parse(saved);
       if (!window.db.manualSchedules) window.db.manualSchedules = [];
+      if (!window.db.extractedEvents) window.db.extractedEvents = [];
       initApp();
     }
 
@@ -639,7 +673,6 @@
       document.getElementById('stat-total-days').innerText = (getUniqueDates().length + getUniqueManualDatesCount()).toLocaleString();
       document.getElementById('main-sync-time').innerText = window.db.updated_at || "2026-05-28 22:54:44";
       
-      // 캘린더를 가장 최신 기록이 있는 달로 자동 조정
       if (window.db.transcripts.length > 0) {
         calDate = new Date(window.db.transcripts[window.db.transcripts.length-1].date);
       } else {
@@ -651,6 +684,7 @@
       renderNotices();
       initTimelineDates();
       renderCalendar();
+      renderAiSuggestions();
     }
 
     window.switchTab = function(tabId) {
@@ -669,6 +703,8 @@
       }
 
       if(tabId === 'timeline') {
+        // 타임라인 진입 시 초기화
+        document.getElementById('timeline-search-input').value = "";
         const dates = getUniqueDates();
         if(dates.length > 0) window.selectTimelineDate(dates[0]);
       }
@@ -687,16 +723,17 @@
       else resultEl.innerText = `D+${Math.abs(diffDays)}`;
     };
 
+    // 홈 화면 셋리스트 렌더링 (담당 보컬 및 순서 반영)
     function renderHomeSetlist() {
       const listEl = document.getElementById('home-setlist');
       listEl.innerHTML = '';
       const songs = [
-        { "id": "01", "name": "혜성", "singer": "윤하" },
-        { "id": "02", "name": "오리날다", "singer": "체리필터" },
-        { "id": "03", "name": "썸데이", "singer": "리쌍" },
-        { "id": "04", "name": "드라우닝", "singer": "WOODZ" },
-        { "id": "05", "name": "고백", "singer": "뜨거운감자" },
-        { "id": "06", "name": "웰컴 투 더 쇼", "singer": "DAY6" }
+        { "id": "1", "name": "오리날다", "singer": "체리필터", "vocal": "현지" },
+        { "id": "2", "name": "드라우닝", "singer": "우즈", "vocal": "현지" },
+        { "id": "3", "name": "나무", "singer": "카더가든", "vocal": "미정" },
+        { "id": "4", "name": "썸데이", "singer": "리쌍", "vocal": "문열, 승빈" },
+        { "id": "5", "name": "개화", "singer": "루시", "vocal": "현지" },
+        { "id": "6", "name": "혜성", "singer": "윤하", "vocal": "현지" }
       ];
 
       songs.forEach(song => {
@@ -705,7 +742,10 @@
         li.innerHTML = `
           <div class="flex items-center gap-3">
             <span class="text-xs font-mono opacity-40">${song.id}</span>
-            <span>${song.name}</span>
+            <div class="flex flex-col">
+              <span class="leading-tight">${song.name}</span>
+              <span class="text-[9px] text-brandDark mt-0.5 group-hover/item:text-amber-200 transition">🎤 보컬: ${song.vocal}</span>
+            </div>
           </div>
           <span class="text-xs font-medium opacity-50 group-hover/item:opacity-100">${song.singer}</span>
         `;
@@ -846,7 +886,7 @@
     window.handleHomeSearch = function() {
       renderHomeSummaries();
       renderNotices();
-      renderCalendar();
+      // 검색 시 캘린더 리렌더링 제거 (추천 리스트로 역할을 분리했기 때문)
     };
 
     function renderNotices() {
@@ -872,6 +912,7 @@
         }
 
         matchedMsgs.forEach(msg => {
+          const senderName = window.normalizeSenderName(msg.sender);
           const li = document.createElement('li');
           li.className = "flex flex-col gap-1 p-3 bg-white/40 border border-brandGray/30 rounded-xl hover:bg-white/70 transition cursor-pointer";
           li.onclick = () => {
@@ -882,7 +923,7 @@
             <div class="flex items-center gap-2">
               <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-gray-200 text-gray-700">검색 매칭</span>
               <span class="text-[10px] opacity-50 font-bold">${msg.date} ${msg.time.substring(0,5)}</span>
-              <span class="text-[10px] font-bold text-amber-700">${msg.sender}</span>
+              <span class="text-[10px] font-bold text-amber-700">${senderName}</span>
             </div>
             <p class="text-sm font-medium text-textMain line-clamp-2">${msg.message}</p>
           `;
@@ -911,6 +952,7 @@
         }
 
         displayNotices.forEach(notice => {
+          const senderName = window.normalizeSenderName(notice.sender);
           let badge = "알림"; let badgeColor = "bg-gray-200 text-gray-700";
           if (notice.message.includes('[공지]')) { badge = "공지"; badgeColor = "bg-red-100 text-red-700"; }
           else if (notice.message.includes('투표')) { badge = "투표"; badgeColor = "bg-blue-100 text-blue-700"; }
@@ -929,7 +971,7 @@
               <div class="flex items-center gap-2" onclick="window.switchTab('timeline'); window.selectTimelineDate('${notice.date}')">
                 <span class="px-2 py-0.5 rounded text-[9px] font-bold ${badgeColor}">${badge}</span>
                 <span class="text-[10px] opacity-50 font-bold">${notice.date}</span>
-                <span class="text-[10px] font-bold">${notice.sender}</span>
+                <span class="text-[10px] font-bold">${senderName}</span>
               </div>
               <button onclick="window.editNoticeContent(this, '${notice.date}', '${notice.time}')" class="text-[9px] bg-brandGray text-textMain px-2 py-1 rounded hover:bg-black hover:text-white transition shadow-sm">수정</button>
             </div>
@@ -990,6 +1032,66 @@
       });
     }
 
+    // 타임라인 단어 글로벌 서치 엔진
+    window.handleTimelineSearch = function() {
+      const query = document.getElementById('timeline-search-input').value.toLowerCase().trim();
+      const feed = document.getElementById('chat-bubble-feed');
+      const summaryEl = document.getElementById('active-timeline-summary');
+      const countEl = document.getElementById('active-timeline-count');
+      const dateTitleEl = document.getElementById('active-timeline-date');
+      
+      if (!query) {
+        // 검색어 없을 시 원래 선택된 날짜 모드로 복귀
+        const activeBtn = document.querySelector('#timeline-dates-list button.bg-white');
+        if(activeBtn) {
+          const date = activeBtn.id.replace('btn-date-', '');
+          window.selectTimelineDate(date);
+        } else {
+           const dates = getUniqueDates();
+           if(dates.length > 0) window.selectTimelineDate(dates[0]);
+        }
+        return;
+      }
+
+      // 검색 모드 활성화
+      dateTitleEl.innerText = "전체 타임라인 검색";
+      summaryEl.innerHTML = `전체 기록 중에서 <span class="text-red-500 font-black">'${query}'</span>(을)를 포함한 말풍선을 찾았습니다.`;
+      
+      const matchedMsgs = window.db.transcripts.filter(t => t.message.toLowerCase().includes(query) || t.sender.toLowerCase().includes(query));
+      countEl.innerText = `${matchedMsgs.length} msg`;
+
+      feed.innerHTML = '';
+      
+      if(matchedMsgs.length === 0) {
+         feed.innerHTML = `<div class="text-center text-brandDark mt-10 font-bold">검색 결과가 없습니다.</div>`;
+         return;
+      }
+
+      matchedMsgs.forEach(msg => {
+        const isMe = msg.sender.includes("경덕"); 
+        const senderName = window.normalizeSenderName(msg.sender);
+        const wrap = document.createElement('div');
+        wrap.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
+        
+        // 검색어 형광펜 하이라이트
+        const regex = new RegExp(`(${query})`, 'gi');
+        const highlightedMsg = msg.message.replace(regex, `<span class="bg-amber-300 text-black px-1 rounded-sm">$1</span>`).replace(/\n/g, '<br>');
+
+        wrap.innerHTML = `
+          <span class="text-[11px] font-bold text-brandDark mb-1 ml-2 uppercase tracking-wide">
+             ${senderName} <span class="ml-2 font-medium opacity-60">${msg.date}</span>
+          </span>
+          <div class="flex items-end gap-2 max-w-[80%] ${isMe ? 'flex-row-reverse' : ''}">
+            <div class="px-5 py-3.5 text-sm font-medium leading-relaxed ${isMe ? 'bg-textMain text-white rounded-[1.5rem] rounded-tr-sm shadow-md' : 'bg-white border border-brandGray/50 text-textMain rounded-[1.5rem] rounded-tl-sm shadow-sm'}">
+              ${highlightedMsg}
+            </div>
+            <span class="text-[10px] text-brandDark font-bold mb-1">${msg.time.substring(0,5)}</span>
+          </div>
+        `;
+        feed.appendChild(wrap);
+      });
+    };
+
     window.selectTimelineDate = function(date) {
       document.querySelectorAll('#timeline-dates-list button').forEach(b => {
         b.classList.remove('bg-white', 'text-textMain', 'border-brandGray', 'shadow-sm');
@@ -1014,12 +1116,14 @@
 
       let lastSender = "";
       msgs.forEach(msg => {
-        const isMe = msg.sender.includes("김경덕"); 
+        const isMe = msg.sender.includes("경덕"); 
         const showName = lastSender !== msg.sender && !isMe;
+        const senderName = window.normalizeSenderName(msg.sender);
+        
         const wrap = document.createElement('div');
         wrap.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
         wrap.innerHTML = `
-          ${showName ? `<span class="text-[11px] font-bold text-brandDark mb-1 ml-2 uppercase tracking-wide">${msg.sender}</span>` : ''}
+          ${showName ? `<span class="text-[11px] font-bold text-brandDark mb-1 ml-2 uppercase tracking-wide">${senderName}</span>` : ''}
           <div class="flex items-end gap-2 max-w-[80%] ${isMe ? 'flex-row-reverse' : ''}">
             <div class="px-5 py-3.5 text-sm font-medium leading-relaxed ${isMe ? 'bg-textMain text-white rounded-[1.5rem] rounded-tr-sm shadow-md' : 'bg-white border border-brandGray/50 text-textMain rounded-[1.5rem] rounded-tl-sm shadow-sm'}">
               ${msg.message.replace(/\n/g, '<br>')}
@@ -1044,7 +1148,6 @@
       reader.readAsText(file);
     };
 
-    // 무한 로딩 방지 및 서버 연동 최적화 함수
     window.processRawText = async function() {
       const rawText = document.getElementById('raw-chat-input').value.trim();
       if (!rawText) { showToast("분석할 텍스트를 입력하거나 파일을 업로드하세요."); return; }
@@ -1074,7 +1177,6 @@
         if (parsedMsgs.length === 0) throw new Error("분석 가능한 카카오톡 형식이 아닙니다.");
 
         const beforeLen = window.db.transcripts.length;
-        // 송신자 이름 변경에 따른 중복 방지를 위해 발신자를 제외하고 [날짜-시간-메시지30자] 기준으로 고유 식별하여 중복 제거
         const map = new Map(window.db.transcripts.map(t => [`${t.date}-${t.time}-${t.message.substring(0, 30)}`, t]));
         parsedMsgs.forEach(t => map.set(`${t.date}-${t.time}-${t.message.substring(0, 30)}`, t));
         window.db.transcripts = Array.from(map.values());
@@ -1082,7 +1184,6 @@
         generateAutoSummaries();
         window.db.updated_at = new Date().toISOString().substring(0, 19).replace('T', ' ');
         
-        // 동기화 시 await를 걸어 무한로딩 방지
         await window.syncToServer();
         
         const addedCount = window.db.transcripts.length - beforeLen;
@@ -1148,7 +1249,7 @@
       return results;
     }
 
-    // 대화 맥락을 파악하여 날짜(D-Day)를 추출해 실제 캘린더 일정으로 매핑하는 엔진
+    // 미래 일정 추출 엔진
     function extractFutureEvents(transcripts) {
       const eventsMap = new Map();
       const dateRegex = /(?:(\d{1,2})월\s*(\d{1,2})일|(\d{1,2})\/(\d{1,2})|(\d{1,2})\.(\d{1,2}))/g;
@@ -1182,11 +1283,11 @@
                 eventsMap.set(eventId, {
                   id: eventId,
                   date: targetDate,
-                  title: `${parseInt(month)}월 ${parseInt(day)}일 ${type} 일정`,
+                  title: `${parseInt(month)}월 ${parseInt(day)}일 ${type} 관련 (자동 감지)`,
                   type: type,
-                  content: `대화방에서 발췌된 ${type} 예정 사항입니다. (언급자: ${t.sender})`,
+                  content: `대화방에서 발췌된 ${type} 관련 예정 사항입니다.\n(언급자: ${t.sender}, ${t.date})`,
                   isManual: false,
-                  checklist: ["일정 참석 확정하기", "관련 내용 숙지"]
+                  checklist: ["일정 내용 톡방 재확인 및 참석 조율"]
                 });
               }
             }
@@ -1194,19 +1295,19 @@
         });
       });
 
-      // 밴드 덕덕의 딥러닝(Hardcoded) 시드 매핑
+      // 밴드 덕덕 고정(시드) 일정 추출
       const milestones = [
         { targetDate: "2025-01-11", title: "문열 입단식 및 친목회", type: "회의", content: "합정 컴피 18시 30분 모임 (대화 감지됨)" },
         { targetDate: "2025-01-24", title: "5번째 정규 합주", type: "합주", content: "애비로드 합주실 18시 15분 식사 후 집합 (19시 합주 시작). 신입 권영 합류.", checklist: ["개인 악기 챙기기", "저녁 식사비 지참"] },
         { targetDate: "2025-03-18", title: "3월 친목회 (권영 환영회)", type: "회의", content: "저녁 모임 및 식사, 권영 입단 환영회 진행." },
         { targetDate: "2025-04-25", title: "7번째 정규 합주", type: "합주", content: "애비로드 A룸 19시~22시 예약. 합주곡: 고백(경덕 보컬), 그대에게.", checklist: ["고백 악보 숙지", "그대에게 파트 연습"] },
-        { targetDate: "2025-05-30", title: "8번째 정규 합주", type: "합주", content: "애비로드 A룸 18시~22시 예약. 합주곡: 혜성, 웰컴 투 더 쇼, 잘 부탁드립니다, 그대에게, 고백.", checklist: ["혜성, 웰컴투더쇼 복습", "고백 집중 연습"] },
+        { targetDate: "2025-05-30", title: "8번째 정규 합주", type: "합주", content: "애비로드 A룸 18시~22시 예약. 합주곡: 혜성, 나무, 잘 부탁드립니다, 그대에게, 고백.", checklist: ["혜성, 나무 복습", "고백 집중 연습"] },
         { targetDate: "2025-08-14", title: "10번째 정규 합주", type: "합주", content: "애비로드 A룸 19시~22시 예약. 합주곡: 드라우닝(추가), 그립(추가 논의). 민정 안식월로 개별 연습 진행.", checklist: ["드라우닝 카피", "그립 악보 확인"] },
         { targetDate: "2025-09-26", title: "11번째 정규 합주", type: "합주", content: "20시~22시 진행 (경덕 지각 예정).", checklist: ["썸데이 집중 연습"] },
         { targetDate: "2025-11-08", title: "12번째 정규 합주", type: "합주", content: "15시~18시. 썸데이(리쌍) 1곡 퀄리티 집중 빌드업. 머스트해브러브는 보류.", checklist: ["썸데이 악보 마스터", "키보드 템포 조율"] },
         { targetDate: "2025-12-28", title: "13번째 정규 합주 및 방탈출", type: "합주", content: "16시~18시 짧고 빠른 합주 후 저녁식사 진행.", checklist: ["연말 회식 참석"] },
         { targetDate: "2026-03-07", title: "14번째 정규 합주", type: "합주", content: "15시~18시 합주 진행." },
-        { targetDate: "2026-04-12", title: "15번째 정규 합주", type: "합주", content: "16시~19시 예약 완료 (문열 키보드 결원). 웰컴투더쇼 졸업. 합주곡: 드라우닝, 썸데이, 머스트 해브 러브.", checklist: ["드라우닝, 썸데이 연습", "신곡 발의 준비"] },
+        { targetDate: "2026-04-12", title: "15번째 정규 합주", type: "합주", content: "16시~19시 예약 완료 (문열 키보드 결원). 나무 졸업. 합주곡: 드라우닝, 썸데이.", checklist: ["드라우닝, 썸데이 연습", "신곡 발의 준비"] },
         { targetDate: "2026-06-27", title: "정규 합주일", type: "합주", content: "6월 27일 정규 합주 진행 (홍대 인근). 세션 밸런스 체크 및 썸데이 축약 버전 1차 시연.", checklist: ["개인 악기 챙기기", "썸데이 축약 버전 악보 숙지", "특이사항 및 편곡 리뷰"] },
         { targetDate: "2026-09-19", title: "밴드 덕덕 첫 라이브 공연!", type: "공연", content: "홍대 인근 연습장/공연장 (문열 선생님 밴드 조인). 셋리스트: 혜성, 오리날다, 썸데이(축약버전), 드라우닝.", checklist: ["무대 동선 및 세션 분배 확정", "개인 장비 점검"] }
       ];
@@ -1227,14 +1328,64 @@
       return Array.from(eventsMap.values());
     }
 
+    // AI 추출 일정 패널 렌더링
+    function renderAiSuggestions() {
+      const container = document.getElementById('ai-suggestion-list');
+      container.innerHTML = '';
+      
+      if(!window.db.extractedEvents || window.db.extractedEvents.length === 0) {
+         container.innerHTML = `<p class="text-xs text-brandDark">추천 일정이 없습니다.</p>`;
+         return;
+      }
+
+      // 이미 수동 캘린더 일정에 등록된 추천 항목은 안 보이게 필터링
+      const suggestions = window.db.extractedEvents.filter(ext => {
+          return !window.db.manualSchedules.some(man => man.date === ext.date && man.title === ext.title);
+      });
+
+      if(suggestions.length === 0) {
+         container.innerHTML = `<p class="text-xs font-bold text-green-600">모든 추천 일정이 캘린더에 성공적으로 등록되었습니다!</p>`;
+         return;
+      }
+
+      suggestions.sort((a, b) => a.date.localeCompare(b.date)).forEach((ev, idx) => {
+          const badgeColor = getScheduleTypeColor(ev.type);
+          container.innerHTML += `
+              <div class="bg-white/80 p-4 rounded-2xl border border-brandGray/50 shadow-sm hover:shadow-md hover:border-textMain transition cursor-pointer group" onclick="window.openAddScheduleModalFromSuggestion(${idx})">
+                  <div class="flex justify-between items-start mb-2">
+                     <span class="px-2 py-0.5 rounded text-[9px] font-bold ${badgeColor}">${ev.type}</span>
+                     <span class="text-[10px] font-bold opacity-50">${ev.date}</span>
+                  </div>
+                  <h5 class="text-xs font-black text-textMain mb-1">${ev.title}</h5>
+                  <p class="text-[10px] text-textMain/70 line-clamp-2">${ev.content}</p>
+                  <div class="mt-2 text-right opacity-0 group-hover:opacity-100 transition">
+                      <span class="text-[9px] font-bold bg-textMain text-white px-2 py-1 rounded-full shadow-sm">+ 캘린더에 추가하기</span>
+                  </div>
+              </div>
+          `;
+      });
+    }
+
+    // 추천 일정 클릭 시 수동 모달 연동
+    window.openAddScheduleModalFromSuggestion = function(idx) {
+       const suggestions = window.db.extractedEvents.filter(ext => !window.db.manualSchedules.some(man => man.date === ext.date && man.title === ext.title)).sort((a,b)=>a.date.localeCompare(b.date));
+       const ev = suggestions[idx];
+       if(!ev) return;
+       document.getElementById('manual-schedule-type').value = ev.type;
+       document.getElementById('manual-schedule-date').value = ev.date;
+       document.getElementById('manual-schedule-title').value = ev.title;
+       document.getElementById('manual-schedule-content').value = ev.content;
+       document.getElementById('manual-schedule-checkitems').value = (ev.checklist||[]).join(', ');
+       document.getElementById('add-schedule-modal').classList.remove('hidden');
+    };
+
     function generateAutoSummaries() {
       const dates = getUniqueDates();
       const newSummaries = [];
       const historicMilestones = {
         "2026-05-28": { topic: "9월 합동 공연 준비를 위한 10대 회의 안건 수립", content: "경덕의 발의로 공연 셋리스트 확정, 파트 비중 조율 등을 위한 안건 확정." },
         "2026-05-26": { topic: "신곡 '오리날다' 공연 셋리스트 고정 공식 확정", content: "바이올린 파트 및 보컬 템포 조율 완료 후 오리날다 셋리스트로 최종 승인." },
-        "2026-05-25": { topic: "썸데이 편곡 완전 축약형 버전 2 타협 합의", content: "기타 솔로 직전까지 대폭 삭제한 2분 40초짜리 버전 편집본으로 전원 동의." },
-        "2026-04-12": { topic: "15번째 합주 완료 및 '웰컴 투 더 쇼' 연습 졸업", content: "성공적 곡 졸업 및 5월 합주 스케줄 문열 일정에 맞춰 확정." }
+        "2026-05-25": { topic: "썸데이 편곡 완전 축약형 버전 2 타협 합의", content: "기타 솔로 직전까지 대폭 삭제한 2분 40초짜리 버전 편집본으로 전원 동의." }
       };
 
       dates.forEach(date => {
@@ -1263,18 +1414,6 @@
       window.db.extractedEvents = extractFutureEvents(window.db.transcripts);
     }
 
-    function showToast(msg) {
-      const t = document.getElementById('toast-message');
-      document.getElementById('toast-text').innerText = msg;
-      t.classList.remove('opacity-0', 'translate-y-24');
-      setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 3000);
-    }
-
-    window.changeCalMonth = function(offset) {
-      calDate.setMonth(calDate.getMonth() + offset);
-      renderCalendar();
-    };
-
     function getScheduleTypeColor(type) {
       switch (type) {
         case "합주": return "bg-emerald-500 text-white border border-emerald-600";
@@ -1296,30 +1435,22 @@
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const grid = document.getElementById('calendar-grid');
       grid.innerHTML = '';
-      const searchQuery = document.getElementById('home-search-input').value.toLowerCase().trim();
 
       for (let i = 0; i < firstDay; i++) {
         grid.innerHTML += `<div class="aspect-[4/3] md:aspect-auto md:min-h-[110px] bg-transparent"></div>`;
       }
 
+      // 오직 수동(Manual) 및 확정된 일정만 캘린더에 표기됨.
+      // (AI 추천 이벤트는 옆의 '추천 일정' 탭으로 분리하여 캘린더 중복을 방지)
       for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
         const hasChat = window.db.transcripts.some(t => t.date === dateStr);
         let dayEvents = [];
 
-        if (window.db.extractedEvents) {
-          const autoExtracted = window.db.extractedEvents.filter(e => e.date === dateStr);
-          dayEvents.push(...autoExtracted);
-        }
-
         const manualEvents = window.db.manualSchedules.filter(s => s.date === dateStr);
         manualEvents.forEach(me => {
-          dayEvents.push({ id: me.id, title: me.title, type: "수동 추가", content: me.content, isManual: true, checklist: me.checklist || [] });
+          dayEvents.push({ id: me.id, title: me.title, type: me.type || "수동 추가", content: me.content, isManual: true, checklist: me.checklist || [] });
         });
-
-        if (searchQuery) {
-          dayEvents = dayEvents.filter(ev => ev.title.toLowerCase().includes(searchQuery) || ev.content.toLowerCase().includes(searchQuery));
-        }
 
         let cellClass = "aspect-[4/3] md:aspect-auto md:min-h-[110px] rounded-2xl flex flex-col justify-between p-2 border transition cursor-pointer bg-white relative shadow-sm ";
         if (dayEvents.length > 0) cellClass += "border-brandDark/40 hover:border-textMain hover:shadow-md bg-white/90";
@@ -1349,14 +1480,9 @@
 
     window.handleCalendarDayClick = function(dateStr) {
       const dayEvents = [];
-      
-      if (window.db.extractedEvents) {
-        const autoExtracted = window.db.extractedEvents.filter(e => e.date === dateStr);
-        dayEvents.push(...autoExtracted);
-      }
 
       const manualEvents = window.db.manualSchedules.filter(s => s.date === dateStr);
-      manualEvents.forEach(me => dayEvents.push({ id: me.id, title: me.title, type: "수동 추가", content: me.content, isManual: true, checklist: me.checklist || [] }));
+      manualEvents.forEach(me => dayEvents.push({ id: me.id, title: me.title, type: me.type || "수동 추가", content: me.content, isManual: true, checklist: me.checklist || [] }));
 
       const hasChat = window.db.transcripts.some(t => t.date === dateStr);
       if (dayEvents.length === 0 && !hasChat) { showToast("기록이나 일정이 없습니다."); return; }
@@ -1375,7 +1501,7 @@
       } else {
         dayEvents.forEach(ev => {
           const typeBadgeColor = getScheduleTypeColor(ev.type);
-          const isManualBadge = ev.isManual ? `<span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-[9px] font-black">수동 추가</span>` : `<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-[9px] font-black">대화 자동 분석</span>`;
+          const isManualBadge = ev.isManual ? `<span class="px-2 py-0.5 bg-brandDark text-white rounded-md text-[9px] font-black">확정된 일정</span>` : ``;
           
           let checklistHtml = ev.checklist && ev.checklist.length > 0 ? ev.checklist.map((item, index) => {
             const itemKey = `chk_${ev.id}_${index}`;
@@ -1396,7 +1522,7 @@
                 <h4 class="text-xl font-black text-textMain leading-snug">${ev.title}</h4>
                 <div class="bg-brandCream/50 p-4 rounded-xl mt-3 border border-brandGray/30">
                   <p class="text-[10px] font-black text-brandDark uppercase tracking-widest mb-1">💡 특이사항 및 요약</p>
-                  <p class="text-sm text-textMain leading-relaxed font-bold">${ev.content}</p>
+                  <p class="text-sm text-textMain leading-relaxed font-bold whitespace-pre-line">${ev.content}</p>
                 </div>
               </div>
               <div class="border-t border-brandGray/20 pt-4">
@@ -1443,7 +1569,7 @@
       const content = document.getElementById('manual-schedule-content').value.trim();
       const checkRaw = document.getElementById('manual-schedule-checkitems').value.trim();
 
-      if (!date || !title || !content) { showToast("분류, 날짜, 타이틀 및 개요는 필수입니다."); return; }
+      if (!date || !title || !content) { showToast("분류, 날짜, 타이틀 및 특이사항은 필수입니다."); return; }
       
       const newEvent = {
         id: "manual_" + Date.now(), date: date, type: type, title: title, content: content,
@@ -1453,7 +1579,7 @@
       window.db.manualSchedules.push(newEvent);
       await window.syncToServer();
       window.closeAddScheduleModal();
-      showToast("새 일정이 캘린더에 성공적으로 추가되었습니다!");
+      showToast("새 일정이 캘린더에 성공적으로 박제되었습니다!");
       initApp();
     };
 
